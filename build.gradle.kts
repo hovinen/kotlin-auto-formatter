@@ -24,12 +24,11 @@ tasks {
     compileTestKotlin {
         kotlinOptions.jvmTarget = "1.8"
     }
+    test {
+        useJUnitPlatform()
+    }
 }
 
 application {
     mainClassName = "org.kotlin.formatter.KotlinFormatterKt"
-}
-
-tasks.test {
-    useJUnitPlatform()
 }
