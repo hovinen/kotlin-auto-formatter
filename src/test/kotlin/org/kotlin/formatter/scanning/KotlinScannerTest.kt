@@ -1260,5 +1260,58 @@ internal class KotlinScannerTest {
         assertThat(result).doesNotContain(BeginToken(length = 9, state = State.CODE))
     }
 
+    @Test
+    fun `outputs directives in PACKAGE_IMPORT state for package directive`() {
+        val subject = subject()
+        val node = kotlinLoader.parseKotlin("""
+            package org.kotlin.formatter
+        """)
+
+        val result = subject.scan(node)
+
+        assertThat(result).containsSubsequence(
+            BeginToken(length = 28, state = State.PACKAGE_IMPORT),
+            BeginToken(length = 20, state = State.PACKAGE_IMPORT),
+            LeafNodeToken("org"),
+            EndToken,
+            EndToken
+        )
+    }
+
+    @Test
+    fun `outputs directives in PACKAGE_IMPORT state for import directive`() {
+        val subject = subject()
+        val node = kotlinLoader.parseKotlin("""
+            import org.kotlin.formatter.MyClass
+        """)
+
+        val result = subject.scan(node)
+
+        assertThat(result).containsSubsequence(
+            BeginToken(length = 35, state = State.PACKAGE_IMPORT),
+            BeginToken(length = 28, state = State.PACKAGE_IMPORT),
+            LeafNodeToken("org"),
+            EndToken,
+            EndToken
+        )
+    }
+
+    @Test
+    fun `outputs a ForcedBreak between imports`() {
+        val subject = subject()
+        val node = kotlinLoader.parseKotlin("""
+            import org.kotlin.formatter.MyClass
+            import org.kotlin.formatter.AnotherClass
+        """)
+
+        val result = subject.scan(node)
+
+        assertThat(result).containsSubsequence(
+            LeafNodeToken("MyClass"),
+            ForcedBreakToken(count = 1),
+            LeafNodeToken("import")
+        )
+    }
+
     private fun subject() = KotlinScanner()
 }

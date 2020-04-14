@@ -604,4 +604,71 @@ class KotlinFormatterTest {
              */
         """.trimIndent())
     }
+
+    @Test
+    fun `does not insert line breaks in the package statement`() {
+        val result = KotlinFormatter(maxLineLength = 20).format("""
+            package org.kotlin.a.very.long.package.name.which.should.not.wrap
+        """.trimIndent())
+
+        assertThat(result).isEqualTo("""
+            package org.kotlin.a.very.long.package.name.which.should.not.wrap
+        """.trimIndent())
+    }
+
+    @Test
+    fun `does not insert line breaks in an import statement`() {
+        val subject = KotlinFormatter(maxLineLength = 20)
+
+        val result = subject.format("""
+            import org.kotlin.a.very.long.package.name.which.should.not.wrap.AClass
+        """.trimIndent())
+
+        assertThat(result).isEqualTo("""
+            import org.kotlin.a.very.long.package.name.which.should.not.wrap.AClass
+        """.trimIndent())
+    }
+
+    @Test
+    fun `does not insert line breaks in an import statement with alias`() {
+        val subject = KotlinFormatter(maxLineLength = 20)
+
+        val result = subject.format("""
+            import org.kotlin.a.very.long.package.name.which.should.not.wrap.AClass as AnAlias
+        """.trimIndent())
+
+        assertThat(result).isEqualTo("""
+            import org.kotlin.a.very.long.package.name.which.should.not.wrap.AClass as AnAlias
+        """.trimIndent())
+    }
+
+    @Test
+    fun `preserves single line breaks between import statements`() {
+        val subject = KotlinFormatter()
+
+        val result = subject.format("""
+            import org.kotlin.formatter.AClass
+            import org.kotlin.formatter.AnotherClass
+        """.trimIndent())
+
+        assertThat(result).isEqualTo("""
+            import org.kotlin.formatter.AClass
+            import org.kotlin.formatter.AnotherClass
+        """.trimIndent())
+    }
+
+    @Test
+    fun `does not strip trailing whitespace in multiline string literals`() {
+        val subject = KotlinFormatter()
+
+        val result = subject.format("""
+            ""${'"'}Before whitespace  
+            After whitespace""${'"'}
+        """.trimIndent())
+
+        assertThat(result).isEqualTo("""
+            ""${'"'}Before whitespace  
+            After whitespace""${'"'}
+        """.trimIndent())
+    }
 }

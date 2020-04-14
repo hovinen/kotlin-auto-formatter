@@ -101,7 +101,7 @@ class KotlinScanner {
             }
             KtNodeTypes.DOT_QUALIFIED_EXPRESSION, KtNodeTypes.SAFE_ACCESS_EXPRESSION -> {
                 val tokens = scanDotQualifiedExpression(node)
-                inBeginEndBlock(tokens, State.CODE)
+                inBeginEndBlock(tokens, stateForDotQualifiedExpression(scannerState))
             }
             KtNodeTypes.BODY, KtNodeTypes.THEN -> {
                 scanNodes(node.children().asIterable(), ScannerState.STATEMENT)
@@ -123,6 +123,12 @@ class KotlinScanner {
             }
             KtNodeTypes.PROPERTY -> {
                 tokensForProperty(node)
+            }
+            KtNodeTypes.PACKAGE_DIRECTIVE,
+            KtNodeTypes.IMPORT_LIST,
+            KtNodeTypes.IMPORT_DIRECTIVE,
+            KtNodeTypes.IMPORT_ALIAS -> {
+                tokensForBlockNode(node, State.PACKAGE_IMPORT, ScannerState.PACKAGE_IMPORT)
             }
             else -> {
                 tokensForBlockNode(node, State.CODE, ScannerState.STATEMENT)
@@ -239,7 +245,7 @@ class KotlinScanner {
         tokens: List<Token>
     ): List<Token> {
         var index = tokens.size - 1
-        while (tokens[index] is EndToken) {
+        while (index > 0 && tokens[index] is EndToken) {
             index--
         }
         return if (index > 0 && tokens[index - 1] is ForcedBreakToken) {
@@ -384,6 +390,9 @@ class KotlinScanner {
         return inBeginEndBlock(innerTokens, State.CODE)
     }
 
+    private fun stateForDotQualifiedExpression(scannerState: ScannerState) =
+        if (scannerState == ScannerState.PACKAGE_IMPORT) State.PACKAGE_IMPORT else State.CODE
+
     private fun inBeginEndBlock(innerTokens: List<Token>, state: State): List<Token> =
         listOf(
             BeginToken(length = lengthOfTokens(innerTokens), state = state),
@@ -394,7 +403,7 @@ class KotlinScanner {
     private fun hasNewlineInBlockState(
         node: LeafPsiElement,
         scannerState: ScannerState
-    ) = node.textContains('\n') && scannerState == ScannerState.BLOCK
+    ) = node.textContains('\n') && setOf(ScannerState.BLOCK, ScannerState.PACKAGE_IMPORT).contains(scannerState)
 
     private fun hasDoubleNewlineInKDocState(
         node: LeafPsiElement,
@@ -438,6 +447,9 @@ class KotlinScanner {
         SYNC_BREAK_LIST,
 
         /** Single newlines are treated as ordinary whitespace, double newlines create forced breaks */
-        KDOC
+        KDOC,
+
+        /** Like BLOCK, but State.CODE should be replaced by State.PACKAGE_IMPORT */
+        PACKAGE_IMPORT
     }
 }

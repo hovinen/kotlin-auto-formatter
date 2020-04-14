@@ -79,7 +79,7 @@ class Printer(
                 spaceRemaining -= token.textLength
             }
             is WhitespaceToken -> {
-                if (whitespacePlusFollowingTokenFitOnLine(token)) {
+                if (!breakingAllowed || whitespacePlusFollowingTokenFitOnLine(token)) {
                     if (inStringLiteral) {
                         result.append(token.content)
                     } else {
@@ -106,7 +106,7 @@ class Printer(
                 indent(0)
             }
             is SynchronizedBreakToken -> {
-                if (!blockStack.peek().topBlockFitsOnLine(maxLineLength)) {
+                if (breakingAllowed && !blockStack.peek().topBlockFitsOnLine(maxLineLength)) {
                     indent(continuationIndent)
                 } else {
                     result.append(" ".repeat(token.whitespaceLength))
@@ -136,6 +136,8 @@ class Printer(
         }
     }
 
+    private val breakingAllowed: Boolean get() = blockStack.peek().state != State.PACKAGE_IMPORT
+
     private fun whitespacePlusFollowingTokenFitOnLine(token: WhitespaceToken) =
         when (blockStack.peek().state) {
             State.MULTILINE_STRING_LITERAL -> true
@@ -164,6 +166,9 @@ class Printer(
                 result.append(STRING_BREAK_TERMINATOR)
                 indentCode(amount)
                 result.append('"')
+            }
+            State.PACKAGE_IMPORT -> {
+                result.append("\n")
             }
             else -> throw IllegalStateException(
                 "Unrecognized state for line breaking ${blockStack.peek().state}"

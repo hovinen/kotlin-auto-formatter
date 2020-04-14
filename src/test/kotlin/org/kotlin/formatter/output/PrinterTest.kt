@@ -11,6 +11,7 @@ import org.kotlin.formatter.SynchronizedBreakToken
 import org.kotlin.formatter.Token
 import org.kotlin.formatter.WhitespaceToken
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
@@ -492,6 +493,36 @@ internal class PrinterTest {
         )
 
         assertThat(result).isEqualTo("  After whitespace")
+    }
+
+    @Test
+    fun `does not insert breaks on WhitespaceToken in state PACKAGE_IMPORT`() {
+        val subject = subject(maxLineLength = 20)
+
+        val result = subject.print(
+            listOf(
+                BeginToken(length = 0, state = State.PACKAGE_IMPORT),
+                WhitespaceToken(length = 21, content = " "),
+                LeafNodeToken("After whitespace")
+            )
+        )
+
+        assertThat(result).isEqualTo(" After whitespace")
+    }
+
+    @Test
+    fun `does not insert breaks on SynchronizedBreakToken in state PACKAGE_IMPORT`() {
+        val subject = subject(maxLineLength = 20)
+
+        val result = subject.print(
+            listOf(
+                BeginToken(length = 21, state = State.PACKAGE_IMPORT),
+                SynchronizedBreakToken(whitespaceLength = 0),
+                LeafNodeToken("After whitespace")
+            )
+        )
+
+        assertThat(result).isEqualTo("After whitespace")
     }
 
     private fun subject(

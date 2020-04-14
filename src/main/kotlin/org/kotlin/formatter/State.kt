@@ -7,5 +7,6 @@ enum class State {
     LINE_COMMENT,
     TODO_COMMENT,
     LONG_COMMENT,
-    KDOC_DIRECTIVE
+    KDOC_DIRECTIVE,
+    PACKAGE_IMPORT
 }
