@@ -7,14 +7,11 @@ import org.gradle.api.tasks.TaskAction
 import org.kotlin.formatter.KotlinFormatter
 import java.util.concurrent.Callable
 
-internal class FormatKotlinTask : SourceTask() {
-    @get:InputFiles
-    internal val sources: FileCollection = project.files(Callable { return@Callable source })
-
+internal open class FormatKotlinTask : SourceTask() {
     @TaskAction
     fun format() {
         val kotlinFormatter = KotlinFormatter()
-        sources.files.forEach {
+        source.forEach {
             kotlinFormatter.formatFile(it.toPath())
         }
     }

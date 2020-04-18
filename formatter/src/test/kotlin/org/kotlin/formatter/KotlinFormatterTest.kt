@@ -671,4 +671,14 @@ class KotlinFormatterTest {
             After whitespace""${'"'}
         """.trimIndent())
     }
+
+    @Test
+    fun `resets state after every file`() {
+        val subject = KotlinFormatter()
+        subject.format("package org.kotlin.formatter")
+
+        val result = subject.format("package org.kotlin.formatter")
+
+        assertThat(result).isEqualTo("package org.kotlin.formatter")
+    }
 }

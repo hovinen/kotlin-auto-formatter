@@ -10,6 +10,7 @@ repositories {
 
 dependencies {
     implementation(kotlin("stdlib-jdk8"))
+    implementation(kotlin("gradle-plugin"))
     implementation(gradleApi())
     implementation(localGroovy())
     implementation(project(":formatter"))
@@ -19,6 +20,7 @@ gradlePlugin {
     plugins {
         create("kotlinFormatterPlugin") {
             id = "org.kotlin.formatter"
+            version = "0.0.1"
             implementationClass = "org.kotlin.formatter.plugin.KotlinFormatterPlugin"
         }
     }

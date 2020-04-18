@@ -14,18 +14,11 @@ import java.nio.file.Path
  *     within an existing statement
  */
 class KotlinFormatter(
-    maxLineLength: Int = 100,
-    standardIndentSize: Int = 4,
-    continuationIndentSize: Int = 4
+    private val maxLineLength: Int = 100,
+    private val standardIndentSize: Int = 4,
+    private val continuationIndentSize: Int = 4
 ) {
     private val kotlinLoader = KotlinFileLoader()
-    private val kotlinScanner = KotlinScanner()
-    private val printer =
-        Printer(
-            maxLineLength = maxLineLength,
-            standardIndent = standardIndentSize,
-            continuationIndent = continuationIndentSize
-        )
 
     /**
      * Formats the Kotlin source code in [input] to fit in the column limit [maxLineLength].
@@ -33,6 +26,13 @@ class KotlinFormatter(
      * Returns the formatted source code.
      */
     fun format(input: String): String {
+        val kotlinScanner = KotlinScanner()
+        val printer =
+            Printer(
+                maxLineLength = maxLineLength,
+                standardIndent = standardIndentSize,
+                continuationIndent = continuationIndentSize
+            )
         return printer.print(kotlinScanner.scan(kotlinLoader.parseKotlin(input)))
     }
 
