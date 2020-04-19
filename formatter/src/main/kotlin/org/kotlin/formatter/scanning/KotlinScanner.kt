@@ -83,13 +83,7 @@ class KotlinScanner {
                 ClassScanner(this).scanClassNode(node)
             }
             KtNodeTypes.FUN -> {
-                val blockNodeTypes = setOf(KtNodeTypes.BLOCK, KtNodeTypes.CLASS_BODY)
-                val innerTokens = if (blockNodeTypes.contains(node.lastChildNode.elementType)) {
-                    scanDeclarationWithBlock(node)
-                } else {
-                    PropertyScanner(this).tokensForProperty(node)
-                }
-                inBeginEndBlock(innerTokens, State.CODE)
+                FunctionDeclarationScanner(this, PropertyScanner(this)).tokensForFunctionDeclaration(node)
             }
             KtNodeTypes.PRIMARY_CONSTRUCTOR -> {
                 scanNodes(node.children().asIterable(), ScannerState.STATEMENT)
@@ -132,26 +126,6 @@ class KotlinScanner {
                 tokensForBlockNode(node, State.CODE, ScannerState.STATEMENT)
             }
         }
-    }
-
-    private fun scanDeclarationWithBlock(node: ASTNode): List<Token> {
-        val children = node.children().toList()
-        val index = indexOfTerminatingBlockIncludingPrecedingWhitespace(children)
-        val childrenWithoutBlock = children.subList(0, index + 1)
-        val blockChildren = children.subList(index + 1, children.size)
-        val declarationParts = scanNodes(childrenWithoutBlock, ScannerState.STATEMENT)
-        return listOf(
-            *inBeginEndBlock(declarationParts, State.CODE).toTypedArray(),
-            *scanNodes(blockChildren, ScannerState.BLOCK).toTypedArray()
-        )
-    }
-
-    private fun indexOfTerminatingBlockIncludingPrecedingWhitespace(children: List<ASTNode>): Int {
-        var index = children.size - 2
-        while (children[index].elementType == KtTokens.WHITE_SPACE) {
-            index--
-        }
-        return index
     }
 
     private fun replaceTerminalForcedBreakTokenWithClosingForcedBreakToken(
