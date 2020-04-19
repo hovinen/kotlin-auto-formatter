@@ -19,6 +19,7 @@ import org.jetbrains.kotlin.kdoc.parser.KDocElementTypes
 import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.psi.psiUtil.children
 import org.jetbrains.kotlin.psi.stubs.elements.KtFileElementType
+import org.jetbrains.kotlin.psi.stubs.elements.KtScriptElementType
 
 class KotlinScanner {
     private var isFirstEntry = false
@@ -37,8 +38,7 @@ class KotlinScanner {
     private fun scanNodeWithChildren(node: ASTNode, scannerState: ScannerState): List<Token> {
         return when (node.elementType) {
             KtNodeTypes.BLOCK, KtNodeTypes.CLASS_BODY -> {
-                val tokens = scanNodes(node.children().asIterable(), ScannerState.BLOCK)
-                replaceTerminalForcedBreakTokenWithClosingForcedBreakToken(tokens)
+                scanBlock(node)
             }
             KtNodeTypes.WHEN -> {
                 val innerTokens = tokensForWhenOrForExpression(node)
@@ -131,12 +131,40 @@ class KotlinScanner {
             KtNodeTypes.IMPORT_ALIAS -> {
                 tokensForBlockNode(node, State.PACKAGE_IMPORT, ScannerState.PACKAGE_IMPORT)
             }
-            KtFileElementType.INSTANCE -> {
+            KtFileElementType.INSTANCE, is KtScriptElementType -> {
                 scanNodes(node.children().asIterable(), ScannerState.BLOCK)
             }
             else -> {
                 tokensForBlockNode(node, State.CODE, ScannerState.STATEMENT)
             }
+        }
+    }
+
+    private fun scanBlock(node: ASTNode): List<Token> {
+        val children = node.children().toList()
+        val indexOfLBrace = children.indexOfFirst { it.elementType == KtTokens.LBRACE }
+        val indexOfRBrace = children.indexOfLast { it.elementType == KtTokens.RBRACE }
+        return if (indexOfLBrace != -1 && indexOfRBrace != -1) {
+            val innerTokens = scanNodes(children.subList(indexOfLBrace + 1, indexOfRBrace), ScannerState.BLOCK)
+            val innerTokensWithClosingBreakToken =
+                if (innerTokens.isNotEmpty() && innerTokens.last() is ForcedBreakToken) {
+                    listOf(
+                        *innerTokens.subList(0, innerTokens.size - 1).toTypedArray(),
+                        ClosingForcedBreakToken
+                    )
+                } else {
+                    innerTokens
+                }
+            listOf(
+                LeafNodeToken("{"),
+                BeginToken(length = lengthOfTokens(innerTokens), state = State.CODE),
+                *innerTokensWithClosingBreakToken.toTypedArray(),
+                EndToken,
+                LeafNodeToken("}")
+            )
+        } else {
+            val tokens = scanNodes(children, ScannerState.BLOCK)
+            replaceTerminalForcedBreakTokenWithClosingForcedBreakToken(tokens)
         }
     }
 

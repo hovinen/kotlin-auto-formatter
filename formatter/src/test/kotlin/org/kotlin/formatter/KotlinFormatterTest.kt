@@ -675,6 +675,23 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `does not indent top level class declaration`() {
+        val subject = KotlinFormatter()
+
+        val result = subject.format("""
+            package org.kotlin.formatter
+            
+            class MyClass
+        """.trimIndent())
+
+        assertThat(result).isEqualTo("""
+            package org.kotlin.formatter
+            
+            class MyClass
+        """.trimIndent())
+    }
+
+    @Test
     fun `does not strip trailing whitespace in multiline string literals`() {
         val subject = KotlinFormatter()
 

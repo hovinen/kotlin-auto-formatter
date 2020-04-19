@@ -433,6 +433,30 @@ internal class KotlinScannerTest {
     }
 
     @Test
+    fun `outputs a BeginBlock, EndBlock pair immediately inside a block`() {
+        val subject = subject()
+        val node = kotlinLoader.parseKotlin("""
+            class MyClass {
+                val property: Int = 0
+            }
+        """.trimIndent())
+
+        val result = subject.scan(node)
+
+        assertThat(result)
+            .containsSubsequence(
+                listOf(
+                    LeafNodeToken("{"),
+                    BeginToken(length = 21, state = State.CODE),
+                    ForcedBreakToken(count = 1),
+                    LeafNodeToken("val"),
+                    EndToken,
+                    LeafNodeToken("}")
+                )
+            )
+    }
+
+    @Test
     fun `outputs ClosingForcedBreakToken before closing brace of a block`() {
         val subject = subject()
         val node = kotlinLoader.parseKotlin("""
