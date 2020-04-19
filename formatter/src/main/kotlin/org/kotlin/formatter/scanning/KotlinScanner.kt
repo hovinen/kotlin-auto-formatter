@@ -40,7 +40,7 @@ class KotlinScanner {
                 BlockScanner(this).scanBlock(node)
             }
             KtNodeTypes.WHEN -> {
-                val innerTokens = tokensForWhenOrForExpression(node)
+                val innerTokens = WhenForExpressionScanner(this).tokensForWhenOrForExpression(node)
                 val tokens = inBeginEndBlock(innerTokens, State.CODE)
                 replaceTerminalForcedBreakTokenWithClosingForcedBreakToken(tokens)
             }
@@ -111,7 +111,7 @@ class KotlinScanner {
                 )
             }
             KtNodeTypes.FOR -> {
-                tokensForWhenOrForExpression(node)
+                WhenForExpressionScanner(this).tokensForWhenOrForExpression(node)
             }
             KtNodeTypes.BINARY_EXPRESSION -> {
                 BinaryExpressionScanner(this).tokensForBinaryExpression(node)
@@ -232,29 +232,6 @@ class KotlinScanner {
         }
 
     private val ASTNode.isAtEndOfFile: Boolean get() = treeNext == null
-
-    private fun tokensForWhenOrForExpression(node: ASTNode): List<Token> {
-        val childNodes = node.children().toList()
-        val indexOfLeftParenthesis = childNodes.indexOfFirst { it.elementType == KtTokens.LPAR }
-        val nodesUntilLeftParenthesis = childNodes.subList(0, indexOfLeftParenthesis)
-        val tokensUntilLeftParenthesis = scanNodes(nodesUntilLeftParenthesis, ScannerState.STATEMENT)
-        val indexOfRightParenthesis = childNodes.indexOfFirst { it.elementType == KtTokens.RPAR }
-        val nodesBetweenParentheses = childNodes.subList(indexOfLeftParenthesis + 1, indexOfRightParenthesis)
-        val tokensBetweenParentheses = scanNodes(nodesBetweenParentheses, ScannerState.STATEMENT)
-        val nodesAfterRightParenthesis = childNodes.subList(indexOfRightParenthesis + 1, childNodes.size)
-        val tokensAfterRightParenthesis = scanNodes(nodesAfterRightParenthesis, ScannerState.BLOCK)
-        val innerTokens = listOf(
-            *tokensUntilLeftParenthesis.toTypedArray(),
-            LeafNodeToken("("),
-            BeginToken(length = lengthOfTokens(tokensBetweenParentheses), state = State.CODE),
-            *tokensBetweenParentheses.toTypedArray(),
-            ClosingSynchronizedBreakToken(whitespaceLength = 0),
-            EndToken,
-            LeafNodeToken(")"),
-            *tokensAfterRightParenthesis.toTypedArray()
-        )
-        return inBeginEndBlock(innerTokens, State.CODE)
-    }
 
     private fun stateForDotQualifiedExpression(scannerState: ScannerState) =
         if (scannerState == ScannerState.PACKAGE_IMPORT) State.PACKAGE_IMPORT else State.CODE
