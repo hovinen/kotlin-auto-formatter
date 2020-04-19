@@ -30,7 +30,7 @@ class KotlinScanner {
 
     private fun scanInState(node: ASTNode, scannerState: ScannerState): List<Token> {
         return when (node) {
-            is LeafPsiElement -> scanLeaf(node, scannerState)
+            is LeafPsiElement -> LeafScanner().scanLeaf(node, scannerState)
             else -> scanNodeWithChildren(node, scannerState)
         }
     }
@@ -287,42 +287,6 @@ class KotlinScanner {
 
     private val ASTNode.isAtEndOfFile: Boolean get() = treeNext == null
 
-    private fun scanLeaf(node: LeafPsiElement, scannerState: ScannerState): List<Token> =
-        when (node.elementType) {
-            KtTokens.EOL_COMMENT -> {
-                listOf(
-                    BeginToken(node.textLength, stateBasedOnCommentContent(node.text)),
-                    *tokenizeString(node.text).toTypedArray(),
-                    EndToken
-                )
-            }
-            KtTokens.BLOCK_COMMENT -> {
-                listOf(
-                    BeginToken(node.textLength, State.LONG_COMMENT),
-                    *tokenizeNodeContentInBlockComment(node).toTypedArray(),
-                    EndToken
-                )
-            }
-            KDocTokens.TEXT -> tokenizeString(node.text.trim())
-            KDocTokens.LEADING_ASTERISK -> listOf()
-            KDocTokens.END -> listOf(ClosingSynchronizedBreakToken(whitespaceLength = 1), LeafNodeToken(node.text))
-            KtTokens.REGULAR_STRING_PART -> tokenizeString(node.text)
-            KtTokens.RPAR -> {
-                if (scannerState == ScannerState.SYNC_BREAK_LIST) {
-                    listOf(ClosingSynchronizedBreakToken(whitespaceLength = 0), LeafNodeToken(node.text))
-                } else {
-                    listOf(LeafNodeToken(node.text))
-                }
-            }
-            KtTokens.DOT, KtTokens.SAFE_ACCESS -> {
-                listOf(
-                    SynchronizedBreakToken(whitespaceLength = 0),
-                    LeafNodeToken(node.text)
-                )
-            }
-            else -> listOf(LeafNodeToken(node.text))
-        }
-
     private fun tokensForWhenOrForExpression(node: ASTNode): List<Token> {
         val childNodes = node.children().toList()
         val indexOfLeftParenthesis = childNodes.indexOfFirst { it.elementType == KtTokens.LPAR }
@@ -362,12 +326,6 @@ class KotlinScanner {
         node.treeNext.elementType == KDocTokens.LEADING_ASTERISK &&
         node.treeNext.treeNext.text.matches(Regex(" *\n.*"))
 
-    private fun stateBasedOnCommentContent(content: String) =
-        if (content.startsWith("// TODO")) State.TODO_COMMENT else State.LINE_COMMENT
-
-    private fun tokenizeNodeContentInBlockComment(node: ASTNode): List<Token> =
-        tokenizeString(node.text.replace(Regex("\n[ ]+\\* "), "\n "))
-
     private fun tokenizeString(text: String): List<Token> {
         val parts = text.split(" ")
         return listOf(
@@ -379,10 +337,6 @@ class KotlinScanner {
                 )
             }.toTypedArray()
         )
-    }
-
-    companion object {
-        private fun <T> List<T>.tail() = this.subList(1, this.size)
     }
 
     internal enum class ScannerState {

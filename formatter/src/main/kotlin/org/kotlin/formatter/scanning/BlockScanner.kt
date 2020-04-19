@@ -3,7 +3,13 @@ package org.kotlin.formatter.scanning
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.psi.psiUtil.children
-import org.kotlin.formatter.*
+import org.kotlin.formatter.BeginToken
+import org.kotlin.formatter.ClosingForcedBreakToken
+import org.kotlin.formatter.EndToken
+import org.kotlin.formatter.ForcedBreakToken
+import org.kotlin.formatter.LeafNodeToken
+import org.kotlin.formatter.State
+import org.kotlin.formatter.Token
 
 internal class BlockScanner(private val kotlinScanner: KotlinScanner) {
     fun scanBlock(node: ASTNode): List<Token> {

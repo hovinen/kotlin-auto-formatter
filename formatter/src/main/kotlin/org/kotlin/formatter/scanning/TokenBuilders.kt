@@ -1,8 +1,12 @@
 package org.kotlin.formatter.scanning
 
-import org.jetbrains.kotlin.com.intellij.lang.ASTNode
-import org.jetbrains.kotlin.psi.psiUtil.children
-import org.kotlin.formatter.*
+import org.kotlin.formatter.BeginToken
+import org.kotlin.formatter.EndToken
+import org.kotlin.formatter.LeafNodeToken
+import org.kotlin.formatter.State
+import org.kotlin.formatter.SynchronizedBreakToken
+import org.kotlin.formatter.Token
+import org.kotlin.formatter.WhitespaceToken
 
 internal fun inBeginEndBlock(innerTokens: List<Token>, state: State): List<Token> =
     listOf(
@@ -21,3 +25,4 @@ internal fun lengthOfTokens(nextTokens: List<Token>): Int =
         }
     }.sum()
 
+internal fun <T> List<T>.tail() = this.subList(1, this.size)

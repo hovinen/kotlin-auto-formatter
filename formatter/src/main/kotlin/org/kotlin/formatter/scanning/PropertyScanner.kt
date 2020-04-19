@@ -3,7 +3,11 @@ package org.kotlin.formatter.scanning
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.psi.psiUtil.children
-import org.kotlin.formatter.*
+import org.kotlin.formatter.LeafNodeToken
+import org.kotlin.formatter.State
+import org.kotlin.formatter.Token
+import org.kotlin.formatter.WhitespaceToken
+import org.kotlin.formatter.nonBreakingSpaceToken
 
 internal class PropertyScanner(private val kotlinScanner: KotlinScanner) {
     fun tokensForProperty(node: ASTNode): List<Token> {
