@@ -692,6 +692,21 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `maintains a line break between KDoc and declaration`() {
+        val subject = KotlinFormatter(maxLineLength = 40)
+
+        val result = subject.format("""
+            /** Some KDoc. */
+            class MyClass
+        """.trimIndent())
+
+        assertThat(result).isEqualTo("""
+            /** Some KDoc. */
+            class MyClass
+        """.trimIndent())
+    }
+
+    @Test
     fun `does not strip trailing whitespace in multiline string literals`() {
         val subject = KotlinFormatter()
 

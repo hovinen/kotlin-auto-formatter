@@ -371,7 +371,7 @@ internal class KotlinScannerTest {
         assertThat(result)
             .containsSubsequence(
                 LeafNodeToken("MyClass"),
-                WhitespaceToken(length = 2, content = " "),
+                WhitespaceToken(length = 1, content = " "),
                 LeafNodeToken("{")
             )
     }
@@ -530,7 +530,7 @@ internal class KotlinScannerTest {
             .containsSubsequence(
                 BeginToken(length = 10, state = State.CODE),
                 LeafNodeToken("aCondition"),
-                ClosingSynchronizedBreakToken,
+                ClosingSynchronizedBreakToken(whitespaceLength = 0),
                 EndToken,
                 LeafNodeToken(")")
             )
@@ -547,7 +547,7 @@ internal class KotlinScannerTest {
             .containsSubsequence(
                 BeginToken(length = 22, state = State.CODE),
                 LeafNodeToken("aCollection"),
-                ClosingSynchronizedBreakToken,
+                ClosingSynchronizedBreakToken(whitespaceLength = 0),
                 EndToken,
                 LeafNodeToken(")")
             )
@@ -583,7 +583,7 @@ internal class KotlinScannerTest {
             .containsSubsequence(
                 BeginToken(length = 8, state = State.CODE),
                 LeafNodeToken("variable"),
-                ClosingSynchronizedBreakToken,
+                ClosingSynchronizedBreakToken(whitespaceLength = 0),
                 EndToken,
                 LeafNodeToken(")")
             )
@@ -661,13 +661,13 @@ internal class KotlinScannerTest {
         val result = subject.scan(node)
 
         assertThat(result)
-                    .containsSubsequence(
-                BeginToken(length = 48, state = State.CODE),
+            .containsSubsequence(
+                BeginToken(length = 49, state = State.CODE),
                 LeafNodeToken("class"),
                 LeafNodeToken("MyClass"),
                 LeafNodeToken("AnInterface"),
+                WhitespaceToken(length = 1, content = " "),
                 EndToken,
-                WhitespaceToken(length = 2, content = " "),
                 LeafNodeToken("{")
             )
     }
@@ -733,7 +733,7 @@ internal class KotlinScannerTest {
             .containsSubsequence(
                 LeafNodeToken("param2"),
                 LeafNodeToken("Int"),
-                ClosingSynchronizedBreakToken,
+                ClosingSynchronizedBreakToken(whitespaceLength = 0),
                 LeafNodeToken(")")
             )
     }
@@ -766,7 +766,7 @@ internal class KotlinScannerTest {
             .doesNotContainSubsequence(
                 listOf(
                     LeafNodeToken("c"),
-                    ClosingSynchronizedBreakToken,
+                    ClosingSynchronizedBreakToken(whitespaceLength = 0),
                     LeafNodeToken("d")
                 )
             )
@@ -799,7 +799,7 @@ internal class KotlinScannerTest {
             .containsSubsequence(
                 LeafNodeToken("param2"),
                 LeafNodeToken("Int"),
-                ClosingSynchronizedBreakToken,
+                ClosingSynchronizedBreakToken(whitespaceLength = 0),
                 LeafNodeToken(")")
             )
     }
@@ -830,7 +830,7 @@ internal class KotlinScannerTest {
         assertThat(result)
             .containsSubsequence(
                 LeafNodeToken("param2"),
-                ClosingSynchronizedBreakToken,
+                ClosingSynchronizedBreakToken(whitespaceLength = 0),
                 LeafNodeToken(")")
             )
     }
@@ -1138,7 +1138,7 @@ internal class KotlinScannerTest {
         assertThat(result)
             .containsSubsequence(
                 LeafNodeToken("comment"),
-                ClosingSynchronizedBreakToken,
+                ClosingSynchronizedBreakToken(whitespaceLength = 1),
                 LeafNodeToken("*/")
             )
     }
@@ -1282,6 +1282,46 @@ internal class KotlinScannerTest {
         val result = subject.scan(node)
 
         assertThat(result).doesNotContain(BeginToken(length = 9, state = State.CODE))
+    }
+
+    @Test
+    fun `outputs a ForcedLineBreak after a KDoc`() {
+        val subject = subject()
+        val node = kotlinLoader.parseKotlin("""
+            /** Some KDoc. */
+            class MyClass
+        """.trimIndent())
+
+        val result = subject.scan(node)
+
+        assertThat(result).containsSubsequence(
+            listOf(
+                LeafNodeToken("*/"),
+                ForcedBreakToken(count = 1),
+                LeafNodeToken("class")
+            )
+        )
+    }
+
+    @Test
+    fun `outputs a BeginToken, EndToken pair around a class which has KDoc`() {
+        val subject = subject()
+        val node = kotlinLoader.parseKotlin("""
+            /** Some KDoc. */
+            class MyClass
+        """.trimIndent())
+
+        val result = subject.scan(node)
+
+        assertThat(result).containsSubsequence(
+            listOf(
+                LeafNodeToken("*/"),
+                BeginToken(length = 13, state = State.CODE),
+                LeafNodeToken("class"),
+                LeafNodeToken("MyClass"),
+                EndToken
+            )
+        )
     }
 
     @Test

@@ -121,6 +121,8 @@ class Printer(
                     } else {
                         indent(0)
                     }
+                } else {
+                    result.append(" ".repeat(token.whitespaceLength))
                 }
             }
             is BeginToken -> {

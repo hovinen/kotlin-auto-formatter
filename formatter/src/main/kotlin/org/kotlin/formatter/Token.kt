@@ -20,7 +20,7 @@ object ClosingForcedBreakToken : Token()
 
 data class SynchronizedBreakToken(internal val whitespaceLength: Int) : Token()
 
-object ClosingSynchronizedBreakToken : Token()
+data class ClosingSynchronizedBreakToken(internal val whitespaceLength: Int) : Token()
 
 data class BeginToken(internal val length: Int, internal val state: State) : Token()
 

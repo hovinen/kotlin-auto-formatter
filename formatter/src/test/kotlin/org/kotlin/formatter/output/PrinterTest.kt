@@ -308,7 +308,7 @@ internal class PrinterTest {
         val result = subject.print(
             listOf(
                 BeginToken(length = 81, state = State.CODE),
-                ClosingSynchronizedBreakToken,
+                ClosingSynchronizedBreakToken(whitespaceLength = 0),
                 LeafNodeToken("variable")
             )
         )
@@ -323,12 +323,12 @@ internal class PrinterTest {
         val result = subject.print(
             listOf(
                 BeginToken(length = 80, state = State.CODE),
-                ClosingSynchronizedBreakToken,
+                ClosingSynchronizedBreakToken(whitespaceLength = 2),
                 LeafNodeToken("variable")
             )
         )
 
-        assertThat(result).isEqualTo("variable")
+        assertThat(result).isEqualTo("  variable")
     }
 
     @ParameterizedTest
@@ -357,7 +357,7 @@ internal class PrinterTest {
         val result = subject.print(
             listOf(
                 BeginToken(length = 81, state = State.LONG_COMMENT),
-                ClosingSynchronizedBreakToken,
+                ClosingSynchronizedBreakToken(whitespaceLength = 0),
                 LeafNodeToken("Comment")
             )
         )
@@ -568,7 +568,7 @@ internal class PrinterTest {
                 Arguments.of(ForcedBreakToken(count = 1)),
                 Arguments.of(SynchronizedBreakToken(whitespaceLength = 1)),
                 Arguments.of(ClosingForcedBreakToken),
-                Arguments.of(ClosingSynchronizedBreakToken)
+                Arguments.of(ClosingSynchronizedBreakToken(whitespaceLength = 1))
             )
     }
 }

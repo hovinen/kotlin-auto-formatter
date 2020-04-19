@@ -81,12 +81,7 @@ class KotlinScanner {
                 }
             }
             KtNodeTypes.CLASS -> {
-                val blockNodeTypes = setOf(KtNodeTypes.BLOCK, KtNodeTypes.CLASS_BODY)
-                if (blockNodeTypes.contains(node.lastChildNode.elementType)) {
-                    scanDeclarationWithBlock(node)
-                } else {
-                    tokensForBlockNode(node, State.CODE, ScannerState.STATEMENT)
-                }
+                scanClassNode(node)
             }
             KtNodeTypes.FUN -> {
                 val blockNodeTypes = setOf(KtNodeTypes.BLOCK, KtNodeTypes.CLASS_BODY)
@@ -112,7 +107,7 @@ class KotlinScanner {
                 listOf(
                     BeginToken(length = lengthOfTokens(innerTokens), state = State.CODE),
                     *innerTokens.toTypedArray(),
-                    ClosingSynchronizedBreakToken,
+                    ClosingSynchronizedBreakToken(whitespaceLength = 0),
                     EndToken
                 )
             }
@@ -138,6 +133,32 @@ class KotlinScanner {
                 tokensForBlockNode(node, State.CODE, ScannerState.STATEMENT)
             }
         }
+    }
+
+    private fun scanClassNode(node: ASTNode): List<Token> {
+        val children = node.children().toList()
+        val indexOfClassKeyword = children.indexOfFirst { it.elementType == KtTokens.CLASS_KEYWORD }
+        val indexOfClassBody = children.indexOfFirst { it.elementType == KtNodeTypes.CLASS_BODY }
+        val nodesBeforeClassKeyword = children.subList(0, indexOfClassKeyword)
+        val tokensBeforeClassKeyword = scanNodes(nodesBeforeClassKeyword, scannerState = ScannerState.BLOCK)
+        val nodesWithinClassDeclaration =
+            if (indexOfClassBody == -1) {
+                children.subList(indexOfClassKeyword, children.size)
+            } else {
+                children.subList(indexOfClassKeyword, indexOfClassBody)
+            }
+        val tokensWithinClassDeclaration = scanNodes(nodesWithinClassDeclaration, scannerState = ScannerState.STATEMENT)
+        val tokensOfBlock =
+            if (indexOfClassBody != -1) {
+                scanNodes(children.subList(indexOfClassBody, children.size), ScannerState.BLOCK)
+            } else {
+                listOf()
+            }
+        return listOf(
+            *tokensBeforeClassKeyword.toTypedArray(),
+            *inBeginEndBlock(tokensWithinClassDeclaration, State.CODE).toTypedArray(),
+            *tokensOfBlock.toTypedArray()
+        )
     }
 
     private fun scanBlock(node: ASTNode): List<Token> {
@@ -380,11 +401,11 @@ class KotlinScanner {
             }
             KDocTokens.TEXT -> tokenizeString(node.text.trim())
             KDocTokens.LEADING_ASTERISK -> listOf()
-            KDocTokens.END -> listOf(ClosingSynchronizedBreakToken, LeafNodeToken(node.text))
+            KDocTokens.END -> listOf(ClosingSynchronizedBreakToken(whitespaceLength = 1), LeafNodeToken(node.text))
             KtTokens.REGULAR_STRING_PART -> tokenizeString(node.text)
             KtTokens.RPAR -> {
                 if (scannerState == ScannerState.SYNC_BREAK_LIST) {
-                    listOf(ClosingSynchronizedBreakToken, LeafNodeToken(node.text))
+                    listOf(ClosingSynchronizedBreakToken(whitespaceLength = 0), LeafNodeToken(node.text))
                 } else {
                     listOf(LeafNodeToken(node.text))
                 }
@@ -413,7 +434,7 @@ class KotlinScanner {
             LeafNodeToken("("),
             BeginToken(length = lengthOfTokens(tokensBetweenParentheses), state = State.CODE),
             *tokensBetweenParentheses.toTypedArray(),
-            ClosingSynchronizedBreakToken,
+            ClosingSynchronizedBreakToken(whitespaceLength = 0),
             EndToken,
             LeafNodeToken(")"),
             *tokensAfterRightParenthesis.toTypedArray()
