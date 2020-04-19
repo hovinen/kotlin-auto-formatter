@@ -13,17 +13,17 @@ internal class ClassScanner(private val kotlinScanner: KotlinScanner) {
         val indexOfClassKeyword = children.indexOfFirst { it.elementType == KtTokens.CLASS_KEYWORD }
         val indexOfClassBody = children.indexOfFirst { it.elementType == KtNodeTypes.CLASS_BODY }
         val nodesBeforeClassKeyword = children.subList(0, indexOfClassKeyword)
-        val tokensBeforeClassKeyword = kotlinScanner.scanNodes(nodesBeforeClassKeyword, scannerState = KotlinScanner.ScannerState.BLOCK)
+        val tokensBeforeClassKeyword = kotlinScanner.scanNodes(nodesBeforeClassKeyword, scannerState = ScannerState.BLOCK)
         val nodesWithinClassDeclaration =
             if (indexOfClassBody == -1) {
                 children.subList(indexOfClassKeyword, children.size)
             } else {
                 children.subList(indexOfClassKeyword, indexOfClassBody)
             }
-        val tokensWithinClassDeclaration = kotlinScanner.scanNodes(nodesWithinClassDeclaration, scannerState = KotlinScanner.ScannerState.STATEMENT)
+        val tokensWithinClassDeclaration = kotlinScanner.scanNodes(nodesWithinClassDeclaration, scannerState = ScannerState.STATEMENT)
         val tokensOfBlock =
             if (indexOfClassBody != -1) {
-                kotlinScanner.scanNodes(children.subList(indexOfClassBody, children.size), KotlinScanner.ScannerState.BLOCK)
+                kotlinScanner.scanNodes(children.subList(indexOfClassBody, children.size), ScannerState.BLOCK)
             } else {
                 listOf()
             }

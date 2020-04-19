@@ -1,5 +1,14 @@
 package org.kotlin.formatter.scanning
 
+import org.jetbrains.kotlin.KtNodeTypes
+import org.jetbrains.kotlin.com.intellij.lang.ASTNode
+import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.LeafPsiElement
+import org.jetbrains.kotlin.kdoc.lexer.KDocTokens
+import org.jetbrains.kotlin.kdoc.parser.KDocElementTypes
+import org.jetbrains.kotlin.lexer.KtTokens
+import org.jetbrains.kotlin.psi.psiUtil.children
+import org.jetbrains.kotlin.psi.stubs.elements.KtFileElementType
+import org.jetbrains.kotlin.psi.stubs.elements.KtScriptElementType
 import org.kotlin.formatter.BeginToken
 import org.kotlin.formatter.ClosingForcedBreakToken
 import org.kotlin.formatter.ClosingSynchronizedBreakToken
@@ -10,16 +19,6 @@ import org.kotlin.formatter.State
 import org.kotlin.formatter.SynchronizedBreakToken
 import org.kotlin.formatter.Token
 import org.kotlin.formatter.WhitespaceToken
-import org.kotlin.formatter.nonBreakingSpaceToken
-import org.jetbrains.kotlin.KtNodeTypes
-import org.jetbrains.kotlin.com.intellij.lang.ASTNode
-import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.LeafPsiElement
-import org.jetbrains.kotlin.kdoc.lexer.KDocTokens
-import org.jetbrains.kotlin.kdoc.parser.KDocElementTypes
-import org.jetbrains.kotlin.lexer.KtTokens
-import org.jetbrains.kotlin.psi.psiUtil.children
-import org.jetbrains.kotlin.psi.stubs.elements.KtFileElementType
-import org.jetbrains.kotlin.psi.stubs.elements.KtScriptElementType
 
 class KotlinScanner {
     private var isFirstEntry = false
@@ -28,7 +27,7 @@ class KotlinScanner {
         return scanInState(node, ScannerState.BLOCK)
     }
 
-    private fun scanInState(node: ASTNode, scannerState: ScannerState): List<Token> {
+    internal fun scanInState(node: ASTNode, scannerState: ScannerState): List<Token> {
         return when (node) {
             is LeafPsiElement -> LeafScanner().scanLeaf(node, scannerState)
             else -> scanNodeWithChildren(node, scannerState)
@@ -60,7 +59,7 @@ class KotlinScanner {
                 tokensForBlockNode(node, State.KDOC_DIRECTIVE, ScannerState.KDOC)
             }
             KtNodeTypes.STRING_TEMPLATE -> {
-                tokensForStringLiteralNode(node)
+                StringLiteralScanner(this).tokensForStringLiteralNode(node)
             }
             KtNodeTypes.LITERAL_STRING_TEMPLATE_ENTRY -> {
                 scanNodes(node.children().asIterable(), ScannerState.BLOCK)
@@ -96,7 +95,7 @@ class KotlinScanner {
                 scanNodes(node.children().asIterable(), ScannerState.STATEMENT)
             }
             KtNodeTypes.DOT_QUALIFIED_EXPRESSION, KtNodeTypes.SAFE_ACCESS_EXPRESSION -> {
-                val tokens = scanDotQualifiedExpression(node)
+                val tokens = DotQualifiedExpressionScanner(this).scanDotQualifiedExpression(node)
                 inBeginEndBlock(tokens, stateForDotQualifiedExpression(scannerState))
             }
             KtNodeTypes.BODY, KtNodeTypes.THEN -> {
@@ -115,7 +114,7 @@ class KotlinScanner {
                 tokensForWhenOrForExpression(node)
             }
             KtNodeTypes.BINARY_EXPRESSION -> {
-                tokensForBinaryExpression(node)
+                BinaryExpressionScanner(this).tokensForBinaryExpression(node)
             }
             KtNodeTypes.PROPERTY -> {
                 PropertyScanner(this).tokensForProperty(node)
@@ -132,59 +131,6 @@ class KotlinScanner {
             else -> {
                 tokensForBlockNode(node, State.CODE, ScannerState.STATEMENT)
             }
-        }
-    }
-
-    private fun tokensForBinaryExpression(node: ASTNode): List<Token> {
-        val nodesWithoutWhitespace = node.children().filter { it.elementType != KtTokens.WHITE_SPACE }.toList()
-        val secondArgumentNodes = scanNodes(listOf(nodesWithoutWhitespace[2]), ScannerState.STATEMENT)
-        val innerTokens = listOf(
-            *scanNodes(listOf(nodesWithoutWhitespace[0]), ScannerState.STATEMENT).toTypedArray(),
-            nonBreakingSpaceToken(content = " "),
-            *scanNodes(listOf(nodesWithoutWhitespace[1]), ScannerState.STATEMENT).toTypedArray(),
-            WhitespaceToken(
-                length = 1 + lengthOfTokensForWhitespace(secondArgumentNodes),
-                content = " "
-            ),
-            *secondArgumentNodes.toTypedArray()
-        )
-        return inBeginEndBlock(innerTokens, State.CODE)
-    }
-
-    private fun tokensForStringLiteralNode(node: ASTNode): List<Token> {
-        val tokens = mutableListOf<Token>()
-        var lastChild: ASTNode? = null
-        for (child in node.children()) {
-            val childTokens = scanInState(child, ScannerState.BLOCK)
-            if (child.elementType != KtTokens.OPEN_QUOTE && child.elementType != KtTokens.CLOSING_QUOTE
-                && lastChild?.elementType != KtTokens.OPEN_QUOTE) {
-                tokens.add(
-                    WhitespaceToken(length = lengthOfTokensForWhitespace(childTokens), content = "")
-                )
-            }
-            tokens.addAll(childTokens)
-            lastChild = child
-        }
-        return inBeginEndBlock(tokens, stateForStringLiteral(node))
-    }
-
-    private fun stateForStringLiteral(node: ASTNode): State =
-        if (node.text.startsWith("\"\"\"")) {
-            State.MULTILINE_STRING_LITERAL
-        } else {
-            State.STRING_LITERAL
-        }
-
-    private fun scanDotQualifiedExpression(node: ASTNode): List<Token> {
-        val dotExpressionTypes =
-            setOf(KtNodeTypes.DOT_QUALIFIED_EXPRESSION, KtNodeTypes.SAFE_ACCESS_EXPRESSION)
-        return if (dotExpressionTypes.contains(node.firstChildNode.elementType)) {
-            listOf(
-                *scanDotQualifiedExpression(node.firstChildNode).toTypedArray(),
-                *scanNodes(node.children().toList().tail(), ScannerState.STATEMENT).toTypedArray()
-            )
-        } else {
-            scanNodes(node.children().asIterable(), ScannerState.STATEMENT)
         }
     }
 
@@ -325,34 +271,4 @@ class KotlinScanner {
         node.textContains('\n') &&
         node.treeNext.elementType == KDocTokens.LEADING_ASTERISK &&
         node.treeNext.treeNext.text.matches(Regex(" *\n.*"))
-
-    private fun tokenizeString(text: String): List<Token> {
-        val parts = text.split(" ")
-        return listOf(
-            LeafNodeToken(parts.first()),
-            *parts.tail().flatMap {
-                listOf(
-                    WhitespaceToken(it.length + 1, " "),
-                    LeafNodeToken(it)
-                )
-            }.toTypedArray()
-        )
-    }
-
-    internal enum class ScannerState {
-        /** Newlines create forced breaks */
-        BLOCK,
-
-        /** Newlines are treated as ordinary whitespace */
-        STATEMENT,
-
-        /** ClosingSynchronizedBreakToken on right parenthesis */
-        SYNC_BREAK_LIST,
-
-        /** Single newlines are treated as ordinary whitespace, double newlines create forced breaks */
-        KDOC,
-
-        /** Like BLOCK, but State.CODE should be replaced by State.PACKAGE_IMPORT */
-        PACKAGE_IMPORT
-    }
 }

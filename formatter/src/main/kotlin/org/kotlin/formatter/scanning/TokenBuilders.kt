@@ -25,4 +25,10 @@ internal fun lengthOfTokens(nextTokens: List<Token>): Int =
         }
     }.sum()
 
+internal fun lengthOfTokensForWhitespace(nextTokens: List<Token>): Int =
+    when (val firstToken = nextTokens.firstOrNull()) {
+        is LeafNodeToken -> firstToken.textLength
+        else -> lengthOfTokens(nextTokens)
+    }
+
 internal fun <T> List<T>.tail() = this.subList(1, this.size)

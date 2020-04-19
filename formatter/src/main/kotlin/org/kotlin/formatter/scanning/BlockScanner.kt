@@ -17,7 +17,7 @@ internal class BlockScanner(private val kotlinScanner: KotlinScanner) {
         val indexOfLBrace = children.indexOfFirst { it.elementType == KtTokens.LBRACE }
         val indexOfRBrace = children.indexOfLast { it.elementType == KtTokens.RBRACE }
         return if (indexOfLBrace != -1 && indexOfRBrace != -1) {
-            val innerTokens = kotlinScanner.scanNodes(children.subList(indexOfLBrace + 1, indexOfRBrace), KotlinScanner.ScannerState.BLOCK)
+            val innerTokens = kotlinScanner.scanNodes(children.subList(indexOfLBrace + 1, indexOfRBrace), ScannerState.BLOCK)
             val innerTokensWithClosingBreakToken =
                 if (innerTokens.isNotEmpty() && innerTokens.last() is ForcedBreakToken) {
                     listOf(
@@ -35,7 +35,7 @@ internal class BlockScanner(private val kotlinScanner: KotlinScanner) {
                 LeafNodeToken("}")
             )
         } else {
-            val tokens = kotlinScanner.scanNodes(children, KotlinScanner.ScannerState.BLOCK)
+            val tokens = kotlinScanner.scanNodes(children, ScannerState.BLOCK)
             replaceTerminalForcedBreakTokenWithClosingForcedBreakToken(tokens)
         }
     }
