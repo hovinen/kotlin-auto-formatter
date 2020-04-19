@@ -166,11 +166,25 @@ internal class PrinterTest {
     }
 
     @Test
-    fun `indents with standard indent on forced break`() {
+    fun `does not indent on forced break if outside a block`() {
         val subject = subject(standardIndent = 2)
 
         val result = subject.print(
             listOf(
+                ForcedBreakToken(count = 1)
+            )
+        )
+
+        assertThat(result).isEqualTo("\n")
+    }
+
+    @Test
+    fun `indents with standard indent on forced break if inside a block`() {
+        val subject = subject(standardIndent = 2)
+
+        val result = subject.print(
+            listOf(
+                BeginToken(length = 0, state = State.CODE),
                 ForcedBreakToken(count = 1)
             )
         )
@@ -184,6 +198,7 @@ internal class PrinterTest {
 
         val result = subject.print(
             listOf(
+                BeginToken(length = 0, state = State.CODE),
                 ForcedBreakToken(count = 2)
             )
         )
@@ -197,6 +212,7 @@ internal class PrinterTest {
 
         val result = subject.print(
             listOf(
+                BeginToken(length = 0, state = State.CODE),
                 ForcedBreakToken(count = 1),
                 BeginToken(length = 0, state = State.CODE),
                 ForcedBreakToken(count = 1),
@@ -213,6 +229,7 @@ internal class PrinterTest {
 
         val result = subject.print(
             listOf(
+                BeginToken(length = 0, state = State.CODE),
                 ClosingForcedBreakToken
             )
         )

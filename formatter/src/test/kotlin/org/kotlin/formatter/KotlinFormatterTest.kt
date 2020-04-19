@@ -656,6 +656,23 @@ class KotlinFormatterTest {
             import org.kotlin.formatter.AnotherClass
         """.trimIndent())
     }
+    
+    @Test
+    fun `does not indent import statements after a package statement`() {
+        val subject = KotlinFormatter()
+
+        val result = subject.format("""
+            package org.kotlin.formatter
+            
+            import org.kotlin.formatter.package.AClass
+        """.trimIndent())
+        
+        assertThat(result).isEqualTo("""
+            package org.kotlin.formatter
+            
+            import org.kotlin.formatter.package.AClass
+        """.trimIndent())
+    }
 
     @Test
     fun `does not strip trailing whitespace in multiline string literals`() {

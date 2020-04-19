@@ -20,7 +20,8 @@ class Printer(
     private data class BlockStackEntry(
         val currentIndent: Int,
         val blockStartColumn: Int,
-        private val token: BeginToken
+        private val token: BeginToken,
+        val isInitial: Boolean = false
     ) {
         fun topBlockFitsOnLine(maxLineLength: Int) = blockStartColumn + token.length <= maxLineLength
 
@@ -38,7 +39,8 @@ class Printer(
             BlockStackEntry(
                 currentIndent = 0,
                 blockStartColumn = 0,
-                token = BeginToken(length = 0, state = State.CODE)
+                token = BeginToken(length = 0, state = State.CODE),
+                isInitial = true
             )
         )
         cleanUpWhitespace(tokens).forEach { printToken(it) }
@@ -100,7 +102,7 @@ class Printer(
             }
             is ForcedBreakToken -> {
                 result.append("\n".repeat(token.count - 1))
-                indent(standardIndent)
+                indent(if (blockStack.peek().isInitial) 0 else standardIndent)
             }
             is ClosingForcedBreakToken -> {
                 indent(0)
