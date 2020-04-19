@@ -88,7 +88,7 @@ class KotlinScanner {
                 val innerTokens = if (blockNodeTypes.contains(node.lastChildNode.elementType)) {
                     scanDeclarationWithBlock(node)
                 } else {
-                    tokensForProperty(node)
+                    PropertyScanner(this).tokensForProperty(node)
                 }
                 inBeginEndBlock(innerTokens, State.CODE)
             }
@@ -118,7 +118,7 @@ class KotlinScanner {
                 tokensForBinaryExpression(node)
             }
             KtNodeTypes.PROPERTY -> {
-                tokensForProperty(node)
+                PropertyScanner(this).tokensForProperty(node)
             }
             KtNodeTypes.PACKAGE_DIRECTIVE,
             KtNodeTypes.IMPORT_LIST,
@@ -186,38 +186,6 @@ class KotlinScanner {
         } else {
             val tokens = scanNodes(children, ScannerState.BLOCK)
             replaceTerminalForcedBreakTokenWithClosingForcedBreakToken(tokens)
-        }
-    }
-
-    private fun tokensForProperty(node: ASTNode): List<Token> {
-        val childNodes = node.children().toList()
-        val indexOfAssignmentOperator = childNodes.indexOfFirst { it.elementType == KtTokens.EQ }
-        if (indexOfAssignmentOperator == -1) {
-            return tokensForBlockNode(node, State.CODE, ScannerState.STATEMENT)
-        } else {
-            var lastNonWhitespaceIndex = indexOfAssignmentOperator - 1
-            while (childNodes[lastNonWhitespaceIndex].elementType == KtTokens.WHITE_SPACE) {
-                lastNonWhitespaceIndex--
-            }
-            val nodesUpToAssignmentOperator = childNodes.subList(0, lastNonWhitespaceIndex + 1)
-            val tokensUpToAssignmentOperator = scanNodes(nodesUpToAssignmentOperator, ScannerState.STATEMENT)
-            var firstNonWhitespaceIndex = indexOfAssignmentOperator + 1
-            while (childNodes[firstNonWhitespaceIndex].elementType == KtTokens.WHITE_SPACE) {
-                firstNonWhitespaceIndex++
-            }
-            val nodesAfterAssignmentOperator = childNodes.subList(firstNonWhitespaceIndex, childNodes.size)
-            val tokensAfterAssignmentOperator = scanNodes(nodesAfterAssignmentOperator, ScannerState.STATEMENT)
-            val innerTokens = listOf(
-                *tokensUpToAssignmentOperator.toTypedArray(),
-                nonBreakingSpaceToken(content = " "),
-                LeafNodeToken("="),
-                WhitespaceToken(
-                    length = 1 + lengthOfTokens(tokensAfterAssignmentOperator),
-                    content = " "
-                ),
-                *tokensAfterAssignmentOperator.toTypedArray()
-            )
-            return inBeginEndBlock(innerTokens, State.CODE)
         }
     }
 
@@ -312,13 +280,13 @@ class KotlinScanner {
         }
     }
 
-    private fun tokensForBlockNode(
+    internal fun tokensForBlockNode(
         node: ASTNode,
         state: State,
         scannerState: ScannerState
     ): List<Token> = inBeginEndBlock(scanNodes(node.children().asIterable(), scannerState), state)
 
-    private fun scanNodes(
+    internal fun scanNodes(
         nodes: Iterable<ASTNode>,
         scannerState: ScannerState
     ): List<Token> {
@@ -370,16 +338,6 @@ class KotlinScanner {
             is LeafNodeToken -> firstToken.textLength
             else -> lengthOfTokens(nextTokens)
         }
-
-    private fun lengthOfTokens(nextTokens: List<Token>): Int =
-        nextTokens.map {
-            when (it) {
-                is WhitespaceToken -> if (it.content.isEmpty()) 0 else 1
-                is SynchronizedBreakToken -> it.whitespaceLength
-                is LeafNodeToken -> it.textLength
-                else -> 0
-            }
-        }.sum()
 
     private val ASTNode.isAtEndOfFile: Boolean get() = treeNext == null
 
@@ -445,13 +403,6 @@ class KotlinScanner {
     private fun stateForDotQualifiedExpression(scannerState: ScannerState) =
         if (scannerState == ScannerState.PACKAGE_IMPORT) State.PACKAGE_IMPORT else State.CODE
 
-    private fun inBeginEndBlock(innerTokens: List<Token>, state: State): List<Token> =
-        listOf(
-            BeginToken(length = lengthOfTokens(innerTokens), state = state),
-            *innerTokens.toTypedArray(),
-            EndToken
-        )
-
     private fun hasNewlineInBlockState(
         node: LeafPsiElement,
         scannerState: ScannerState
@@ -488,7 +439,7 @@ class KotlinScanner {
         private fun <T> List<T>.tail() = this.subList(1, this.size)
     }
 
-    private enum class ScannerState {
+    internal enum class ScannerState {
         /** Newlines create forced breaks */
         BLOCK,
 
