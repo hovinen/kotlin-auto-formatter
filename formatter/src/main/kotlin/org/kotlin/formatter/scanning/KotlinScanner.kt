@@ -18,6 +18,7 @@ import org.jetbrains.kotlin.kdoc.lexer.KDocTokens
 import org.jetbrains.kotlin.kdoc.parser.KDocElementTypes
 import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.psi.psiUtil.children
+import org.jetbrains.kotlin.psi.stubs.elements.KtFileElementType
 
 class KotlinScanner {
     private var isFirstEntry = false
@@ -129,6 +130,9 @@ class KotlinScanner {
             KtNodeTypes.IMPORT_DIRECTIVE,
             KtNodeTypes.IMPORT_ALIAS -> {
                 tokensForBlockNode(node, State.PACKAGE_IMPORT, ScannerState.PACKAGE_IMPORT)
+            }
+            KtFileElementType.INSTANCE -> {
+                scanNodes(node.children().asIterable(), ScannerState.BLOCK)
             }
             else -> {
                 tokensForBlockNode(node, State.CODE, ScannerState.STATEMENT)
@@ -296,11 +300,7 @@ class KotlinScanner {
     ) = if (scannerState == ScannerState.SYNC_BREAK_LIST) {
             listOf()
         } else if (node.isAtEndOfFile || hasNewlineInBlockState(node, scannerState)) {
-            if (node.text.matches(Regex(".*\n.*\n.*", RegexOption.DOT_MATCHES_ALL))) {
-                listOf(ForcedBreakToken(count = 2))
-            } else {
-                listOf(ForcedBreakToken(count = 1))
-            }
+            listOf(ForcedBreakToken(count = if (hasDoubleNewline(node)) 2 else 1))
         } else if (hasDoubleNewlineInKDocState(node, scannerState)) {
             listOf(ForcedBreakToken(count = 2))
         } else if (scannerState == ScannerState.KDOC) {
@@ -312,6 +312,9 @@ class KotlinScanner {
         } else {
             listOf(WhitespaceToken(1 + lengthOfTokensForWhitespace(nextTokens), node.text))
         }
+
+    private fun hasDoubleNewline(node: LeafPsiElement): Boolean =
+        node.text.matches(Regex(".*\n.*\n.*", RegexOption.DOT_MATCHES_ALL))
 
     private fun lengthOfTokensForWhitespace(nextTokens: List<Token>): Int =
         when (val firstToken = nextTokens.firstOrNull()) {

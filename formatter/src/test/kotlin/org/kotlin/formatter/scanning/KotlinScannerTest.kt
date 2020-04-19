@@ -1313,5 +1313,23 @@ internal class KotlinScannerTest {
         )
     }
 
+    @Test
+    fun `outputs a ForcedBreak with count 2 between package and import`() {
+        val subject = subject()
+        val node = kotlinLoader.parseKotlin("""
+            package org.kotlin.formatter
+            
+            import org.kotlin.formatter.package.AClass
+        """.trimIndent())
+
+        val result = subject.scan(node)
+
+        assertThat(result).containsSubsequence(
+            LeafNodeToken("formatter"),
+            ForcedBreakToken(count = 2),
+            LeafNodeToken("import")
+        )
+    }
+
     private fun subject() = KotlinScanner()
 }
