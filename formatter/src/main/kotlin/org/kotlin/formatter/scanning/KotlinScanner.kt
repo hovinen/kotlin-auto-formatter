@@ -10,7 +10,6 @@ import org.jetbrains.kotlin.psi.psiUtil.children
 import org.jetbrains.kotlin.psi.stubs.elements.KtFileElementType
 import org.jetbrains.kotlin.psi.stubs.elements.KtScriptElementType
 import org.kotlin.formatter.BeginToken
-import org.kotlin.formatter.ClosingForcedBreakToken
 import org.kotlin.formatter.ClosingSynchronizedBreakToken
 import org.kotlin.formatter.EndToken
 import org.kotlin.formatter.ForcedBreakToken
@@ -37,9 +36,7 @@ class KotlinScanner {
                 BlockScanner(this).scanBlock(node)
             }
             KtNodeTypes.WHEN -> {
-                val innerTokens = WhenForExpressionScanner(this).tokensForWhenOrForExpression(node)
-                val tokens = inBeginEndBlock(innerTokens, State.CODE)
-                replaceTerminalForcedBreakTokenWithClosingForcedBreakToken(tokens)
+                WhenForExpressionScanner(this).scanWhenExpression(node)
             }
             KDocTokens.KDOC -> {
                 tokensForBlockNode(node, State.LONG_COMMENT, ScannerState.KDOC)
@@ -107,24 +104,6 @@ class KotlinScanner {
             else -> {
                 tokensForBlockNode(node, State.CODE, ScannerState.STATEMENT)
             }
-        }
-    }
-
-    private fun replaceTerminalForcedBreakTokenWithClosingForcedBreakToken(
-        tokens: List<Token>
-    ): List<Token> {
-        var index = tokens.size - 1
-        while (index > 0 && tokens[index] is EndToken) {
-            index--
-        }
-        return if (index > 0 && tokens[index - 1] is ForcedBreakToken) {
-            listOf(
-                *tokens.subList(0, index - 1).toTypedArray(),
-                ClosingForcedBreakToken,
-                *tokens.subList(index, tokens.size).toTypedArray()
-            )
-        } else {
-            tokens
         }
     }
 
