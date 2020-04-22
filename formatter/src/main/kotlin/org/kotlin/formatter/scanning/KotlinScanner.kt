@@ -64,13 +64,7 @@ class KotlinScanner {
                 inBeginEndBlock(tokens, stateForDotQualifiedExpression(scannerState))
             }
             KtNodeTypes.CONDITION -> {
-                val innerTokens = scanNodes(node.children().asIterable(), ScannerState.STATEMENT)
-                listOf(
-                    BeginToken(length = lengthOfTokens(innerTokens), state = State.CODE),
-                    *innerTokens.toTypedArray(),
-                    ClosingSynchronizedBreakToken(whitespaceLength = 0),
-                    EndToken
-                )
+                ConditionScanner(this).scanCondition(node)
             }
             KtNodeTypes.FOR -> {
                 WhenForExpressionScanner(this).tokensForWhenOrForExpression(node)
