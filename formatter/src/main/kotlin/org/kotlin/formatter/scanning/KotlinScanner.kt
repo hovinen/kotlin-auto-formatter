@@ -45,12 +45,7 @@ class KotlinScanner {
                 tokensForBlockNode(node, State.KDOC_DIRECTIVE, ScannerState.KDOC)
             }
             KDocElementTypes.KDOC_SECTION -> {
-                val innerTokens = tokensForBlockNode(node, State.LONG_COMMENT, ScannerState.KDOC)
-                listOf(
-                    WhitespaceToken(length = lengthOfTokensForWhitespace(innerTokens), content = " "),
-                    *innerTokens.toTypedArray(),
-                    WhitespaceToken(length = 1, content = " ")
-                )
+                KDocSectionScanner(this).scanKDocSection(node)
             }
             KtNodeTypes.STRING_TEMPLATE -> {
                 StringLiteralScanner(this).tokensForStringLiteralNode(node)
