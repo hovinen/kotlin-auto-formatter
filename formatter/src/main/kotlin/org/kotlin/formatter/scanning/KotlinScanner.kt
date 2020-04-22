@@ -44,6 +44,9 @@ class KotlinScanner {
             KDocTokens.KDOC -> {
                 tokensForBlockNode(node, State.LONG_COMMENT, ScannerState.KDOC)
             }
+            KDocElementTypes.KDOC_TAG, KDocTokens.MARKDOWN_LINK, KDocElementTypes.KDOC_NAME -> {
+                tokensForBlockNode(node, State.KDOC_DIRECTIVE, ScannerState.KDOC)
+            }
             KDocElementTypes.KDOC_SECTION -> {
                 val innerTokens = tokensForBlockNode(node, State.LONG_COMMENT, ScannerState.KDOC)
                 listOf(
@@ -52,20 +55,11 @@ class KotlinScanner {
                     WhitespaceToken(length = 1, content = " ")
                 )
             }
-            KDocElementTypes.KDOC_TAG, KDocTokens.MARKDOWN_LINK, KDocElementTypes.KDOC_NAME -> {
-                tokensForBlockNode(node, State.KDOC_DIRECTIVE, ScannerState.KDOC)
-            }
             KtNodeTypes.STRING_TEMPLATE -> {
                 StringLiteralScanner(this).tokensForStringLiteralNode(node)
             }
-            KtNodeTypes.LITERAL_STRING_TEMPLATE_ENTRY -> {
-                scanNodes(node.children().asIterable(), ScannerState.BLOCK)
-            }
             KtNodeTypes.VALUE_PARAMETER_LIST, KtNodeTypes.VALUE_ARGUMENT_LIST -> {
                 ParameterListScanner(this).scan(node)
-            }
-            KtNodeTypes.VALUE_PARAMETER, KtNodeTypes.VALUE_ARGUMENT -> {
-                tokensForBlockNode(node, State.CODE, ScannerState.STATEMENT)
             }
             KtNodeTypes.CLASS -> {
                 ClassScanner(this).scanClassNode(node)
@@ -73,15 +67,9 @@ class KotlinScanner {
             KtNodeTypes.FUN -> {
                 FunctionDeclarationScanner(this, PropertyScanner(this)).tokensForFunctionDeclaration(node)
             }
-            KtNodeTypes.PRIMARY_CONSTRUCTOR -> {
-                scanNodes(node.children().asIterable(), ScannerState.STATEMENT)
-            }
             KtNodeTypes.DOT_QUALIFIED_EXPRESSION, KtNodeTypes.SAFE_ACCESS_EXPRESSION -> {
                 val tokens = DotQualifiedExpressionScanner(this).scanDotQualifiedExpression(node)
                 inBeginEndBlock(tokens, stateForDotQualifiedExpression(scannerState))
-            }
-            KtNodeTypes.BODY, KtNodeTypes.THEN -> {
-                scanNodes(node.children().asIterable(), ScannerState.STATEMENT)
             }
             KtNodeTypes.CONDITION -> {
                 val innerTokens = scanNodes(node.children().asIterable(), ScannerState.STATEMENT)
@@ -107,8 +95,14 @@ class KotlinScanner {
             KtNodeTypes.IMPORT_ALIAS -> {
                 tokensForBlockNode(node, State.PACKAGE_IMPORT, ScannerState.PACKAGE_IMPORT)
             }
-            KtFileElementType.INSTANCE, is KtScriptElementType -> {
+            KtFileElementType.INSTANCE, is KtScriptElementType, KtNodeTypes.LITERAL_STRING_TEMPLATE_ENTRY -> {
                 scanNodes(node.children().asIterable(), ScannerState.BLOCK)
+            }
+            KtNodeTypes.PRIMARY_CONSTRUCTOR, KtNodeTypes.BODY, KtNodeTypes.THEN -> {
+                scanNodes(node.children().asIterable(), ScannerState.STATEMENT)
+            }
+            KtNodeTypes.VALUE_PARAMETER, KtNodeTypes.VALUE_ARGUMENT -> {
+                tokensForBlockNode(node, State.CODE, ScannerState.STATEMENT)
             }
             else -> {
                 tokensForBlockNode(node, State.CODE, ScannerState.STATEMENT)
