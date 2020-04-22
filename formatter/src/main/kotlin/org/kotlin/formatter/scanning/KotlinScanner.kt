@@ -60,8 +60,7 @@ class KotlinScanner {
                 FunctionDeclarationScanner(this, PropertyScanner(this)).tokensForFunctionDeclaration(node)
             }
             KtNodeTypes.DOT_QUALIFIED_EXPRESSION, KtNodeTypes.SAFE_ACCESS_EXPRESSION -> {
-                val tokens = DotQualifiedExpressionScanner(this).scanDotQualifiedExpression(node)
-                inBeginEndBlock(tokens, stateForDotQualifiedExpression(scannerState))
+                DotQualifiedExpressionScanner(this).scanDotQualifiedExpression(node, scannerState)
             }
             KtNodeTypes.CONDITION -> {
                 ConditionScanner(this).scanCondition(node)
@@ -156,10 +155,7 @@ class KotlinScanner {
         }
 
     private val ASTNode.isAtEndOfFile: Boolean get() = treeNext == null
-
-    private fun stateForDotQualifiedExpression(scannerState: ScannerState) =
-        if (scannerState == ScannerState.PACKAGE_IMPORT) State.PACKAGE_IMPORT else State.CODE
-
+    
     private fun hasNewlineInBlockState(
         node: LeafPsiElement,
         scannerState: ScannerState
