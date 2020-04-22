@@ -14,7 +14,10 @@ internal class PropertyScanner(private val kotlinScanner: KotlinScanner) {
         val childNodes = node.children().toList()
         val indexOfAssignmentOperator = childNodes.indexOfFirst { it.elementType == KtTokens.EQ }
         if (indexOfAssignmentOperator == -1) {
-            return kotlinScanner.tokensForBlockNode(node, State.CODE, ScannerState.STATEMENT)
+            return inBeginEndBlock(
+                kotlinScanner.scanNodes(node.children().asIterable(), ScannerState.STATEMENT),
+                State.CODE
+            )
         } else {
             var lastNonWhitespaceIndex = indexOfAssignmentOperator - 1
             while (childNodes[lastNonWhitespaceIndex].elementType == KtTokens.WHITE_SPACE) {

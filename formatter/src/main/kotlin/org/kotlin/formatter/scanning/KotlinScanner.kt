@@ -9,9 +9,6 @@ import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.psi.psiUtil.children
 import org.jetbrains.kotlin.psi.stubs.elements.KtFileElementType
 import org.jetbrains.kotlin.psi.stubs.elements.KtScriptElementType
-import org.kotlin.formatter.BeginToken
-import org.kotlin.formatter.ClosingSynchronizedBreakToken
-import org.kotlin.formatter.EndToken
 import org.kotlin.formatter.ForcedBreakToken
 import org.kotlin.formatter.LeafNodeToken
 import org.kotlin.formatter.State
@@ -39,10 +36,10 @@ class KotlinScanner {
                 WhenForExpressionScanner(this).scanWhenExpression(node)
             }
             KDocTokens.KDOC -> {
-                tokensForBlockNode(node, State.LONG_COMMENT, ScannerState.KDOC)
+                inBeginEndBlock(scanNodes(node.children().asIterable(), ScannerState.KDOC), State.LONG_COMMENT)
             }
             KDocElementTypes.KDOC_TAG, KDocTokens.MARKDOWN_LINK, KDocElementTypes.KDOC_NAME -> {
-                tokensForBlockNode(node, State.KDOC_DIRECTIVE, ScannerState.KDOC)
+                inBeginEndBlock(scanNodes(node.children().asIterable(), ScannerState.KDOC), State.KDOC_DIRECTIVE)
             }
             KDocElementTypes.KDOC_SECTION -> {
                 KDocSectionScanner(this).scanKDocSection(node)
@@ -78,7 +75,10 @@ class KotlinScanner {
             KtNodeTypes.IMPORT_LIST,
             KtNodeTypes.IMPORT_DIRECTIVE,
             KtNodeTypes.IMPORT_ALIAS -> {
-                tokensForBlockNode(node, State.PACKAGE_IMPORT, ScannerState.PACKAGE_IMPORT)
+                inBeginEndBlock(
+                    scanNodes(node.children().asIterable(), ScannerState.PACKAGE_IMPORT),
+                    State.PACKAGE_IMPORT
+                )
             }
             KtFileElementType.INSTANCE, is KtScriptElementType, KtNodeTypes.LITERAL_STRING_TEMPLATE_ENTRY -> {
                 scanNodes(node.children().asIterable(), ScannerState.BLOCK)
@@ -87,19 +87,13 @@ class KotlinScanner {
                 scanNodes(node.children().asIterable(), ScannerState.STATEMENT)
             }
             KtNodeTypes.VALUE_PARAMETER, KtNodeTypes.VALUE_ARGUMENT -> {
-                tokensForBlockNode(node, State.CODE, ScannerState.STATEMENT)
+                inBeginEndBlock(scanNodes(node.children().asIterable(), ScannerState.STATEMENT), State.CODE)
             }
             else -> {
-                tokensForBlockNode(node, State.CODE, ScannerState.STATEMENT)
+                inBeginEndBlock(scanNodes(node.children().asIterable(), ScannerState.STATEMENT), State.CODE)
             }
         }
     }
-
-    internal fun tokensForBlockNode(
-        node: ASTNode,
-        state: State,
-        scannerState: ScannerState
-    ): List<Token> = inBeginEndBlock(scanNodes(node.children().asIterable(), scannerState), state)
 
     internal fun scanNodes(
         nodes: Iterable<ASTNode>,
