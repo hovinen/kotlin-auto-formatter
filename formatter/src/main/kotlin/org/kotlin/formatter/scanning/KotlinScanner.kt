@@ -16,13 +16,10 @@ import org.kotlin.formatter.EndToken
 import org.kotlin.formatter.ForcedBreakToken
 import org.kotlin.formatter.LeafNodeToken
 import org.kotlin.formatter.State
-import org.kotlin.formatter.SynchronizedBreakToken
 import org.kotlin.formatter.Token
 import org.kotlin.formatter.WhitespaceToken
 
 class KotlinScanner {
-    private var isFirstEntry = false
-
     fun scan(node: ASTNode): List<Token> {
         return scanInState(node, ScannerState.BLOCK)
     }
@@ -65,19 +62,10 @@ class KotlinScanner {
                 scanNodes(node.children().asIterable(), ScannerState.BLOCK)
             }
             KtNodeTypes.VALUE_PARAMETER_LIST, KtNodeTypes.VALUE_ARGUMENT_LIST -> {
-                isFirstEntry = true
-                scanNodes(node.children().asIterable(), ScannerState.SYNC_BREAK_LIST)
+                ParameterListScanner(this).scan(node)
             }
             KtNodeTypes.VALUE_PARAMETER, KtNodeTypes.VALUE_ARGUMENT -> {
-                val childTokens = tokensForBlockNode(node, State.CODE, ScannerState.STATEMENT)
-                if (scannerState == ScannerState.SYNC_BREAK_LIST) {
-                    val breakToken =
-                        SynchronizedBreakToken(whitespaceLength = if (isFirstEntry) 0 else 1)
-                    isFirstEntry = false
-                    listOf(breakToken, *childTokens.toTypedArray())
-                } else {
-                    childTokens
-                }
+                tokensForBlockNode(node, State.CODE, ScannerState.STATEMENT)
             }
             KtNodeTypes.CLASS -> {
                 ClassScanner(this).scanClassNode(node)
