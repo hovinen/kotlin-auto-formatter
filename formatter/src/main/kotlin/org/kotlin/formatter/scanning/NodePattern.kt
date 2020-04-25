@@ -17,7 +17,7 @@ internal class NodePattern private constructor(private val initialState: State) 
             val transition = state.transition(currentNode)
             when (transition) {
                 is ConsumingTransition -> {
-                    result.addAll(transition.action(accumulatedNodes))
+                    result.addAll(transition.action(accumulatedNodes, currentNode))
                     accumulatedNodes.clear()
                 }
                 is AccumulatingTransition -> {
@@ -32,11 +32,15 @@ internal class NodePattern private constructor(private val initialState: State) 
     internal class Builder {
         private val elements = mutableListOf<Element>()
 
-        fun matchingElement(matcher: (ASTNode) -> Boolean, action: (List<ASTNode>) -> List<Token>) {
+        fun accumulateUntilNodeMatching(matcher: (ASTNode) -> Boolean, action: Action) {
             elements.add(MatchingElement(matcher, action))
         }
+
+        fun skipNodesMatching(matcher: (ASTNode) -> Boolean) {
+            elements.add(SkippingElement(matcher))
+        }
         
-        fun endingElement(action: (List<ASTNode>) -> List<Token>) {
+        fun accumulateUntilEnd(action: Action) {
             elements.add(EndingElement(action))
         }
 
@@ -47,22 +51,27 @@ internal class NodePattern private constructor(private val initialState: State) 
 internal fun nodePattern(init: NodePattern.Builder.() -> Unit): NodePattern =
     NodePattern.Builder().apply(init).build()
 
-private typealias Action = (List<ASTNode>) -> List<Token>
+private typealias Action = (List<ASTNode>, ASTNode) -> List<Token>
 
 private sealed class State {
     abstract fun transition(node: ASTNode): Transition
 }
 
-private class NonTerminalState(
-    private val transitions: List<Transition>
-) : State() {
+private class NonTerminalState : State() {
+    private val transitions = mutableListOf<Transition>()
+
+    fun addTransition(transition: Transition): NonTerminalState {
+        transitions.add(transition)
+        return this
+    }
+
     override fun transition(node: ASTNode): Transition {
         for (transition in transitions) {
             if (transition.matches(node)) {
                 return transition
             }
         }
-        return AccumulatingTransition(this)
+        throw Exception("Node $node not accepted by state machine")
     }
 }
 
@@ -93,6 +102,9 @@ private sealed class Element(internal val action: Action)
 private class MatchingElement(internal val matcher: (ASTNode) -> Boolean, action: Action)
     : Element(action)
 
+private class SkippingElement(internal val matcher: (ASTNode) -> Boolean)
+    : Element(emptyAction())
+
 private class EndingElement(action: Action) : Element(action)
 
 private fun buildStateMachine(elements: List<Element>): State {
@@ -102,15 +114,25 @@ private fun buildStateMachine(elements: List<Element>): State {
         val nextState = buildStateMachine(elements.tail())
         return when (val element = elements.first()) {
             is MatchingElement -> {
-                NonTerminalState(
-                    listOf(ConsumingTransition(element.matcher, nextState, element.action))
-                )
+                val state = NonTerminalState()
+                state.addTransition(ConsumingTransition(element.matcher, nextState, element.action))
+                    .addTransition(AccumulatingTransition(state))
+            }
+            is SkippingElement -> {
+                val state = NonTerminalState()
+                state.addTransition(ConsumingTransition(element.matcher, state, emptyAction()))
+                    .addTransition(AccumulatingTransition(nextState))
             }
             is EndingElement -> {
-                NonTerminalState(
-                    listOf(ConsumingTransition({ it is TerminalNode }, nextState, element.action))
-                )
+                val state = NonTerminalState()
+                state
+                    .addTransition(
+                        ConsumingTransition({ it is TerminalNode }, nextState, element.action)
+                    )
+                    .addTransition(AccumulatingTransition(state))
             }
         }
     }
 }
+
+private fun emptyAction(): Action = { _, _ -> listOf() }

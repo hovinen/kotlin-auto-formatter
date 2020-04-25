@@ -12,10 +12,10 @@ import org.kotlin.formatter.Token
 
 internal class WhenForExpressionScanner(private val kotlinScanner: KotlinScanner): NodeScanner {
     private val whenForPattern = nodePattern {
-        matchingElement({ it.elementType == KtTokens.LPAR }) { nodes ->
+        accumulateUntilNodeMatching({ it.elementType == KtTokens.LPAR }) { nodes, _ ->
             kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
         }
-        matchingElement({ it.elementType == KtTokens.RPAR }) { nodes ->
+        accumulateUntilNodeMatching({ it.elementType == KtTokens.RPAR }) { nodes, _ ->
             val tokens = kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
             listOf(
                 LeafNodeToken("("),
@@ -26,7 +26,7 @@ internal class WhenForExpressionScanner(private val kotlinScanner: KotlinScanner
                 LeafNodeToken(")")
             )
         }
-        endingElement { nodes ->
+        accumulateUntilEnd { nodes, _ ->
             kotlinScanner.scanNodes(nodes, ScannerState.BLOCK)
         }
     }
