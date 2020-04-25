@@ -12,8 +12,8 @@ import org.kotlin.formatter.LeafNodeToken
 import org.kotlin.formatter.State
 import org.kotlin.formatter.Token
 
-internal class WhenForExpressionScanner(private val kotlinScanner: KotlinScanner) {
-    fun tokensForWhenOrForExpression(node: ASTNode): List<Token> {
+internal class WhenForExpressionScanner(private val kotlinScanner: KotlinScanner): NodeScanner {
+    override fun scan(node: ASTNode, scannerState: ScannerState): List<Token> {
         val childNodes = node.children().toList()
         val indexOfLeftParenthesis = childNodes.indexOfFirst { it.elementType == KtTokens.LPAR }
         val nodesUntilLeftParenthesis = childNodes.subList(0, indexOfLeftParenthesis)
@@ -36,8 +36,11 @@ internal class WhenForExpressionScanner(private val kotlinScanner: KotlinScanner
         return inBeginEndBlock(innerTokens, State.CODE)
     }
     
-    fun scanWhenExpression(node: ASTNode): List<Token> {
-        val innerTokens = tokensForWhenOrForExpression(node)
+    fun scanWhenExpression(
+        node: ASTNode,
+        scannerState: ScannerState
+    ): List<Token> {
+        val innerTokens = scan(node, scannerState)
         val tokens = inBeginEndBlock(innerTokens, State.CODE)
         return replaceTerminalForcedBreakTokenWithClosingForcedBreakToken(tokens)
     }

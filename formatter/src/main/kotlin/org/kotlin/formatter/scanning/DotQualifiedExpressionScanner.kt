@@ -6,8 +6,8 @@ import org.jetbrains.kotlin.psi.psiUtil.children
 import org.kotlin.formatter.State
 import org.kotlin.formatter.Token
 
-internal class DotQualifiedExpressionScanner(private val kotlinScanner: KotlinScanner) {
-    fun scanDotQualifiedExpression(node: ASTNode, scannerState: ScannerState): List<Token> {
+internal class DotQualifiedExpressionScanner(private val kotlinScanner: KotlinScanner): NodeScanner {
+    override fun scan(node: ASTNode, scannerState: ScannerState): List<Token> {
         val tokens = scanInnerDotQualifiedExpression(node)
         return inBeginEndBlock(tokens, stateForDotQualifiedExpression(scannerState))
     }

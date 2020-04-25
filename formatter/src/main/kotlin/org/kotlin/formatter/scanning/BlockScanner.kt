@@ -11,8 +11,8 @@ import org.kotlin.formatter.LeafNodeToken
 import org.kotlin.formatter.State
 import org.kotlin.formatter.Token
 
-internal class BlockScanner(private val kotlinScanner: KotlinScanner) {
-    fun scanBlock(node: ASTNode): List<Token> {
+internal class BlockScanner(private val kotlinScanner: KotlinScanner): NodeScanner {
+    override fun scan(node: ASTNode, scannerState: ScannerState): List<Token> {
         val children = node.children().toList()
         val indexOfLBrace = children.indexOfFirst { it.elementType == KtTokens.LBRACE }
         val indexOfRBrace = children.indexOfLast { it.elementType == KtTokens.RBRACE }

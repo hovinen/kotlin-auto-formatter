@@ -9,8 +9,8 @@ import org.kotlin.formatter.Token
 import org.kotlin.formatter.WhitespaceToken
 import org.kotlin.formatter.nonBreakingSpaceToken
 
-internal class PropertyScanner(private val kotlinScanner: KotlinScanner) {
-    fun tokensForProperty(node: ASTNode): List<Token> {
+internal class PropertyScanner(private val kotlinScanner: KotlinScanner): NodeScanner {
+    override fun scan(node: ASTNode, scannerState: ScannerState): List<Token> {
         val childNodes = node.children().toList()
         val indexOfAssignmentOperator = childNodes.indexOfFirst { it.elementType == KtTokens.EQ }
         if (indexOfAssignmentOperator == -1) {

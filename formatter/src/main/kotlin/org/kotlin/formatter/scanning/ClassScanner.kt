@@ -7,8 +7,8 @@ import org.jetbrains.kotlin.psi.psiUtil.children
 import org.kotlin.formatter.State
 import org.kotlin.formatter.Token
 
-internal class ClassScanner(private val kotlinScanner: KotlinScanner) {
-    fun scanClassNode(node: ASTNode): List<Token> {
+internal class ClassScanner(private val kotlinScanner: KotlinScanner): NodeScanner {
+    override fun scan(node: ASTNode, scannerState: ScannerState): List<Token> {
         val children = node.children().toList()
         val indexOfClassKeyword = children.indexOfFirst { it.elementType == KtTokens.CLASS_KEYWORD }
         val indexOfClassBody = children.indexOfFirst { it.elementType == KtNodeTypes.CLASS_BODY }

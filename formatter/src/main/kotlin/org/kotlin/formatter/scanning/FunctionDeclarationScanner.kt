@@ -10,13 +10,13 @@ import org.kotlin.formatter.Token
 internal class FunctionDeclarationScanner(
     private val kotlinScanner: KotlinScanner,
     private val propertyScanner: PropertyScanner
-) {
-    fun tokensForFunctionDeclaration(node: ASTNode): List<Token> {
+): NodeScanner {
+    override fun scan(node: ASTNode, scannerState: ScannerState): List<Token> {
         val blockNodeTypes = setOf(KtNodeTypes.BLOCK, KtNodeTypes.CLASS_BODY)
         val innerTokens = if (blockNodeTypes.contains(node.lastChildNode.elementType)) {
             scanDeclarationWithBlock(node)
         } else {
-            propertyScanner.tokensForProperty(node)
+            propertyScanner.scan(node, scannerState)
         }
         return inBeginEndBlock(innerTokens, State.CODE)
     }

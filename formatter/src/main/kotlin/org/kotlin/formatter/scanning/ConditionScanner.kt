@@ -8,8 +8,8 @@ import org.kotlin.formatter.EndToken
 import org.kotlin.formatter.State
 import org.kotlin.formatter.Token
 
-internal class ConditionScanner(private val kotlinScanner: KotlinScanner) {
-    fun scanCondition(node: ASTNode): List<Token> {
+internal class ConditionScanner(private val kotlinScanner: KotlinScanner): NodeScanner {
+    override fun scan(node: ASTNode, scannerState: ScannerState): List<Token> {
         val innerTokens = kotlinScanner.scanNodes(node.children().asIterable(), ScannerState.STATEMENT)
         return listOf(
             BeginToken(length = lengthOfTokens(innerTokens), state = State.CODE),

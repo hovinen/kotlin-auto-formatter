@@ -30,10 +30,10 @@ class KotlinScanner {
     private fun scanNodeWithChildren(node: ASTNode, scannerState: ScannerState): List<Token> {
         return when (node.elementType) {
             KtNodeTypes.BLOCK, KtNodeTypes.CLASS_BODY -> {
-                BlockScanner(this).scanBlock(node)
+                BlockScanner(this).scan(node, scannerState)
             }
             KtNodeTypes.WHEN -> {
-                WhenForExpressionScanner(this).scanWhenExpression(node)
+                WhenForExpressionScanner(this).scanWhenExpression(node, scannerState)
             }
             KDocTokens.KDOC -> {
                 inBeginEndBlock(scanNodes(node.children().asIterable(), ScannerState.KDOC), State.LONG_COMMENT)
@@ -42,34 +42,34 @@ class KotlinScanner {
                 inBeginEndBlock(scanNodes(node.children().asIterable(), ScannerState.KDOC), State.KDOC_DIRECTIVE)
             }
             KDocElementTypes.KDOC_SECTION -> {
-                KDocSectionScanner(this).scanKDocSection(node)
+                KDocSectionScanner(this).scan(node, scannerState)
             }
             KtNodeTypes.STRING_TEMPLATE -> {
-                StringLiteralScanner(this).tokensForStringLiteralNode(node)
+                StringLiteralScanner(this).scan(node, scannerState)
             }
             KtNodeTypes.VALUE_PARAMETER_LIST, KtNodeTypes.VALUE_ARGUMENT_LIST -> {
-                ParameterListScanner(this).scan(node)
+                ParameterListScanner(this).scan(node, scannerState)
             }
             KtNodeTypes.CLASS -> {
-                ClassScanner(this).scanClassNode(node)
+                ClassScanner(this).scan(node, scannerState)
             }
             KtNodeTypes.FUN -> {
-                FunctionDeclarationScanner(this, PropertyScanner(this)).tokensForFunctionDeclaration(node)
+                FunctionDeclarationScanner(this, PropertyScanner(this)).scan(node, scannerState)
             }
             KtNodeTypes.DOT_QUALIFIED_EXPRESSION, KtNodeTypes.SAFE_ACCESS_EXPRESSION -> {
-                DotQualifiedExpressionScanner(this).scanDotQualifiedExpression(node, scannerState)
+                DotQualifiedExpressionScanner(this).scan(node, scannerState)
             }
             KtNodeTypes.CONDITION -> {
-                ConditionScanner(this).scanCondition(node)
+                ConditionScanner(this).scan(node, scannerState)
             }
             KtNodeTypes.FOR -> {
-                WhenForExpressionScanner(this).tokensForWhenOrForExpression(node)
+                WhenForExpressionScanner(this).scan(node, scannerState)
             }
             KtNodeTypes.BINARY_EXPRESSION -> {
-                BinaryExpressionScanner(this).tokensForBinaryExpression(node)
+                BinaryExpressionScanner(this).scan(node, scannerState)
             }
             KtNodeTypes.PROPERTY -> {
-                PropertyScanner(this).tokensForProperty(node)
+                PropertyScanner(this).scan(node, scannerState)
             }
             KtNodeTypes.PACKAGE_DIRECTIVE,
             KtNodeTypes.IMPORT_LIST,

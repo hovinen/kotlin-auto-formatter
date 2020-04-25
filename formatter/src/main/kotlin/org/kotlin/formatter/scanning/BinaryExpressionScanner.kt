@@ -8,8 +8,8 @@ import org.kotlin.formatter.Token
 import org.kotlin.formatter.WhitespaceToken
 import org.kotlin.formatter.nonBreakingSpaceToken
 
-internal class BinaryExpressionScanner(private val kotlinScanner: KotlinScanner) {
-    internal fun tokensForBinaryExpression(node: ASTNode): List<Token> {
+internal class BinaryExpressionScanner(private val kotlinScanner: KotlinScanner): NodeScanner {
+    override fun scan(node: ASTNode, scannerState: ScannerState): List<Token> {
         val nodesWithoutWhitespace = node.children().filter { it.elementType != KtTokens.WHITE_SPACE }.toList()
         val secondArgumentNodes = kotlinScanner.scanNodes(listOf(nodesWithoutWhitespace[2]), ScannerState.STATEMENT)
         val innerTokens = listOf(

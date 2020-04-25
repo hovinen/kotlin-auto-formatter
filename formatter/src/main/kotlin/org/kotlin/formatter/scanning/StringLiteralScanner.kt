@@ -7,8 +7,8 @@ import org.kotlin.formatter.State
 import org.kotlin.formatter.Token
 import org.kotlin.formatter.WhitespaceToken
 
-internal class StringLiteralScanner(private val kotlinScanner: KotlinScanner) {
-    fun tokensForStringLiteralNode(node: ASTNode): List<Token> {
+internal class StringLiteralScanner(private val kotlinScanner: KotlinScanner): NodeScanner {
+    override fun scan(node: ASTNode, scannerState: ScannerState): List<Token> {
         val tokens = mutableListOf<Token>()
         var lastChild: ASTNode? = null
         for (child in node.children()) {

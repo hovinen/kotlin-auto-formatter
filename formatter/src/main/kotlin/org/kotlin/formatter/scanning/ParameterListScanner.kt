@@ -8,10 +8,10 @@ import org.kotlin.formatter.State
 import org.kotlin.formatter.SynchronizedBreakToken
 import org.kotlin.formatter.Token
 
-internal class ParameterListScanner(private val kotlinScanner: KotlinScanner) {
+internal class ParameterListScanner(private val kotlinScanner: KotlinScanner): NodeScanner {
     private var isFirstEntry = false
 
-    fun scan(node: ASTNode): List<Token> {
+    override fun scan(node: ASTNode, scannerState: ScannerState): List<Token> {
         isFirstEntry = true
         val children = node.children().toList()
         return children.flatMap { scanEntry(it) }
