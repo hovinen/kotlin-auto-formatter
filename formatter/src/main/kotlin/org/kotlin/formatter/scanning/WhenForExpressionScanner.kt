@@ -11,26 +11,26 @@ import org.kotlin.formatter.State
 import org.kotlin.formatter.Token
 
 internal class WhenForExpressionScanner(private val kotlinScanner: KotlinScanner): NodeScanner {
-    override fun scan(node: ASTNode, scannerState: ScannerState): List<Token> {
-        val childNodes = node.children().toList()
-        val indexOfLeftParenthesis = childNodes.indexOfFirst { it.elementType == KtTokens.LPAR }
-        val nodesUntilLeftParenthesis = childNodes.subList(0, indexOfLeftParenthesis)
-        val tokensUntilLeftParenthesis = kotlinScanner.scanNodes(nodesUntilLeftParenthesis, ScannerState.STATEMENT)
-        val indexOfRightParenthesis = childNodes.indexOfFirst { it.elementType == KtTokens.RPAR }
-        val nodesBetweenParentheses = childNodes.subList(indexOfLeftParenthesis + 1, indexOfRightParenthesis)
-        val tokensBetweenParentheses = kotlinScanner.scanNodes(nodesBetweenParentheses, ScannerState.STATEMENT)
-        val nodesAfterRightParenthesis = childNodes.subList(indexOfRightParenthesis + 1, childNodes.size)
-        val tokensAfterRightParenthesis = kotlinScanner.scanNodes(nodesAfterRightParenthesis, ScannerState.BLOCK)
-        val innerTokens = listOf(
-            *tokensUntilLeftParenthesis.toTypedArray(),
-            LeafNodeToken("("),
-            BeginToken(length = lengthOfTokens(tokensBetweenParentheses), state = State.CODE),
-            *tokensBetweenParentheses.toTypedArray(),
-            ClosingSynchronizedBreakToken(whitespaceLength = 0),
-            EndToken,
-            LeafNodeToken(")"),
-            *tokensAfterRightParenthesis.toTypedArray()
-        )
-        return inBeginEndBlock(innerTokens, State.CODE)
+    private val whenForPattern = nodePattern {
+        matchingElement({ it.elementType == KtTokens.LPAR }) { nodes ->
+            kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
+        }
+        matchingElement({ it.elementType == KtTokens.RPAR }) { nodes ->
+            val tokens = kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
+            listOf(
+                LeafNodeToken("("),
+                BeginToken(length = lengthOfTokens(tokens), state = State.CODE),
+                *tokens.toTypedArray(),
+                ClosingSynchronizedBreakToken(whitespaceLength = 0),
+                EndToken,
+                LeafNodeToken(")")
+            )
+        }
+        endingElement { nodes ->
+            kotlinScanner.scanNodes(nodes, ScannerState.BLOCK)
+        }
     }
+
+    override fun scan(node: ASTNode, scannerState: ScannerState): List<Token> =
+        inBeginEndBlock(whenForPattern.matchSequence(node.children().asIterable()), State.CODE)
 }
