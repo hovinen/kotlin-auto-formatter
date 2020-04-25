@@ -1,17 +1,11 @@
 package org.kotlin.formatter.scanning
 
-import org.jetbrains.kotlin.KtNodeTypes
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.LeafPsiElement
 import org.jetbrains.kotlin.kdoc.lexer.KDocTokens
-import org.jetbrains.kotlin.kdoc.parser.KDocElementTypes
 import org.jetbrains.kotlin.lexer.KtTokens
-import org.jetbrains.kotlin.psi.psiUtil.children
-import org.jetbrains.kotlin.psi.stubs.elements.KtFileElementType
-import org.jetbrains.kotlin.psi.stubs.elements.KtScriptElementType
 import org.kotlin.formatter.ForcedBreakToken
 import org.kotlin.formatter.LeafNodeToken
-import org.kotlin.formatter.State
 import org.kotlin.formatter.Token
 import org.kotlin.formatter.WhitespaceToken
 
@@ -28,71 +22,7 @@ class KotlinScanner {
     }
 
     private fun scanNodeWithChildren(node: ASTNode, scannerState: ScannerState): List<Token> {
-        return when (node.elementType) {
-            KtNodeTypes.BLOCK, KtNodeTypes.CLASS_BODY -> {
-                BlockScanner(this).scan(node, scannerState)
-            }
-            KtNodeTypes.WHEN -> {
-                WhenForExpressionScanner(this).scanWhenExpression(node, scannerState)
-            }
-            KDocTokens.KDOC -> {
-                inBeginEndBlock(scanNodes(node.children().asIterable(), ScannerState.KDOC), State.LONG_COMMENT)
-            }
-            KDocElementTypes.KDOC_TAG, KDocTokens.MARKDOWN_LINK, KDocElementTypes.KDOC_NAME -> {
-                inBeginEndBlock(scanNodes(node.children().asIterable(), ScannerState.KDOC), State.KDOC_DIRECTIVE)
-            }
-            KDocElementTypes.KDOC_SECTION -> {
-                KDocSectionScanner(this).scan(node, scannerState)
-            }
-            KtNodeTypes.STRING_TEMPLATE -> {
-                StringLiteralScanner(this).scan(node, scannerState)
-            }
-            KtNodeTypes.VALUE_PARAMETER_LIST, KtNodeTypes.VALUE_ARGUMENT_LIST -> {
-                ParameterListScanner(this).scan(node, scannerState)
-            }
-            KtNodeTypes.CLASS -> {
-                ClassScanner(this).scan(node, scannerState)
-            }
-            KtNodeTypes.FUN -> {
-                FunctionDeclarationScanner(this, PropertyScanner(this)).scan(node, scannerState)
-            }
-            KtNodeTypes.DOT_QUALIFIED_EXPRESSION, KtNodeTypes.SAFE_ACCESS_EXPRESSION -> {
-                DotQualifiedExpressionScanner(this).scan(node, scannerState)
-            }
-            KtNodeTypes.CONDITION -> {
-                ConditionScanner(this).scan(node, scannerState)
-            }
-            KtNodeTypes.FOR -> {
-                WhenForExpressionScanner(this).scan(node, scannerState)
-            }
-            KtNodeTypes.BINARY_EXPRESSION -> {
-                BinaryExpressionScanner(this).scan(node, scannerState)
-            }
-            KtNodeTypes.PROPERTY -> {
-                PropertyScanner(this).scan(node, scannerState)
-            }
-            KtNodeTypes.PACKAGE_DIRECTIVE,
-            KtNodeTypes.IMPORT_LIST,
-            KtNodeTypes.IMPORT_DIRECTIVE,
-            KtNodeTypes.IMPORT_ALIAS -> {
-                inBeginEndBlock(
-                    scanNodes(node.children().asIterable(), ScannerState.PACKAGE_IMPORT),
-                    State.PACKAGE_IMPORT
-                )
-            }
-            KtFileElementType.INSTANCE, is KtScriptElementType, KtNodeTypes.LITERAL_STRING_TEMPLATE_ENTRY -> {
-                scanNodes(node.children().asIterable(), ScannerState.BLOCK)
-            }
-            KtNodeTypes.PRIMARY_CONSTRUCTOR, KtNodeTypes.BODY, KtNodeTypes.THEN -> {
-                scanNodes(node.children().asIterable(), ScannerState.STATEMENT)
-            }
-            KtNodeTypes.VALUE_PARAMETER, KtNodeTypes.VALUE_ARGUMENT -> {
-                inBeginEndBlock(scanNodes(node.children().asIterable(), ScannerState.STATEMENT), State.CODE)
-            }
-            else -> {
-                inBeginEndBlock(scanNodes(node.children().asIterable(), ScannerState.STATEMENT), State.CODE)
-            }
-        }
+        return nodeScannerForElementType(this, node.elementType).scan(node, scannerState)
     }
 
     internal fun scanNodes(
