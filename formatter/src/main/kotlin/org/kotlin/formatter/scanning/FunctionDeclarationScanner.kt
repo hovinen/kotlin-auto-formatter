@@ -6,18 +6,30 @@ import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.psi.psiUtil.children
 import org.kotlin.formatter.State
 import org.kotlin.formatter.Token
+import org.kotlin.formatter.scanning.nodepattern.nodePattern
 
 internal class FunctionDeclarationScanner(
     private val kotlinScanner: KotlinScanner,
     private val propertyScanner: PropertyScanner
 ): NodeScanner {
-    override fun scan(node: ASTNode, scannerState: ScannerState): List<Token> {
-        val blockNodeTypes = setOf(KtNodeTypes.BLOCK, KtNodeTypes.CLASS_BODY)
-        val innerTokens = if (blockNodeTypes.contains(node.lastChildNode.elementType)) {
-            scanDeclarationWithBlock(node)
-        } else {
-            propertyScanner.scan(node, scannerState)
+    private val blockPattern = nodePattern {
+        oneOrMore { anyNode() }.andThen { nodes ->
+            inBeginEndBlock(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT), State.CODE)
         }
+        zeroOrMore { nodeOfType(KtTokens.WHITE_SPACE) }
+        zeroOrOne { nodeOfType(KtNodeTypes.BLOCK) }.andThen { nodes ->
+            kotlinScanner.scanNodes(nodes, ScannerState.BLOCK)
+        }
+        end()
+    }
+
+    override fun scan(node: ASTNode, scannerState: ScannerState): List<Token> {
+        val innerTokens =
+            if (node.lastChildNode.elementType == KtNodeTypes.BLOCK) {
+                scanDeclarationWithBlock(node)
+            } else {
+                propertyScanner.scan(node, scannerState)
+            }
         return inBeginEndBlock(innerTokens, State.CODE)
     }
 

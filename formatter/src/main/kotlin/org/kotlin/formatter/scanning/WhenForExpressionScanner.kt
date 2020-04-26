@@ -13,10 +13,11 @@ import org.kotlin.formatter.scanning.nodepattern.nodePattern
 
 internal class WhenForExpressionScanner(private val kotlinScanner: KotlinScanner): NodeScanner {
     private val whenForPattern = nodePattern {
-        accumulateUntilNodeMatching({ it.elementType == KtTokens.LPAR }) { nodes, _ ->
+        oneOrMore { anyNode() } andThen { nodes ->
             kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
         }
-        accumulateUntilNodeMatching({ it.elementType == KtTokens.RPAR }) { nodes, _ ->
+        nodeOfType(KtTokens.LPAR)
+        oneOrMore { anyNode() } andThen { nodes ->
             val tokens = kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
             listOf(
                 LeafNodeToken("("),
@@ -27,9 +28,11 @@ internal class WhenForExpressionScanner(private val kotlinScanner: KotlinScanner
                 LeafNodeToken(")")
             )
         }
-        accumulateUntilEnd { nodes, _ ->
+        nodeOfType(KtTokens.RPAR)
+        zeroOrMore { anyNode() } andThen { nodes ->
             kotlinScanner.scanNodes(nodes, ScannerState.BLOCK)
         }
+        end()
     }
 
     override fun scan(node: ASTNode, scannerState: ScannerState): List<Token> =

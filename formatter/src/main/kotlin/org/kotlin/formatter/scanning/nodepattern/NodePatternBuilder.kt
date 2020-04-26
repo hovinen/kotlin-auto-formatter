@@ -1,63 +1,112 @@
 package org.kotlin.formatter.scanning.nodepattern
 
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
-import org.kotlin.formatter.scanning.tail
+import org.jetbrains.kotlin.com.intellij.psi.tree.IElementType
+import java.util.Stack
 
 class NodePatternBuilder {
-    private val elements = mutableListOf<Element>()
+    private val elementStack = Stack<Element>()
 
-    fun accumulateUntilNodeMatching(matcher: (ASTNode) -> Boolean, action: Action) {
-        elements.add(MatchingElement(matcher, action))
+    fun anyNode(): NodePatternBuilder = nodeMatching { true }
+
+    fun nodeOfType(type: IElementType): NodePatternBuilder = nodeMatching { it.elementType == type }
+
+    fun end(): NodePatternBuilder = nodeMatching { it == TerminalNode }
+
+    private fun nodeMatching(matcher: (ASTNode) -> Boolean): NodePatternBuilder {
+        val finalState = terminalState()
+        elementStack.push(
+            Element(
+                State().addTransition(MatchingTransition(matcher, finalState)),
+                finalState
+            )
+        )
+        return this
     }
 
-    fun skipNodesMatching(matcher: (ASTNode) -> Boolean) {
-        elements.add(SkippingElement(matcher))
+    fun zeroOrOne(init: NodePatternBuilder.() -> Unit): NodePatternBuilder {
+        val subgraphElement = buildSubgraph(init)
+        val initialState =
+            State()
+                .addTransition(EpsilonTransition(subgraphElement.initialState))
+                .addTransition(EpsilonTransition(subgraphElement.finalState))
+        elementStack.push(Element(initialState, subgraphElement.finalState))
+        return this
     }
 
-    fun accumulateUntilEnd(action: Action) {
-        elements.add(EndingElement(action))
+    fun zeroOrMore(init: NodePatternBuilder.() -> Unit): NodePatternBuilder {
+        val subgraphElement = buildSubgraph(init)
+        val finalState = terminalState()
+        subgraphElement.finalState
+            .addTransition(EpsilonTransition(subgraphElement.initialState))
+            .addTransition(EpsilonTransition(finalState))
+        elementStack.push(Element(subgraphElement.finalState, finalState))
+        return this
     }
 
-    internal fun build(): NodePattern = NodePattern(buildStateMachine(elements))
+    fun exactlyOne(init: NodePatternBuilder.() -> Unit): NodePatternBuilder {
+        elementStack.push(buildSubgraph(init))
+        return this
+    }
+
+    fun oneOrMore(init: NodePatternBuilder.() -> Unit): NodePatternBuilder {
+        val subgraphElement = buildSubgraph(init)
+        val finalState = terminalState()
+        subgraphElement.finalState
+            .addTransition(EpsilonTransition(subgraphElement.initialState))
+            .addTransition(EpsilonTransition(finalState))
+        elementStack.push(Element(subgraphElement.initialState, finalState))
+        return this
+    }
+
+    private fun buildSubgraph(init: NodePatternBuilder.() -> Unit): Element {
+        val builder = NodePatternBuilder()
+        init(builder)
+        builder.reduce()
+        return builder.elementStack.pop()
+    }
+
+    infix fun andThen(action: Action) {
+        val topElement = elementStack.peek()
+        val coveredStates = mutableSetOf<State>()
+        var states = setOf(topElement.initialState)
+        while (states.isNotEmpty()) {
+            val nextStates = mutableSetOf<State>()
+            states.forEach {
+                it.accumulate()
+                coveredStates.add(it)
+                nextStates.addAll(it.nextStates.minus(coveredStates))
+            }
+            states = nextStates
+        }
+        topElement.finalState.installAction(action)
+    }
+
+    internal fun build(): NodePattern {
+        reduce()
+        return NodePattern(elementStack.pop().initialState)
+    }
+
+    private fun reduce() {
+        while (elementStack.size > 1) {
+            concatenate()
+        }
+    }
+
+    private fun concatenate() {
+        val secondElement = elementStack.pop()
+        val firstElement = elementStack.pop()
+        firstElement.finalState.combineWith(secondElement.initialState)
+        elementStack.push(Element(firstElement.initialState, secondElement.finalState))
+    }
+
+    private fun terminalState() = State()
 }
 
 fun nodePattern(init: NodePatternBuilder.() -> Unit): NodePattern =
     NodePatternBuilder().apply(init).build()
 
-private sealed class Element(internal val action: Action)
-
-private class MatchingElement(internal val matcher: (ASTNode) -> Boolean, action: Action)
-    : Element(action)
-
-private class SkippingElement(internal val matcher: (ASTNode) -> Boolean)
-    : Element(emptyAction())
-
-private class EndingElement(action: Action) : Element(action)
-
-private fun buildStateMachine(elements: List<Element>): State {
-    if (elements.isEmpty()) {
-        return TerminalState
-    } else {
-        val nextState = buildStateMachine(elements.tail())
-        return when (val element = elements.first()) {
-            is MatchingElement -> {
-                val state = NonTerminalState()
-                state.addTransition(ConsumingTransition(element.matcher, nextState, element.action))
-                    .addTransition(AccumulatingTransition(state))
-            }
-            is SkippingElement -> {
-                val state = NonTerminalState()
-                state.addTransition(ConsumingTransition(element.matcher, state, emptyAction()))
-                    .addTransition(AccumulatingTransition(nextState))
-            }
-            is EndingElement -> {
-                val state = NonTerminalState()
-                state
-                    .addTransition(
-                        ConsumingTransition({ it is TerminalNode }, nextState, element.action)
-                    )
-                    .addTransition(AccumulatingTransition(state))
-            }
-        }
-    }
-}
+private class Element internal constructor(
+    internal val initialState: State,
+    internal val finalState: State
+)

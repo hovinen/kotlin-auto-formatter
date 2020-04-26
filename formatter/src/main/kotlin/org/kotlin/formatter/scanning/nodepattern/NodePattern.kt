@@ -4,31 +4,83 @@ import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.LeafPsiElement
 import org.jetbrains.kotlin.lexer.KtTokens
 import org.kotlin.formatter.Token
-import org.kotlin.formatter.scanning.tail
 
 class NodePattern internal constructor(private val initialState: State) {
     fun matchSequence(nodes: Iterable<ASTNode>): List<Token> {
-        var state = initialState
-        val result = mutableListOf<Token>()
-        val currentNodeIterator = nodes.iterator()
-        val accumulatedNodes = mutableListOf<ASTNode>()
-        while (!(state is TerminalState)) {
-            val currentNode =
-                if (currentNodeIterator.hasNext()) currentNodeIterator.next() else TerminalNode
-            val transition = state.transition(currentNode)
-            when (transition) {
-                is ConsumingTransition -> {
-                    result.addAll(transition.action(accumulatedNodes, currentNode))
-                    accumulatedNodes.clear()
-                }
-                is AccumulatingTransition -> {
-                    accumulatedNodes.add(currentNode)
-                }
-            }
-            state = transition.state
+        var paths = listOf<PathStep>(InitialPathStep(initialState))
+        for (node in nodes) {
+            paths = epsilonStep(paths)
+            paths = setNodeOnPaths(paths, node)
+            paths = step(paths, node)
         }
-        return result
+        paths = step(epsilonStep(paths), TerminalNode)
+        return paths.firstOrNull { it is FinalPathStep }?.runActions()?.tokens
+            ?: throw Exception("Could not match node sequence $nodes")
     }
+
+    private fun setNodeOnPaths(paths: List<PathStep>, node: ASTNode): List<PathStep> =
+        paths.map { it.withNode(node) }
+
+    private fun epsilonStep(paths: List<PathStep>): List<PathStep> {
+        val nonFinalPaths = paths.filterIsInstance<PathStepOnState>()
+        val allStates = nonFinalPaths.map { it.state }.toSet()
+        val nextStates = allStates.flatMap { it.immediateNextStates }
+        return if (allStates.containsAll(nextStates)) {
+            paths
+        } else {
+            epsilonStep(nonFinalPaths.flatMap { path ->
+                path.state.immediateNextStates.map { state -> ContinuingPathStep(state, path) }
+            }).plus(paths)
+        }
+    }
+
+    private fun step(paths: List<PathStep>, node: ASTNode): List<PathStep> =
+        paths.flatMap { path ->
+            if (path is PathStepOnState) {
+                path.state.matchingNextStates(node).map { state ->
+                    if (state.isTerminal) {
+                        FinalPathStep(state, path)
+                    } else {
+                        ContinuingPathStep(state, path)
+                    }
+                }
+            } else {
+                listOf()
+            }
+        }
 }
 
-internal object TerminalNode: LeafPsiElement(KtTokens.WHITE_SPACE, "")
+private sealed class PathStep {
+    abstract fun runActions(): Evaluation
+
+    abstract fun withNode(node: ASTNode): PathStep
+}
+
+private abstract class PathStepOnState(
+    internal val state: State,
+    internal val node: ASTNode?
+) : PathStep()
+
+private class InitialPathStep(state: State, node: ASTNode? = null) : PathStepOnState(state, node) {
+    override fun runActions(): Evaluation = state.action(Evaluation(listOf(), listOf()), node)
+
+    override fun withNode(node: ASTNode): PathStep = InitialPathStep(state, node)
+}
+
+private class ContinuingPathStep(
+    state: State,
+    internal val previous: PathStep,
+    node: ASTNode? = null
+) : PathStepOnState(state, node) {
+    override fun runActions(): Evaluation = state.action(previous.runActions(), node)
+
+    override fun withNode(node: ASTNode): PathStep = ContinuingPathStep(state, previous, node)
+}
+
+private class FinalPathStep(internal val state: State, val previous: PathStep) : PathStep() {
+    override fun runActions(): Evaluation = previous.runActions()
+
+    override fun withNode(node: ASTNode): PathStep = this
+}
+
+internal object TerminalNode: LeafPsiElement(KtTokens.EOF, "")
