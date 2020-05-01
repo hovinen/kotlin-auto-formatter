@@ -16,8 +16,8 @@ class State {
 
     internal val nextStates get(): Set<State> = transitions.map { it.state }.toSet()
 
-    internal val immediateNextStates get(): Set<State> =
-        transitions.filterIsInstance<EpsilonTransition>().map { it.state }.toSet()
+    internal val immediateNextStates get(): List<State> =
+        transitions.filterIsInstance<EpsilonTransition>().map { it.state }
 
     internal fun matchingNextStates(node: ASTNode): List<State> =
         transitions.filter { it is MatchingTransition && it.matcher(node) }.map { it.state }

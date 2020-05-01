@@ -1,5 +1,6 @@
 package org.kotlin.formatter.scanning
 
+import org.jetbrains.kotlin.KtNodeTypes
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.psi.psiUtil.children
@@ -8,40 +9,45 @@ import org.kotlin.formatter.State
 import org.kotlin.formatter.Token
 import org.kotlin.formatter.WhitespaceToken
 import org.kotlin.formatter.nonBreakingSpaceToken
+import org.kotlin.formatter.scanning.nodepattern.nodePattern
 
 internal class PropertyScanner(private val kotlinScanner: KotlinScanner): NodeScanner {
-    override fun scan(node: ASTNode, scannerState: ScannerState): List<Token> {
-        val childNodes = node.children().toList()
-        val indexOfAssignmentOperator = childNodes.indexOfFirst { it.elementType == KtTokens.EQ }
-        if (indexOfAssignmentOperator == -1) {
-            return inBeginEndBlock(
-                kotlinScanner.scanNodes(node.children().asIterable(), ScannerState.STATEMENT),
-                State.CODE
-            )
-        } else {
-            var lastNonWhitespaceIndex = indexOfAssignmentOperator - 1
-            while (childNodes[lastNonWhitespaceIndex].elementType == KtTokens.WHITE_SPACE) {
-                lastNonWhitespaceIndex--
+    private val nodePattern = nodePattern {
+        exactlyOne {
+            anyNode()
+            whitespace()
+            nodeOfType(KtTokens.IDENTIFIER)
+            zeroOrOne { nodeOfType(KtNodeTypes.VALUE_PARAMETER_LIST) }
+            zeroOrOne {
+                zeroOrMore { whitespace() }
+                nodeOfType(KtTokens.COLON)
+                zeroOrMore { whitespace() }
+                nodeOfType(KtNodeTypes.TYPE_REFERENCE)
+                zeroOrMore {
+                    whitespace()
+                    nodeOfType(KtNodeTypes.PROPERTY_ACCESSOR)
+                }
             }
-            val nodesUpToAssignmentOperator = childNodes.subList(0, lastNonWhitespaceIndex + 1)
-            val tokensUpToAssignmentOperator = kotlinScanner.scanNodes(nodesUpToAssignmentOperator, ScannerState.STATEMENT)
-            var firstNonWhitespaceIndex = indexOfAssignmentOperator + 1
-            while (childNodes[firstNonWhitespaceIndex].elementType == KtTokens.WHITE_SPACE) {
-                firstNonWhitespaceIndex++
-            }
-            val nodesAfterAssignmentOperator = childNodes.subList(firstNonWhitespaceIndex, childNodes.size)
-            val tokensAfterAssignmentOperator = kotlinScanner.scanNodes(nodesAfterAssignmentOperator, ScannerState.STATEMENT)
-            val innerTokens = listOf(
-                *tokensUpToAssignmentOperator.toTypedArray(),
-                nonBreakingSpaceToken(content = " "),
-                LeafNodeToken("="),
-                WhitespaceToken(
-                    length = 1 + lengthOfTokens(tokensAfterAssignmentOperator),
-                    content = " "
-                ),
-                *tokensAfterAssignmentOperator.toTypedArray()
-            )
-            return inBeginEndBlock(innerTokens, State.CODE)
+        } andThen { nodes ->
+            kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
         }
+        zeroOrOne {
+            zeroOrMore { whitespace() }
+            nodeOfType(KtTokens.EQ)
+            zeroOrMore { whitespace() }
+            zeroOrMore { anyNode() } andThen { nodes ->
+                val tokens = kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
+                listOf(
+                    nonBreakingSpaceToken(content = " "),
+                    LeafNodeToken("="),
+                    WhitespaceToken(length = 1 + lengthOfTokens(tokens), content = " "),
+                    *tokens.toTypedArray()
+                )
+            }
+        }
+        end()
     }
+
+    override fun scan(node: ASTNode, scannerState: ScannerState): List<Token> =
+        inBeginEndBlock(nodePattern.matchSequence(node.children().asIterable()), State.CODE)
 }

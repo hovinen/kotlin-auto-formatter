@@ -207,6 +207,27 @@ class NodePatternTest {
     }
 
     @Test
+    fun `accumulates nodes on nested zeroOrMore`() {
+        val accumulatedNodes = mutableListOf<ASTNode>()
+        val subject = nodePattern {
+            zeroOrOne {
+                zeroOrMore { anyNode() } andThen { nodes ->
+                    accumulatedNodes.addAll(nodes)
+                    listOf()
+                }
+            }
+            end()
+        }
+        val identifierElement = LeafPsiElement(KtTokens.IDENTIFIER, "MyClass")
+        val nodes = listOf(identifierElement)
+        val nodesExpected = listOf(identifierElement)
+
+        subject.matchSequence(nodes)
+
+        assertThat(accumulatedNodes).isEqualTo(nodesExpected)
+    }
+
+    @Test
     fun `accepts and accumulates a group of tokens to appear zero or one times`() {
         val accumulatedNodes = mutableListOf<ASTNode>()
         val subject = nodePattern {
@@ -328,6 +349,26 @@ class NodePatternTest {
     }
 
     @Test
+    fun `accepts as many matching nodes as possible on Kleene star`() {
+        var accumulatedNodes = listOf<ASTNode>()
+        val subject = nodePattern {
+            zeroOrMore {
+                nodeOfType(KtTokens.IDENTIFIER)
+            } andThen {
+                accumulatedNodes = it
+                listOf()
+            }
+            zeroOrMore { anyNode() }
+            end()
+        }
+        val variableElement = LeafPsiElement(KtTokens.IDENTIFIER, "aVariable")
+
+        subject.matchSequence(listOf(variableElement))
+
+        assertThat(accumulatedNodes).isEqualTo(listOf(variableElement))
+    }
+
+    @Test
     fun `accepts one matching token with one plus Kleene star`() {
         val accumulatedNodes = mutableListOf<ASTNode>()
         val subject = nodePattern {
@@ -366,6 +407,26 @@ class NodePatternTest {
     }
 
     @Test
+    fun `accepts as many matching nodes as possible on one plus Kleene star`() {
+        var accumulatedNodes = listOf<ASTNode>()
+        val subject = nodePattern {
+            oneOrMore {
+                nodeOfType(KtTokens.IDENTIFIER)
+            } andThen {
+                accumulatedNodes = it
+                listOf()
+            }
+            zeroOrMore { anyNode() }
+            end()
+        }
+        val variableElement = LeafPsiElement(KtTokens.IDENTIFIER, "aVariable")
+
+        subject.matchSequence(listOf(variableElement, variableElement))
+
+        assertThat(accumulatedNodes).isEqualTo(listOf(variableElement, variableElement))
+    }
+
+    @Test
     fun `invokes callback only once on one plus Kleene star`() {
         var calledCount = 0
         val subject = nodePattern {
@@ -398,5 +459,26 @@ class NodePatternTest {
         }
 
         assertThrows<Exception> { subject.matchSequence(listOf()) }
+    }
+
+    @Test
+    fun `does not invoke command on branch which was not invoked`() {
+        var wasCalled = false
+        val subject = nodePattern {
+            zeroOrMore { anyNode() }
+            zeroOrOne {
+                nodeOfType(KtTokens.EQ)
+                anyNode() andThen {
+                    wasCalled = true
+                    listOf()
+                }
+            }
+            end()
+        }
+        val variableElement = LeafPsiElement(KtTokens.IDENTIFIER, "aVariable")
+
+        subject.matchSequence(listOf(variableElement))
+
+        assertThat(wasCalled).isFalse()
     }
 }

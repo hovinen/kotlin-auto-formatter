@@ -13,25 +13,31 @@ class NodePattern internal constructor(private val initialState: State) {
             paths = setNodeOnPaths(paths, node)
             paths = step(paths, node)
         }
-        paths = step(epsilonStep(paths), TerminalNode)
+        paths = epsilonStep(paths)
+        paths = step(paths, TerminalNode)
         return paths.firstOrNull { it is FinalPathStep }?.runActions()?.tokens
-            ?: throw Exception("Could not match node sequence $nodes")
+            ?: throw Exception("Could not match node sequence ${nodes.toList()}")
     }
 
     private fun setNodeOnPaths(paths: List<PathStep>, node: ASTNode): List<PathStep> =
         paths.map { it.withNode(node) }
 
-    private fun epsilonStep(paths: List<PathStep>): List<PathStep> {
-        val nonFinalPaths = paths.filterIsInstance<PathStepOnState>()
-        val allStates = nonFinalPaths.map { it.state }.toSet()
-        val nextStates = allStates.flatMap { it.immediateNextStates }
-        return if (allStates.containsAll(nextStates)) {
-            paths
-        } else {
-            epsilonStep(nonFinalPaths.flatMap { path ->
-                path.state.immediateNextStates.map { state -> ContinuingPathStep(state, path) }
-            }).plus(paths)
-        }
+    private fun epsilonStep(paths: List<PathStep>): List<PathStep> =
+        paths.flatMap { if (it is PathStepOnState) epsilonStepForPath(it) else listOf(it) }
+
+    private fun epsilonStepForPath(startingPath: PathStepOnState): List<PathStep> {
+        val result = mutableListOf<PathStep>(startingPath)
+        var allStates = setOf(startingPath.state)
+        var nextStates: List<State>
+        do {
+            result.addAll(result.filterIsInstance<PathStepOnState>().flatMap { path ->
+                path.state.immediateNextStates.minus(allStates)
+                    .map { state -> ContinuingPathStep(state, path) }
+            })
+            allStates = result.filterIsInstance<PathStepOnState>().map { it.state }.toSet()
+            nextStates = allStates.flatMap { it.immediateNextStates }
+        } while (!allStates.containsAll(nextStates))
+        return result
     }
 
     private fun step(paths: List<PathStep>, node: ASTNode): List<PathStep> =

@@ -2,6 +2,7 @@ package org.kotlin.formatter.scanning.nodepattern
 
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.com.intellij.psi.tree.IElementType
+import org.jetbrains.kotlin.lexer.KtTokens
 import java.util.Stack
 
 class NodePatternBuilder {
@@ -10,6 +11,12 @@ class NodePatternBuilder {
     fun anyNode(): NodePatternBuilder = nodeMatching { true }
 
     fun nodeOfType(type: IElementType): NodePatternBuilder = nodeMatching { it.elementType == type }
+
+    fun whitespace(): NodePatternBuilder = nodeOfType(KtTokens.WHITE_SPACE)
+
+    fun nodeNotOfType(type: IElementType): NodePatternBuilder = nodeMatching {
+        it.elementType != type
+    }
 
     fun end(): NodePatternBuilder = nodeMatching { it == TerminalNode }
 
@@ -26,11 +33,13 @@ class NodePatternBuilder {
 
     fun zeroOrOne(init: NodePatternBuilder.() -> Unit): NodePatternBuilder {
         val subgraphElement = buildSubgraph(init)
+        val finalState = terminalState()
         val initialState =
             State()
                 .addTransition(EpsilonTransition(subgraphElement.initialState))
-                .addTransition(EpsilonTransition(subgraphElement.finalState))
-        elementStack.push(Element(initialState, subgraphElement.finalState))
+                .addTransition(EpsilonTransition(finalState))
+        subgraphElement.finalState.addTransition(EpsilonTransition(finalState))
+        elementStack.push(Element(initialState, finalState))
         return this
     }
 

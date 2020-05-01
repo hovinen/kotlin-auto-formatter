@@ -14,7 +14,10 @@ internal interface NodeScanner {
     fun scan(node: ASTNode, scannerState: ScannerState): List<Token>
 }
 
-internal fun nodeScannerForElementType(kotlinScanner: KotlinScanner, elementType: IElementType): NodeScanner {
+internal fun nodeScannerForElementType(
+    kotlinScanner: KotlinScanner,
+    elementType: IElementType
+): NodeScanner {
     return when (elementType) {
         KtNodeTypes.BLOCK, KtNodeTypes.CLASS_BODY -> {
             BlockScanner(kotlinScanner)
