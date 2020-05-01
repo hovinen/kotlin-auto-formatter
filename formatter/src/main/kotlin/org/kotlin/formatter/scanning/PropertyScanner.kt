@@ -9,6 +9,7 @@ import org.kotlin.formatter.State
 import org.kotlin.formatter.Token
 import org.kotlin.formatter.WhitespaceToken
 import org.kotlin.formatter.nonBreakingSpaceToken
+import org.kotlin.formatter.scanning.nodepattern.NodePatternBuilder
 import org.kotlin.formatter.scanning.nodepattern.nodePattern
 
 internal class PropertyScanner(private val kotlinScanner: KotlinScanner): NodeScanner {
@@ -19,9 +20,9 @@ internal class PropertyScanner(private val kotlinScanner: KotlinScanner): NodeSc
             nodeOfType(KtTokens.IDENTIFIER)
             zeroOrOne { nodeOfType(KtNodeTypes.VALUE_PARAMETER_LIST) }
             zeroOrOne {
-                zeroOrMore { whitespace() }
+                possibleWhitespace()
                 nodeOfType(KtTokens.COLON)
-                zeroOrMore { whitespace() }
+                possibleWhitespace()
                 nodeOfType(KtNodeTypes.TYPE_REFERENCE)
                 zeroOrMore {
                     whitespace()
@@ -32,9 +33,9 @@ internal class PropertyScanner(private val kotlinScanner: KotlinScanner): NodeSc
             kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
         }
         zeroOrOne {
-            zeroOrMore { whitespace() }
+            possibleWhitespace()
             nodeOfType(KtTokens.EQ)
-            zeroOrMore { whitespace() }
+            possibleWhitespace()
             zeroOrMore { anyNode() } andThen { nodes ->
                 val tokens = kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
                 listOf(

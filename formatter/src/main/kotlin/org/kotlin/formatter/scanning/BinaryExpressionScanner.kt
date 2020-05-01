@@ -18,11 +18,11 @@ internal class BinaryExpressionScanner(private val kotlinScanner: KotlinScanner)
                 nonBreakingSpaceToken(content = " ")
             )
         }
-        zeroOrMore { nodeOfType(KtTokens.WHITE_SPACE) }
+        possibleWhitespace()
         nodeOfType(KtNodeTypes.OPERATION_REFERENCE) andThen { operator ->
             kotlinScanner.scanNodes(operator, ScannerState.STATEMENT)
         }
-        zeroOrMore { nodeOfType(KtTokens.WHITE_SPACE) }
+        possibleWhitespace()
         anyNode() andThen { nodes ->
             val tokens = kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
             listOf(

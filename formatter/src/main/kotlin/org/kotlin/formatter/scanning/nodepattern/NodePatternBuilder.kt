@@ -14,9 +14,7 @@ class NodePatternBuilder {
 
     fun whitespace(): NodePatternBuilder = nodeOfType(KtTokens.WHITE_SPACE)
 
-    fun nodeNotOfType(type: IElementType): NodePatternBuilder = nodeMatching {
-        it.elementType != type
-    }
+    fun possibleWhitespace() = zeroOrMore { whitespace() }
 
     fun end(): NodePatternBuilder = nodeMatching { it == TerminalNode }
 
