@@ -2,6 +2,8 @@ package org.kotlin.formatter
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 
 class KotlinFormatterTest {
     @Test
@@ -153,6 +155,23 @@ class KotlinFormatterTest {
                     aThirdParameter: String
                 ) {
                 }
+            }
+        """.trimIndent())
+    }
+
+    @Test
+    fun `breaks between annotations and multiline declarations`() {
+        val result = KotlinFormatter(maxLineLength = 50).format("""
+            @AnAnnotation
+            fun myFunction() {
+                aFunctionCall()
+            }
+        """.trimIndent())
+
+        assertThat(result).isEqualTo("""
+            @AnAnnotation
+            fun myFunction() {
+                aFunctionCall()
             }
         """.trimIndent())
     }
@@ -636,17 +655,18 @@ class KotlinFormatterTest {
         """.trimIndent())
     }
 
-    @Test
-    fun `does not break on a single dot expression`() {
+    @ParameterizedTest
+    @ValueSource(strings = [".", "?."])
+    fun `does not break on a single dot expression`(operator: String) {
         val result = KotlinFormatter(maxLineLength = 50).format("""
             fun myFunction() {
-                anObject.aMethod(aParameter, anotherParameter, aThirdParameter)
+                anObject${operator}aMethod(aParameter, anotherParameter, aThirdParameter)
             }
         """.trimIndent())
 
         assertThat(result).isEqualTo("""
             fun myFunction() {
-                anObject.aMethod(
+                anObject${operator}aMethod(
                     aParameter,
                     anotherParameter,
                     aThirdParameter

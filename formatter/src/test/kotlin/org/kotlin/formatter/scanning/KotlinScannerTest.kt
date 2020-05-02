@@ -1002,12 +1002,12 @@ internal class KotlinScannerTest {
     @Test
     fun `outputs SynchronizedBreakToken for chained null-safe dot expression`() {
         val subject = subject()
-        val node = kotlinLoader.parseKotlin("myNullableObject?.myProperty")
+        val node = kotlinLoader.parseKotlin("myNullableObject?.myProperty?.anotherProperty")
 
         val result = subject.scan(node)
 
         assertThat(result)
-                .containsSubsequence(
+            .containsSubsequence(
                 LeafNodeToken("myNullableObject"),
                 SynchronizedBreakToken(whitespaceLength = 0),
                 LeafNodeToken("myProperty")
