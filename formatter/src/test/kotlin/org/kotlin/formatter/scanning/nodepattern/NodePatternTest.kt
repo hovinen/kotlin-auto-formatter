@@ -447,6 +447,26 @@ class NodePatternTest {
     }
 
     @Test
+    fun `accepts as few matching nodes as possible on frugal one plus Kleene star`() {
+        var accumulatedNodes = listOf<ASTNode>()
+        val subject = nodePattern {
+            oneOrMoreFrugal {
+                anyNode()
+            } andThen {
+                accumulatedNodes = it
+                listOf()
+            }
+            zeroOrMore { nodeOfType(KtTokens.IDENTIFIER) }
+            end()
+        }
+        val variableElement = LeafPsiElement(KtTokens.IDENTIFIER, "aVariable")
+
+        subject.matchSequence(listOf(variableElement, variableElement))
+
+        assertThat(accumulatedNodes).isEqualTo(listOf(variableElement))
+    }
+
+    @Test
     fun `invokes callback only once on one plus Kleene star`() {
         var calledCount = 0
         val subject = nodePattern {
