@@ -17,13 +17,16 @@ internal interface NodeScanner {
 internal fun nodeScannerForElementType(
     kotlinScanner: KotlinScanner,
     elementType: IElementType
-): NodeScanner {
-    return when (elementType) {
+): NodeScanner =
+    when (elementType) {
         KtNodeTypes.BLOCK, KtNodeTypes.CLASS_BODY -> {
             BlockScanner(kotlinScanner)
         }
         KtNodeTypes.WHEN -> {
             WhenExpressionScanner(WhenForExpressionScanner(kotlinScanner))
+        }
+        KtNodeTypes.IF -> {
+            IfExpressionScanner(kotlinScanner)
         }
         KDocTokens.KDOC -> {
             SimpleBlockScanner(kotlinScanner, ScannerState.KDOC, State.LONG_COMMENT)
@@ -83,4 +86,3 @@ internal fun nodeScannerForElementType(
             SimpleBlockScanner(kotlinScanner, ScannerState.STATEMENT, State.CODE)
         }
     }
-}

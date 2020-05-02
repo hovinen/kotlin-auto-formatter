@@ -563,6 +563,31 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `does not break between else and opening brace of block`() {
+        val result = KotlinFormatter(maxLineLength = 50).format("""
+            fun myFunction() {
+                if (aCondition) {
+                    doSomething()
+                } else {
+                    doSomethingElse().andThenSomethingElse().andThenSomethingElse()
+                }
+            }
+        """.trimIndent())
+
+        assertThat(result).isEqualTo("""
+            fun myFunction() {
+                if (aCondition) {
+                    doSomething()
+                } else {
+                    doSomethingElse()
+                        .andThenSomethingElse()
+                        .andThenSomethingElse()
+                }
+            }
+        """.trimIndent())
+    }
+
+    @Test
     fun `format breaks KDoc comment text`() {
         val result = KotlinFormatter(maxLineLength = 60).format("""
             /**
