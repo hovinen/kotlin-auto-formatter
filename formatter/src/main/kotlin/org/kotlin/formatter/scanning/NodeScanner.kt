@@ -44,7 +44,7 @@ internal fun nodeScannerForElementType(
             ClassScanner(kotlinScanner)
         }
         KtNodeTypes.FUN -> {
-            FunctionDeclarationScanner(kotlinScanner, PropertyScanner(kotlinScanner))
+            FunctionDeclarationScanner(kotlinScanner)
         }
         KtNodeTypes.DOT_QUALIFIED_EXPRESSION, KtNodeTypes.SAFE_ACCESS_EXPRESSION -> {
             DotQualifiedExpressionScanner(kotlinScanner)
