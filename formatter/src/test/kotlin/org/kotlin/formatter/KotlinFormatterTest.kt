@@ -620,6 +620,23 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `does not insert a newline between throw and exception`() {
+        val result = KotlinFormatter(maxLineLength = 50).format("""
+            fun myFunction() {
+                throw AnException("A long exception message which wraps")
+            }
+        """.trimIndent())
+
+        assertThat(result).isEqualTo("""
+            fun myFunction() {
+                throw AnException(
+                    "A long exception message which wraps"
+                )
+            }
+        """.trimIndent())
+    }
+
+    @Test
     fun `format breaks KDoc comment text`() {
         val result = KotlinFormatter(maxLineLength = 60).format("""
             /**
