@@ -15,7 +15,7 @@ internal class BinaryExpressionScanner(private val kotlinScanner: KotlinScanner)
         anyNode() andThen { firstNode ->
             listOf(
                 *kotlinScanner.scanNodes(firstNode, ScannerState.STATEMENT).toTypedArray(),
-                nonBreakingSpaceToken(content = " ")
+                nonBreakingSpaceToken()
             )
         }
         possibleWhitespace()

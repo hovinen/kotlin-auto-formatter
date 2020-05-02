@@ -18,7 +18,7 @@ internal class FunctionDeclarationScanner(private val kotlinScanner: KotlinScann
             possibleWhitespace()
             nodeOfType(KtNodeTypes.BLOCK) andThen { nodes ->
                 listOf(
-                    nonBreakingSpaceToken(content = " "),
+                    nonBreakingSpaceToken(),
                     *kotlinScanner.scanNodes(nodes, ScannerState.BLOCK).toTypedArray()
                 )
             }

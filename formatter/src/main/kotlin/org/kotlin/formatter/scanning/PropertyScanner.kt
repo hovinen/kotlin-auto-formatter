@@ -47,7 +47,7 @@ internal fun NodePatternBuilder.propertyInitializer(kotlinScanner: KotlinScanner
     zeroOrMore { anyNode() } andThen { nodes ->
         val tokens = kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
         listOf(
-            nonBreakingSpaceToken(content = " "),
+            nonBreakingSpaceToken(),
             LeafNodeToken("="),
             WhitespaceToken(length = 1 + lengthOfTokens(tokens), content = " "),
             *tokens.toTypedArray()

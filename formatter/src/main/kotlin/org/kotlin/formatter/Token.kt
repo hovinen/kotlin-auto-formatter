@@ -10,7 +10,7 @@ data class LeafNodeToken(internal val text: String) : Token() {
     }
 }
 
-fun nonBreakingSpaceToken(content: String): Token = LeafNodeToken(text = content)
+fun nonBreakingSpaceToken(content: String = " "): Token = LeafNodeToken(text = content)
 
 data class WhitespaceToken(internal val length: Int, internal val content: String) : Token()
 
