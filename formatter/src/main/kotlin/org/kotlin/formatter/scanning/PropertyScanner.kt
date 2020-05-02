@@ -15,7 +15,7 @@ import org.kotlin.formatter.scanning.nodepattern.nodePattern
 internal class PropertyScanner(private val kotlinScanner: KotlinScanner): NodeScanner {
     private val nodePattern = nodePattern {
         exactlyOne {
-            anyNode()
+            nodeOfOneOfTypes(KtTokens.VAL_KEYWORD, KtTokens.VAR_KEYWORD)
             whitespace()
             nodeOfType(KtTokens.IDENTIFIER)
             zeroOrOne { nodeOfType(KtNodeTypes.VALUE_PARAMETER_LIST) }
@@ -32,21 +32,23 @@ internal class PropertyScanner(private val kotlinScanner: KotlinScanner): NodeSc
         } andThen { nodes ->
             kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
         }
-        zeroOrOne {
-            possibleWhitespace()
-            nodeOfType(KtTokens.EQ)
-            possibleWhitespace()
-            zeroOrMore { anyNode() } andThen { nodes ->
-                val tokens = kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
-                listOf(
-                    nonBreakingSpaceToken(content = " "),
-                    LeafNodeToken("="),
-                    WhitespaceToken(length = 1 + lengthOfTokens(tokens), content = " "),
-                    *tokens.toTypedArray()
-                )
-            }
-        }
+        zeroOrOne { propertyInitializer() }
         end()
+    }
+
+    internal fun NodePatternBuilder.propertyInitializer() {
+        possibleWhitespace()
+        nodeOfType(KtTokens.EQ)
+        possibleWhitespace()
+        zeroOrMore { anyNode() } andThen { nodes ->
+            val tokens = kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
+            listOf(
+                nonBreakingSpaceToken(content = " "),
+                LeafNodeToken("="),
+                WhitespaceToken(length = 1 + lengthOfTokens(tokens), content = " "),
+                *tokens.toTypedArray()
+            )
+        }
     }
 
     override fun scan(node: ASTNode, scannerState: ScannerState): List<Token> =

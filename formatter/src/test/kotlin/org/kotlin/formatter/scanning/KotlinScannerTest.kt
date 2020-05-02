@@ -645,7 +645,7 @@ internal class KotlinScannerTest {
                 LeafNodeToken("("),
                 LeafNodeToken(")"),
                 EndToken,
-                WhitespaceToken(length = 2, content = " "),
+                LeafNodeToken(" "),
                 LeafNodeToken("{")
             )
     }
