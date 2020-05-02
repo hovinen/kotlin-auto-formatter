@@ -14,21 +14,8 @@ import org.kotlin.formatter.scanning.nodepattern.nodePattern
 
 internal class PropertyScanner(private val kotlinScanner: KotlinScanner): NodeScanner {
     private val nodePattern = nodePattern {
-        exactlyOne {
-            nodeOfOneOfTypes(KtTokens.VAL_KEYWORD, KtTokens.VAR_KEYWORD)
-            whitespace()
-            nodeOfType(KtTokens.IDENTIFIER)
-            zeroOrOne { nodeOfType(KtNodeTypes.VALUE_PARAMETER_LIST) }
-            zeroOrOne {
-                possibleWhitespace()
-                nodeOfType(KtTokens.COLON)
-                possibleWhitespace()
-                nodeOfType(KtNodeTypes.TYPE_REFERENCE)
-                zeroOrMore {
-                    whitespace()
-                    nodeOfType(KtNodeTypes.PROPERTY_ACCESSOR)
-                }
-            }
+        zeroOrMoreFrugal {
+            anyNode()
         } andThen { nodes ->
             kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
         }
