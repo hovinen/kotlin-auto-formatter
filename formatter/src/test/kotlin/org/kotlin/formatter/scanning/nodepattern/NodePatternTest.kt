@@ -543,6 +543,48 @@ class NodePatternTest {
         assertThat(wasCalled).isFalse()
     }
 
+    @Test
+    fun `accepts first branch of an either-or block`() {
+        var accumulatedNodes = listOf<ASTNode>()
+        val subject = nodePattern {
+            either {
+                nodeOfType(KtTokens.VAL_KEYWORD)
+            } or {
+                nodeOfType(KtTokens.VAR_KEYWORD)
+            } andThen {
+                accumulatedNodes = it
+                listOf()
+            }
+            end()
+        }
+        val element = LeafPsiElement(KtTokens.VAL_KEYWORD, "val")
+
+        subject.matchSequence(listOf(element))
+
+        assertThat(accumulatedNodes).isEqualTo(listOf(element))
+    }
+
+    @Test
+    fun `accepts second branch of an either-or block`() {
+        var accumulatedNodes = listOf<ASTNode>()
+        val subject = nodePattern {
+            either {
+                nodeOfType(KtTokens.VAL_KEYWORD)
+            } or {
+                nodeOfType(KtTokens.VAR_KEYWORD)
+            } andThen {
+                accumulatedNodes = it
+                listOf()
+            }
+            end()
+        }
+        val element = LeafPsiElement(KtTokens.VAR_KEYWORD, "var")
+
+        subject.matchSequence(listOf(element))
+
+        assertThat(accumulatedNodes).isEqualTo(listOf(element))
+    }
+
     companion object {
         @JvmStatic
         fun valVarNodeCases(): List<Arguments> =

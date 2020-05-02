@@ -34,6 +34,24 @@ class NodePatternBuilder {
         return this
     }
 
+    fun either(init: NodePatternBuilder.() -> Unit) = EitherOrBuilder(init)
+
+    inner class EitherOrBuilder(private val eitherInit: NodePatternBuilder.() -> Unit) {
+        infix fun or(orInit: NodePatternBuilder.() -> Unit): NodePatternBuilder {
+            val eitherElement = buildSubgraph(eitherInit)
+            val orElement = buildSubgraph(orInit)
+            val initialState =
+                State()
+                    .addTransition(EpsilonTransition(eitherElement.initialState))
+                    .addTransition(EpsilonTransition(orElement.initialState))
+            val finalState = terminalState()
+            eitherElement.finalState.addTransition(EpsilonTransition(finalState))
+            orElement.finalState.addTransition(EpsilonTransition(finalState))
+            elementStack.push(Element(initialState, finalState))
+            return this@NodePatternBuilder
+        }
+    }
+
     fun zeroOrOne(init: NodePatternBuilder.() -> Unit): NodePatternBuilder {
         val subgraphElement = buildSubgraph(init)
         val finalState = terminalState()
