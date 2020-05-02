@@ -563,6 +563,21 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `does not include trailing whitespace on naked return`() {
+        val result = KotlinFormatter(maxLineLength = 50).format("""
+            fun myFunction() {
+                return
+            }
+        """.trimIndent())
+
+        assertThat(result).isEqualTo("""
+            fun myFunction() {
+                return
+            }
+        """.trimIndent())
+    }
+
+    @Test
     fun `does not break between else and opening brace of block`() {
         val result = KotlinFormatter(maxLineLength = 50).format("""
             fun myFunction() {

@@ -10,13 +10,17 @@ import org.kotlin.formatter.scanning.nodepattern.nodePattern
 
 internal class ReturnScanner(private val kotlinScanner: KotlinScanner) : NodeScanner {
     private val nodePattern = nodePattern {
-        nodeOfType(KtTokens.RETURN_KEYWORD)
+        nodeOfType(KtTokens.RETURN_KEYWORD) andThen { listOf(LeafNodeToken("return")) }
         possibleWhitespace()
         zeroOrMore { anyNode() } andThen { nodes ->
-            listOf(
-                LeafNodeToken("return "),
-                *kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT).toTypedArray()
-            )
+            if (nodes.isNotEmpty()) {
+                listOf(
+                    LeafNodeToken(" "),
+                    *kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT).toTypedArray()
+                )
+            } else {
+                listOf()
+            }
         }
         end()
     }
