@@ -51,6 +51,16 @@ class NodePatternBuilder {
         return this
     }
 
+    fun zeroOrMoreFrugal(init: NodePatternBuilder.() -> Unit): NodePatternBuilder {
+        val subgraphElement = buildSubgraph(init)
+        val finalState = terminalState()
+        subgraphElement.finalState
+            .addTransition(EpsilonTransition(finalState))
+            .addTransition(EpsilonTransition(subgraphElement.initialState))
+        elementStack.push(Element(subgraphElement.finalState, finalState))
+        return this
+    }
+
     fun exactlyOne(init: NodePatternBuilder.() -> Unit): NodePatternBuilder {
         elementStack.push(buildSubgraph(init))
         return this

@@ -16,8 +16,8 @@ internal class FunctionDeclarationScanner(
         oneOrMore { anyNode() }.andThen { nodes ->
             inBeginEndBlock(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT), State.CODE)
         }
-        zeroOrMore { nodeOfType(KtTokens.WHITE_SPACE) }
-        zeroOrOne { nodeOfType(KtNodeTypes.BLOCK) }.andThen { nodes ->
+        possibleWhitespace()
+        zeroOrOne { nodeOfType(KtNodeTypes.BLOCK) } andThen { nodes ->
             kotlinScanner.scanNodes(nodes, ScannerState.BLOCK)
         }
         end()
@@ -33,23 +33,6 @@ internal class FunctionDeclarationScanner(
         return inBeginEndBlock(innerTokens, State.CODE)
     }
 
-    private fun scanDeclarationWithBlock(node: ASTNode): List<Token> {
-        val children = node.children().toList()
-        val index = indexOfTerminatingBlockIncludingPrecedingWhitespace(children)
-        val childrenWithoutBlock = children.subList(0, index + 1)
-        val blockChildren = children.subList(index + 1, children.size)
-        val declarationParts = kotlinScanner.scanNodes(childrenWithoutBlock, ScannerState.STATEMENT)
-        return listOf(
-            *inBeginEndBlock(declarationParts, State.CODE).toTypedArray(),
-            *kotlinScanner.scanNodes(blockChildren, ScannerState.BLOCK).toTypedArray()
-        )
-    }
-
-    private fun indexOfTerminatingBlockIncludingPrecedingWhitespace(children: List<ASTNode>): Int {
-        var index = children.size - 2
-        while (children[index].elementType == KtTokens.WHITE_SPACE) {
-            index--
-        }
-        return index
-    }
+    private fun scanDeclarationWithBlock(node: ASTNode): List<Token> =
+        blockPattern.matchSequence(node.children().asIterable())
 }

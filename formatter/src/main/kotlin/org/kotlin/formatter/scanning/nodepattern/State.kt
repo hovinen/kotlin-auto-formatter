@@ -3,7 +3,7 @@ package org.kotlin.formatter.scanning.nodepattern
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.kotlin.formatter.Token
 
-class State {
+class State(private val id: Int = idCounter++) {
     private val transitions = mutableListOf<Transition>()
 
     internal var action: EvaluationAction = Evaluation.consume
@@ -36,6 +36,12 @@ class State {
     }
 
     val isTerminal: Boolean get() = transitions.isEmpty()
+
+    override fun toString() = "State($id)"
+
+    companion object {
+        private var idCounter = 0
+    }
 }
 
 internal typealias Action = (List<ASTNode>) -> List<Token>
