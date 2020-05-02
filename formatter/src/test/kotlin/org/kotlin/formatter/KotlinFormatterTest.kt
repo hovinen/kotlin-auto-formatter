@@ -545,6 +545,24 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `does not break between return and return value`() {
+        val result = KotlinFormatter(maxLineLength = 50).format("""
+            fun myFunction() {
+                return aVariable.aMethod().anotherMethod().aThirdMethod()
+            }
+        """.trimIndent())
+
+        assertThat(result).isEqualTo("""
+            fun myFunction() {
+                return aVariable
+                    .aMethod()
+                    .anotherMethod()
+                    .aThirdMethod()
+            }
+        """.trimIndent())
+    }
+
+    @Test
     fun `format breaks KDoc comment text`() {
         val result = KotlinFormatter(maxLineLength = 60).format("""
             /**

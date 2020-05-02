@@ -76,6 +76,9 @@ internal fun nodeScannerForElementType(
         KtNodeTypes.VALUE_PARAMETER, KtNodeTypes.VALUE_ARGUMENT -> {
             SimpleBlockScanner(kotlinScanner, ScannerState.STATEMENT, State.CODE)
         }
+        KtNodeTypes.RETURN -> {
+            ReturnScanner(kotlinScanner)
+        }
         else -> {
             SimpleBlockScanner(kotlinScanner, ScannerState.STATEMENT, State.CODE)
         }
