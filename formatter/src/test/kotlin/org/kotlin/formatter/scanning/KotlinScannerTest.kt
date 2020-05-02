@@ -651,6 +651,44 @@ internal class KotlinScannerTest {
     }
 
     @Test
+    fun `outputs a ForcedBreakToken between KDoc and function declaration`() {
+        val subject = subject()
+        val node = kotlinLoader.parseKotlin("""
+            /** Some KDoc */
+            fun myFunction() {
+            }
+        """)
+
+        val result = subject.scan(node)
+
+        assertThat(result)
+            .containsSubsequence(
+                LeafNodeToken("*/"),
+                ForcedBreakToken(count = 1),
+                LeafNodeToken("fun")
+            )
+    }
+
+    @Test
+    fun `suppresses whitespace between KDoc and function declaration`() {
+        val subject = subject()
+        val node = kotlinLoader.parseKotlin("""
+            /** Some KDoc */
+            fun myFunction() {
+            }
+        """.trimIndent())
+
+        val result = subject.scan(node)
+
+        assertThat(result)
+            .doesNotContainSubsequence(
+                LeafNodeToken("*/"),
+                WhitespaceToken(length = 4, content = "\n"),
+                LeafNodeToken("fun")
+            )
+    }
+
+    @Test
     fun `outputs BeginToken, EndToken pair around class declaration`() {
         val subject = subject()
         val node = kotlinLoader.parseKotlin("""
