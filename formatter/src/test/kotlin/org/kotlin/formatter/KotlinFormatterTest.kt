@@ -637,6 +637,25 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `does not break on a single dot expression`() {
+        val result = KotlinFormatter(maxLineLength = 50).format("""
+            fun myFunction() {
+                anObject.aMethod(aParameter, anotherParameter, aThirdParameter)
+            }
+        """.trimIndent())
+
+        assertThat(result).isEqualTo("""
+            fun myFunction() {
+                anObject.aMethod(
+                    aParameter,
+                    anotherParameter,
+                    aThirdParameter
+                )
+            }
+        """.trimIndent())
+    }
+
+    @Test
     fun `format breaks KDoc comment text`() {
         val result = KotlinFormatter(maxLineLength = 60).format("""
             /**
