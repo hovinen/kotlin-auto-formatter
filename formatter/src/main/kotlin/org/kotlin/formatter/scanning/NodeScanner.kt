@@ -52,6 +52,9 @@ internal fun nodeScannerForElementType(
         KtNodeTypes.DOT_QUALIFIED_EXPRESSION, KtNodeTypes.SAFE_ACCESS_EXPRESSION -> {
             DotQualifiedExpressionScanner(kotlinScanner)
         }
+        KtNodeTypes.FUNCTION_LITERAL -> {
+            FunctionLiteralScanner(kotlinScanner)
+        }
         KtNodeTypes.CONDITION -> {
             ConditionScanner(kotlinScanner)
         }
@@ -60,6 +63,9 @@ internal fun nodeScannerForElementType(
         }
         KtNodeTypes.BINARY_EXPRESSION -> {
             BinaryExpressionScanner(kotlinScanner)
+        }
+        KtNodeTypes.CALL_EXPRESSION -> {
+            CallExpressionScanner(kotlinScanner)
         }
         KtNodeTypes.PROPERTY -> {
             PropertyScanner(kotlinScanner)

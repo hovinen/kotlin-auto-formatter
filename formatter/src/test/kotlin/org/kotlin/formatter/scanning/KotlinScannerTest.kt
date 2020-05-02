@@ -554,6 +554,51 @@ internal class KotlinScannerTest {
     }
 
     @Test
+    fun `outputs a ClosingSynchronizedBreakToken before closing brace on function literal`() {
+        val subject = subject()
+        val node = kotlinLoader.parseKotlin("map { aFunction() }")
+
+        val result = subject.scan(node)
+
+        assertThat(result)
+            .containsSubsequence(
+                LeafNodeToken(")"),
+                ClosingSynchronizedBreakToken(whitespaceLength = 1),
+                LeafNodeToken("}")
+            )
+    }
+
+    @Test
+    fun `does not output a WhitespaceToken before closing brace on function literal`() {
+        val subject = subject()
+        val node = kotlinLoader.parseKotlin("map { aFunction() }")
+
+        val result = subject.scan(node)
+
+        assertThat(result)
+            .doesNotContainSubsequence(
+                LeafNodeToken(")"),
+                WhitespaceToken(length = 2, content = " "),
+                LeafNodeToken("}")
+            )
+    }
+
+    @Test
+    fun `outputs a WhitespaceToken after opening brace on function literal`() {
+        val subject = subject()
+        val node = kotlinLoader.parseKotlin("map {aFunction() }")
+
+        val result = subject.scan(node)
+
+        assertThat(result)
+            .containsSubsequence(
+                LeafNodeToken("{"),
+                WhitespaceToken(length = 12, content = " "),
+                LeafNodeToken("aFunction")
+            )
+    }
+
+    @Test
     fun `outputs BeginToken, EndToken pair around when`() {
         val subject = subject()
         val node = kotlinLoader.parseKotlin("""

@@ -603,6 +603,23 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `does not break between function and closure parameter`() {
+        val result = KotlinFormatter(maxLineLength = 50).format("""
+            fun myFunction() {
+                aMethodWithLambda { doSomething().doSomethingElse() }
+            }
+        """.trimIndent())
+
+        assertThat(result).isEqualTo("""
+            fun myFunction() {
+                aMethodWithLambda {
+                    doSomething().doSomethingElse()
+                }
+            }
+        """.trimIndent())
+    }
+
+    @Test
     fun `format breaks KDoc comment text`() {
         val result = KotlinFormatter(maxLineLength = 60).format("""
             /**
