@@ -12,6 +12,11 @@ class NodePatternBuilder {
 
     fun nodeOfType(type: IElementType): NodePatternBuilder = nodeMatching { it.elementType == type }
 
+    fun nodeOfOneOfTypes(vararg types: IElementType): NodePatternBuilder {
+        val typeSet = setOf(*types)
+        return nodeMatching { typeSet.contains(it.elementType) }
+    }
+
     fun whitespace(): NodePatternBuilder = nodeOfType(KtTokens.WHITE_SPACE)
 
     fun possibleWhitespace() = zeroOrMore { whitespace() }

@@ -6,6 +6,9 @@ import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.LeafPsiElement
 import org.jetbrains.kotlin.lexer.KtTokens
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
 
 class NodePatternTest {
     @Test
@@ -19,6 +22,24 @@ class NodePatternTest {
             end()
         }
         val nodes = listOf(LeafPsiElement(KtTokens.CLASS_KEYWORD, "class"))
+
+        subject.matchSequence(nodes)
+
+        assertThat(accumulatedNodes).isEqualTo(nodes)
+    }
+
+    @ParameterizedTest
+    @MethodSource("valVarNodeCases")
+    fun `accepts nodes of given types`(node: ASTNode) {
+        val accumulatedNodes = mutableListOf<ASTNode>()
+        val subject = nodePattern {
+            nodeOfOneOfTypes(KtTokens.VAL_KEYWORD, KtTokens.VAR_KEYWORD) andThen {
+                accumulatedNodes.addAll(it)
+                listOf()
+            }
+            end()
+        }
+        val nodes = listOf(node)
 
         subject.matchSequence(nodes)
 
@@ -520,5 +541,14 @@ class NodePatternTest {
         subject.matchSequence(listOf(variableElement))
 
         assertThat(wasCalled).isFalse()
+    }
+
+    companion object {
+        @JvmStatic
+        fun valVarNodeCases(): List<Arguments> =
+            listOf(
+                Arguments.of(LeafPsiElement(KtTokens.VAL_KEYWORD, "val")),
+                Arguments.of(LeafPsiElement(KtTokens.VAR_KEYWORD, "var"))
+            )
     }
 }
