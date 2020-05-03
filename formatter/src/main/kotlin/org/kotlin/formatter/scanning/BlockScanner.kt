@@ -6,7 +6,6 @@ import org.jetbrains.kotlin.psi.psiUtil.children
 import org.kotlin.formatter.BeginToken
 import org.kotlin.formatter.ClosingForcedBreakToken
 import org.kotlin.formatter.EndToken
-import org.kotlin.formatter.ForcedBreakToken
 import org.kotlin.formatter.LeafNodeToken
 import org.kotlin.formatter.State
 import org.kotlin.formatter.Token
