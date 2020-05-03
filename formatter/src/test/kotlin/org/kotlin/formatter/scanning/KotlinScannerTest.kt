@@ -837,6 +837,21 @@ internal class KotlinScannerTest {
     }
 
     @Test
+    fun `does not output a ClosingSynchronizedBreakToken if no class constructor parameters`() {
+        val subject = subject()
+        val node = kotlinLoader.parseKotlin("class MyClass()")
+
+        val result = subject.scan(node)
+
+        assertThat(result)
+            .doesNotContainSubsequence(
+                LeafNodeToken("("),
+                ClosingSynchronizedBreakToken(whitespaceLength = 0),
+                LeafNodeToken(")")
+            )
+    }
+
+    @Test
     fun `does not output BeginToken, EndToken pair for class constructor`() {
         val subject = subject()
         val node = kotlinLoader.parseKotlin("class MyClass(param1: Int, param2: Int)")

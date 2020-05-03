@@ -4,6 +4,8 @@ import org.jetbrains.kotlin.KtNodeTypes
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.psi.psiUtil.children
+import org.kotlin.formatter.ClosingSynchronizedBreakToken
+import org.kotlin.formatter.LeafNodeToken
 import org.kotlin.formatter.State
 import org.kotlin.formatter.SynchronizedBreakToken
 import org.kotlin.formatter.Token
@@ -31,6 +33,13 @@ internal class ParameterListScanner(private val kotlinScanner: KotlinScanner): N
                 listOf(breakToken, *childTokens.toTypedArray())
             }
             KtTokens.WHITE_SPACE -> listOf()
+            KtTokens.RPAR -> if (isFirstEntry) {
+                listOf(LeafNodeToken(")"))
+            } else {
+                listOf(
+                    ClosingSynchronizedBreakToken(whitespaceLength = 0), LeafNodeToken(")")
+                )
+            }
             else -> kotlinScanner.scanInState(node, ScannerState.SYNC_BREAK_LIST)
         }
     }

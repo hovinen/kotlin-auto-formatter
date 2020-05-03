@@ -216,6 +216,22 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `indents property initializer for function when inside a class`() {
+        val result = KotlinFormatter(maxLineLength = 50).format("""
+            class MyClass {
+                private fun aFunction(): String = "A long string which should wrap"
+            }
+        """.trimIndent())
+
+        assertThat(result).isEqualTo("""
+            class MyClass {
+                private fun aFunction(): String =
+                    "A long string which should wrap"
+            }
+        """.trimIndent())
+    }
+
+    @Test
     fun `format breaks at logical operator in an if statement`() {
         val result = KotlinFormatter(maxLineLength = 50).format("""
             fun myFunction() {
