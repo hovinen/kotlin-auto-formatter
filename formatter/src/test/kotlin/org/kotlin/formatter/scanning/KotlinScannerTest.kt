@@ -711,7 +711,7 @@ internal class KotlinScannerTest {
     }
 
     @Test
-    fun `outputs a ForcedBreakToken between KDoc and function declaration`() {
+    fun `outputs a ClosingForcedBreakToken between KDoc and function declaration`() {
         val subject = subject()
         val node = kotlinLoader.parseKotlin("""
             /** Some KDoc */
@@ -724,7 +724,7 @@ internal class KotlinScannerTest {
         assertThat(result)
             .containsSubsequence(
                 LeafNodeToken("*/"),
-                ForcedBreakToken(count = 1),
+                ClosingForcedBreakToken,
                 LeafNodeToken("fun")
             )
     }

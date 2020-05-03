@@ -3,8 +3,6 @@ package org.kotlin.formatter.scanning
 import org.jetbrains.kotlin.KtNodeTypes
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.kdoc.lexer.KDocTokens
-import org.jetbrains.kotlin.kdoc.parser.KDocElementTypes
-import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.psi.psiUtil.children
 import org.kotlin.formatter.ForcedBreakToken
 import org.kotlin.formatter.State
@@ -14,19 +12,6 @@ import org.kotlin.formatter.scanning.nodepattern.nodePattern
 
 internal class FunctionDeclarationScanner(private val kotlinScanner: KotlinScanner): NodeScanner {
     private val nodePattern = nodePattern {
-        zeroOrOne {
-            nodeOfType(KDocTokens.KDOC)
-            possibleWhitespace()
-        } andThen { nodes ->
-            if (nodes.isNotEmpty()) {
-                listOf(
-                    *kotlinScanner.scanNodes(nodes, ScannerState.KDOC).toTypedArray(),
-                    ForcedBreakToken(count = 1)
-                )
-            } else {
-                listOf()
-            }
-        }
         either {
             exactlyOne {
                 declarationWithOptionalModifierList(kotlinScanner)

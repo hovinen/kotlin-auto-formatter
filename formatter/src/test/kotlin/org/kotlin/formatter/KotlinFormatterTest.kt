@@ -878,7 +878,7 @@ class KotlinFormatterTest {
     }
 
     @Test
-    fun `maintains a line break between KDoc and declaration`() {
+    fun `maintains a line break between KDoc and class declaration`() {
         val subject = KotlinFormatter(maxLineLength = 40)
 
         val result = subject.format("""
@@ -889,6 +889,55 @@ class KotlinFormatterTest {
         assertThat(result).isEqualTo("""
             /** Some KDoc. */
             class MyClass
+        """.trimIndent())
+    }
+
+    @Test
+    fun `maintains a line break between KDoc and function declaration`() {
+        val subject = KotlinFormatter(maxLineLength = 40)
+
+        val result = subject.format("""
+            /** Some KDoc. */
+            fun aFunction()
+        """.trimIndent())
+
+        assertThat(result).isEqualTo("""
+            /** Some KDoc. */
+            fun aFunction()
+        """.trimIndent())
+    }
+
+    @Test
+    fun `maintains a line break between KDoc and property declaration`() {
+        val subject = KotlinFormatter(maxLineLength = 40)
+
+        val result = subject.format("""
+            /** Some KDoc. */
+            val aProperty
+        """.trimIndent())
+
+        assertThat(result).isEqualTo("""
+            /** Some KDoc. */
+            val aProperty
+        """.trimIndent())
+    }
+
+    @Test
+    fun `maintains a line break between KDoc and enum value declaration`() {
+        val subject = KotlinFormatter(maxLineLength = 40)
+
+        val result = subject.format("""
+            enum class AnEnum {
+                /** Some KDoc. */
+                A_VALUE
+            }
+        """.trimIndent())
+
+        assertThat(result).isEqualTo("""
+            enum class AnEnum {
+                /** Some KDoc. */
+                A_VALUE
+            }
         """.trimIndent())
     }
 

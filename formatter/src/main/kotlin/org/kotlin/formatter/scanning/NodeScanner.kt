@@ -49,6 +49,9 @@ internal fun nodeScannerForElementType(
         KtNodeTypes.FUN -> {
             FunctionDeclarationScanner(kotlinScanner)
         }
+        KtNodeTypes.ENUM_ENTRY -> {
+            EnumEntryScanner(kotlinScanner)
+        }
         KtNodeTypes.DOT_QUALIFIED_EXPRESSION, KtNodeTypes.SAFE_ACCESS_EXPRESSION -> {
             DotQualifiedExpressionScanner(kotlinScanner)
         }
