@@ -40,7 +40,7 @@ internal class ParameterListScanner(private val kotlinScanner: KotlinScanner): N
                     ClosingSynchronizedBreakToken(whitespaceLength = 0), LeafNodeToken(")")
                 )
             }
-            else -> kotlinScanner.scanInState(node, ScannerState.SYNC_BREAK_LIST)
+            else -> kotlinScanner.scanInState(node, ScannerState.STATEMENT)
         }
     }
 }

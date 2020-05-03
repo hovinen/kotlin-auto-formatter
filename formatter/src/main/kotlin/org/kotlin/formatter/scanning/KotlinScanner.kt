@@ -16,7 +16,7 @@ class KotlinScanner {
 
     internal fun scanInState(node: ASTNode, scannerState: ScannerState): List<Token> {
         return when (node) {
-            is LeafPsiElement -> LeafScanner().scanLeaf(node, scannerState)
+            is LeafPsiElement -> LeafScanner().scanLeaf(node)
             else -> scanNodeWithChildren(node, scannerState)
         }
     }
@@ -53,9 +53,7 @@ class KotlinScanner {
         node: LeafPsiElement,
         scannerState: ScannerState,
         nextTokens: List<Token>
-    ) = if (scannerState == ScannerState.SYNC_BREAK_LIST) {
-            listOf()
-        } else if (node.isAtEndOfFile || hasNewlineInBlockState(node, scannerState)) {
+    ) = if (node.isAtEndOfFile || hasNewlineInBlockState(node, scannerState)) {
             listOf(ForcedBreakToken(count = if (hasDoubleNewline(node)) 2 else 1))
         } else if (hasDoubleNewlineInKDocState(node, scannerState)) {
             listOf(ForcedBreakToken(count = 2))

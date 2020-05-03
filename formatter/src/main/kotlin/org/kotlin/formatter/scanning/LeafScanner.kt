@@ -14,7 +14,7 @@ import org.kotlin.formatter.Token
 import org.kotlin.formatter.WhitespaceToken
 
 internal class LeafScanner {
-    fun scanLeaf(node: LeafPsiElement, scannerState: ScannerState): List<Token> =
+    fun scanLeaf(node: LeafPsiElement): List<Token> =
         when (node.elementType) {
             KtTokens.EOL_COMMENT -> {
                 listOf(
@@ -34,13 +34,6 @@ internal class LeafScanner {
             KDocTokens.LEADING_ASTERISK -> listOf()
             KDocTokens.END -> listOf(ClosingSynchronizedBreakToken(whitespaceLength = 1), LeafNodeToken(node.text))
             KtTokens.REGULAR_STRING_PART -> tokenizeString(node.text)
-            KtTokens.RPAR -> {
-                if (scannerState == ScannerState.SYNC_BREAK_LIST) {
-                    listOf(ClosingSynchronizedBreakToken(whitespaceLength = 0), LeafNodeToken(node.text))
-                } else {
-                    listOf(LeafNodeToken(node.text))
-                }
-            }
             KtTokens.DOT, KtTokens.SAFE_ACCESS -> {
                 listOf(
                     SynchronizedBreakToken(whitespaceLength = 0),

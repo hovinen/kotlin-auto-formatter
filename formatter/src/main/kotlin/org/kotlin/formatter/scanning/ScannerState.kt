@@ -7,9 +7,6 @@ internal enum class ScannerState {
     /** Newlines are treated as ordinary whitespace */
     STATEMENT,
 
-    /** ClosingSynchronizedBreakToken on right parenthesis */
-    SYNC_BREAK_LIST,
-
     /** Single newlines are treated as ordinary whitespace, double newlines create forced breaks */
     KDOC,
 
