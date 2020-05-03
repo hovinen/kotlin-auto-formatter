@@ -15,6 +15,11 @@ internal class ModifierListScanner(private val kotlinScanner: KotlinScanner) : N
                 nodeOfType(KtNodeTypes.ANNOTATION_ENTRY) andThen { nodes ->
                     listOf(
                         *kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT).toTypedArray(),
+
+                        // We use a ClosingForcedBreakToken rather than a ForcedBreakToken here
+                        // because the modifier list is inside a block representing the full
+                        // property, class, or function declaration, and a ForcedBreakToken would
+                        // then cause the next lines to indent with the next standard indent.
                         ClosingForcedBreakToken
                     )
                 }
