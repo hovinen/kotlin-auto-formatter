@@ -490,6 +490,21 @@ internal class KotlinScannerTest {
     }
 
     @Test
+    fun `accepts an if statement with whitespace before the closing parenthesis`() {
+        val subject = subject()
+        val node = kotlinLoader.parseKotlin("if (aCondition ) {}")
+
+        val result = subject.scan(node)
+
+        assertThat(result)
+            .containsSubsequence(
+                LeafNodeToken("if ("),
+                LeafNodeToken("aCondition"),
+                LeafNodeToken(") ")
+            )
+    }
+
+    @Test
     fun `does not output a BeginToken, EndToken pair around body of while statement`() {
         val subject = subject()
         val node = kotlinLoader.parseKotlin("while (aCondition) {}")

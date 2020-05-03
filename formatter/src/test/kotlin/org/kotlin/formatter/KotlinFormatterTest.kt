@@ -192,13 +192,25 @@ class KotlinFormatterTest {
     }
 
     @Test
-    fun `does not break between modifiers and function`() {
+    fun `includes space between modifiers and property`() {
         val result = KotlinFormatter(maxLineLength = 50).format("""
             private val aProperty: String = "A long string which should wrap"
         """.trimIndent())
 
         assertThat(result).isEqualTo("""
             private val aProperty: String =
+                "A long string which should wrap"
+        """.trimIndent())
+    }
+
+    @Test
+    fun `includes space between modifiers and function`() {
+        val result = KotlinFormatter(maxLineLength = 50).format("""
+            private fun aFunction(): String = "A long string which should wrap"
+        """.trimIndent())
+
+        assertThat(result).isEqualTo("""
+            private fun aFunction(): String =
                 "A long string which should wrap"
         """.trimIndent())
     }

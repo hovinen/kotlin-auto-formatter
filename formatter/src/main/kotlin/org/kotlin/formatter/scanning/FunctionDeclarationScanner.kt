@@ -27,15 +27,9 @@ internal class FunctionDeclarationScanner(private val kotlinScanner: KotlinScann
                 listOf()
             }
         }
-        zeroOrOne {
-            nodeOfType(KtNodeTypes.MODIFIER_LIST)
-        } andThen { nodes ->
-            kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
-        }
-        possibleWhitespace()
-        oneOrMoreFrugal { anyNode() } andThen { nodes ->
-            inBeginEndBlock(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT), State.CODE)
-        }
+        exactlyOne {
+            declarationWithOptionalModifierList(kotlinScanner)
+        } thenMapTokens { inBeginEndBlock(it, State.CODE) }
         zeroOrOne {
             either {
                 propertyInitializer(kotlinScanner)

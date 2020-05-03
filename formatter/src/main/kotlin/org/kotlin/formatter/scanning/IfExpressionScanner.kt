@@ -28,6 +28,7 @@ internal class IfExpressionScanner(private val kotlinScanner: KotlinScanner) : N
                     EndToken
                 )
             }
+            possibleWhitespace()
             nodeOfType(KtTokens.RPAR)
             possibleWhitespace()
             nodeOfType(KtNodeTypes.THEN) andThen { nodes ->
