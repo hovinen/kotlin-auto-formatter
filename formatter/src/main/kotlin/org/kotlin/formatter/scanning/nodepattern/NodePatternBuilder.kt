@@ -20,6 +20,10 @@ class NodePatternBuilder {
 
     fun whitespace(): NodePatternBuilder = nodeOfType(KtTokens.WHITE_SPACE)
 
+    fun whitespaceWithNewline(): NodePatternBuilder = nodeMatching {
+        it.elementType == KtTokens.WHITE_SPACE && it.textContains('\n')
+    }
+
     fun possibleWhitespace() = zeroOrMore { whitespace() }
 
     fun end(): NodePatternBuilder = nodeMatching { it == TerminalNode }

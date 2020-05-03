@@ -10,51 +10,36 @@ import org.kotlin.formatter.ForcedBreakToken
 import org.kotlin.formatter.LeafNodeToken
 import org.kotlin.formatter.State
 import org.kotlin.formatter.Token
+import org.kotlin.formatter.scanning.nodepattern.nodePattern
 
 internal class BlockScanner(private val kotlinScanner: KotlinScanner): NodeScanner {
-    override fun scan(node: ASTNode, scannerState: ScannerState): List<Token> {
-        val children = node.children().toList()
-        val indexOfLBrace = children.indexOfFirst { it.elementType == KtTokens.LBRACE }
-        val indexOfRBrace = children.indexOfLast { it.elementType == KtTokens.RBRACE }
-        return if (indexOfLBrace != -1 && indexOfRBrace != -1) {
-            val innerTokens = kotlinScanner.scanNodes(children.subList(indexOfLBrace + 1, indexOfRBrace), ScannerState.BLOCK)
-            val innerTokensWithClosingBreakToken =
-                if (innerTokens.isNotEmpty() && innerTokens.last() is ForcedBreakToken) {
-                    listOf(
-                        *innerTokens.subList(0, innerTokens.size - 1).toTypedArray(),
-                        ClosingForcedBreakToken
-                    )
-                } else {
-                    innerTokens
-                }
-            listOf(
-                LeafNodeToken("{"),
-                BeginToken(State.CODE),
-                *innerTokensWithClosingBreakToken.toTypedArray(),
-                EndToken,
-                LeafNodeToken("}")
-            )
-        } else {
-            val tokens = kotlinScanner.scanNodes(children, ScannerState.BLOCK)
-            replaceTerminalForcedBreakTokenWithClosingForcedBreakToken(tokens)
+    private val nodePattern = nodePattern {
+        either {
+            nodeOfType(KtTokens.LBRACE)
+            zeroOrMoreFrugal { anyNode() } andThen { nodes ->
+                listOf(
+                    LeafNodeToken("{"),
+                    BeginToken(State.CODE),
+                    *kotlinScanner.scanNodes(nodes, ScannerState.BLOCK).toTypedArray()
+                )
+            }
+            zeroOrOne { whitespaceWithNewline() } andThen { nodes ->
+                if (nodes.isNotEmpty()) listOf(ClosingForcedBreakToken) else listOf()
+            }
+            nodeOfType(KtTokens.RBRACE) andThen {
+                listOf(EndToken, LeafNodeToken("}"))
+            }
+        } or {
+            zeroOrMoreFrugal { anyNode() } andThen { nodes ->
+                kotlinScanner.scanNodes(nodes, ScannerState.BLOCK)
+            }
+            zeroOrOne { whitespaceWithNewline() } andThen { nodes ->
+                if (nodes.isNotEmpty()) listOf(ClosingForcedBreakToken) else listOf()
+            }
         }
+        end()
     }
 
-    private fun replaceTerminalForcedBreakTokenWithClosingForcedBreakToken(
-        tokens: List<Token>
-    ): List<Token> {
-        var index = tokens.size - 1
-        while (index > 0 && tokens[index] is EndToken) {
-            index--
-        }
-        return if (index > 0 && tokens[index - 1] is ForcedBreakToken) {
-            listOf(
-                *tokens.subList(0, index - 1).toTypedArray(),
-                ClosingForcedBreakToken,
-                *tokens.subList(index, tokens.size).toTypedArray()
-            )
-        } else {
-            tokens
-        }
-    }
+    override fun scan(node: ASTNode, scannerState: ScannerState): List<Token> =
+        nodePattern.matchSequence(node.children().asIterable())
 }
