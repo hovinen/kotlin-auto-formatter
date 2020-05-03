@@ -1,8 +1,10 @@
 package org.kotlin.formatter.scanning
 
+import org.jetbrains.kotlin.KtNodeTypes
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.psi.psiUtil.children
+import org.kotlin.formatter.ClosingForcedBreakToken
 import org.kotlin.formatter.LeafNodeToken
 import org.kotlin.formatter.State
 import org.kotlin.formatter.Token
@@ -13,17 +15,46 @@ import org.kotlin.formatter.scanning.nodepattern.nodePattern
 
 internal class PropertyScanner(private val kotlinScanner: KotlinScanner): NodeScanner {
     private val nodePattern = nodePattern {
-        zeroOrMoreFrugal {
-            anyNode()
-        } andThen { nodes ->
-            kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
-        }
-        zeroOrOne { propertyInitializer(kotlinScanner) }
+        exactlyOne {
+            either {
+                exactlyOne {
+                    nodeOfType(KtNodeTypes.MODIFIER_LIST) andThen { nodes ->
+                        kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
+                    }
+                    possibleWhitespace()
+                    anyNode() andThen { nodes ->
+                        kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
+                    }
+                } thenMapTokens { tokens ->
+                    insertWhitespaceIfNoForcedBreakIsPresent(tokens)
+                }
+                zeroOrMoreFrugal { anyNode() } andThen { nodes ->
+                    kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
+                }
+            } or {
+                oneOrMoreFrugal { anyNode() } andThen { nodes ->
+                    kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
+                }
+            }
+            zeroOrOne { propertyInitializer(kotlinScanner) }
+        } thenMapTokens { inBeginEndBlock(it, State.CODE) }
         end()
     }
 
+    private fun insertWhitespaceIfNoForcedBreakIsPresent(tokens: List<Token>): List<Token> {
+        return if (tokens[tokens.size - 2] is ClosingForcedBreakToken) {
+            tokens
+        } else {
+            listOf(
+                *tokens.subList(0, tokens.size - 1).toTypedArray(),
+                WhitespaceToken(length = lengthOfTokens(listOf(tokens.last())), content = " "),
+                tokens.last()
+            )
+        }
+    }
+
     override fun scan(node: ASTNode, scannerState: ScannerState): List<Token> =
-        inBeginEndBlock(nodePattern.matchSequence(node.children().asIterable()), State.CODE)
+        nodePattern.matchSequence(node.children().asIterable())
 }
 
 internal fun NodePatternBuilder.propertyInitializer(kotlinScanner: KotlinScanner) {

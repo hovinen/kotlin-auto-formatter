@@ -9,6 +9,8 @@ import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
+import org.kotlin.formatter.LeafNodeToken
+import org.kotlin.formatter.Token
 
 class NodePatternTest {
     @Test
@@ -583,6 +585,131 @@ class NodePatternTest {
         subject.matchSequence(listOf(element))
 
         assertThat(accumulatedNodes).isEqualTo(listOf(element))
+    }
+
+    @Test
+    fun `allows additional processing of nodes on a given group`() {
+        var tokens = listOf<Token>()
+        val subject = nodePattern {
+            exactlyOne {
+                oneOrMore {
+                    anyNode() andThen { listOf(LeafNodeToken("a")) }
+                }
+            } thenMapTokens {
+                tokens = it
+                listOf()
+            }
+            end()
+        }
+        val element = LeafPsiElement(KtTokens.IDENTIFIER, "anyElement")
+
+        subject.matchSequence(listOf(element))
+
+        assertThat(tokens).isEqualTo(listOf(LeafNodeToken("a")))
+    }
+
+    @Test
+    fun `executes action on node before mapping tokens`() {
+        var tokens = listOf<Token>()
+        val subject = nodePattern {
+            exactlyOne {
+                oneOrMore {
+                    anyNode()
+                } andThen { listOf(LeafNodeToken("a")) }
+            } thenMapTokens {
+                tokens = it
+                listOf()
+            }
+            end()
+        }
+        val element = LeafPsiElement(KtTokens.IDENTIFIER, "anyElement")
+
+        subject.matchSequence(listOf(element))
+
+        assertThat(tokens).isEqualTo(listOf(LeafNodeToken("a")))
+    }
+
+    @Test
+    fun `does not include tokens from previous group in input to token mapper`() {
+        var tokens = listOf<Token>()
+        val subject = nodePattern {
+            anyNode() andThen { listOf(LeafNodeToken("omitted")) }
+            exactlyOne {
+                oneOrMore {
+                    anyNode() andThen { listOf(LeafNodeToken("a")) }
+                }
+            } thenMapTokens {
+                tokens = it
+                listOf()
+            }
+            end()
+        }
+        val element = LeafPsiElement(KtTokens.IDENTIFIER, "anyElement")
+
+        subject.matchSequence(listOf(element, element))
+
+        assertThat(tokens).isEqualTo(listOf(LeafNodeToken("a")))
+    }
+
+    @Test
+    fun `does not repeatedly push new empty token lists to the token stack`() {
+        val subject = nodePattern {
+            anyNode() andThen { listOf(LeafNodeToken("a")) }
+            exactlyOne {
+                oneOrMore {
+                    anyNode() andThen { listOf(LeafNodeToken("b")) }
+                }
+            } thenMapTokens {
+                listOf(it.first())
+            }
+            end()
+        }
+        val element = LeafPsiElement(KtTokens.IDENTIFIER, "anyElement")
+
+        val tokens = subject.matchSequence(listOf(element, element, element, element, element))
+
+        assertThat(tokens).isEqualTo(listOf(LeafNodeToken("a"), LeafNodeToken("b")))
+    }
+
+    @Test
+    fun `passes tokens processed in previous steps to the output`() {
+        val subject = nodePattern {
+            anyNode() andThen { listOf(LeafNodeToken("a")) }
+            exactlyOne {
+                oneOrMore {
+                    anyNode() andThen { listOf(LeafNodeToken("b")) }
+                }
+            } thenMapTokens {
+                it
+            }
+            end()
+        }
+        val element = LeafPsiElement(KtTokens.IDENTIFIER, "anyElement")
+
+        val tokens = subject.matchSequence(listOf(element, element))
+
+        assertThat(tokens).isEqualTo(listOf(LeafNodeToken("a"), LeafNodeToken("b")))
+    }
+
+    @Test
+    fun `passes tokens processed in previous steps to the output in more complicated case`() {
+        val subject = nodePattern {
+            anyNode() andThen { listOf(LeafNodeToken("a")) }
+            possibleWhitespace()
+            exactlyOne {
+                oneOrMore {
+                    anyNode() andThen { listOf(LeafNodeToken("b")) }
+                }
+            } thenMapTokens {
+                it
+            }
+            end()
+        }
+        val element = LeafPsiElement(KtTokens.IDENTIFIER, "anyElement")
+
+        val tokens = subject.matchSequence(listOf(element, element))
+
+        assertThat(tokens).isEqualTo(listOf(LeafNodeToken("a"), LeafNodeToken("b")))
     }
 
     companion object {

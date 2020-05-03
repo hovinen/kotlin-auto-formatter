@@ -4,6 +4,7 @@ import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.LeafPsiElement
 import org.jetbrains.kotlin.lexer.KtTokens
 import org.kotlin.formatter.Token
+import java.util.Stack
 
 class NodePattern internal constructor(private val initialState: State) {
     fun matchSequence(nodes: Iterable<ASTNode>): List<Token> {
@@ -68,7 +69,8 @@ private abstract class PathStepOnState(
 ) : PathStep()
 
 private class InitialPathStep(state: State, node: ASTNode? = null) : PathStepOnState(state, node) {
-    override fun runActions(): Evaluation = state.action(Evaluation(listOf(), listOf()), node)
+    override fun runActions(): Evaluation =
+        state.action(Evaluation(listOf(), Stack<List<Token>>().apply { push(listOf()) }), node)
 
     override fun withNode(node: ASTNode): PathStep = InitialPathStep(state, node)
 }

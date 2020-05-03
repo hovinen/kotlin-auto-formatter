@@ -177,6 +177,33 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `breaks between different annotations`() {
+        val result = KotlinFormatter(maxLineLength = 50).format("""
+            @AnAnnotation
+            @AnotherAnnotation
+            val aProperty: String
+        """.trimIndent())
+
+        assertThat(result).isEqualTo("""
+            @AnAnnotation
+            @AnotherAnnotation
+            val aProperty: String
+        """.trimIndent())
+    }
+
+    @Test
+    fun `does not break between modifiers and function`() {
+        val result = KotlinFormatter(maxLineLength = 50).format("""
+            private val aProperty: String = "A long string which should wrap"
+        """.trimIndent())
+
+        assertThat(result).isEqualTo("""
+            private val aProperty: String =
+                "A long string which should wrap"
+        """.trimIndent())
+    }
+
+    @Test
     fun `format breaks at logical operator in an if statement`() {
         val result = KotlinFormatter(maxLineLength = 50).format("""
             fun myFunction() {

@@ -3,6 +3,7 @@ package org.kotlin.formatter.scanning.nodepattern
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.com.intellij.psi.tree.IElementType
 import org.jetbrains.kotlin.lexer.KtTokens
+import org.kotlin.formatter.Token
 import java.util.Stack
 
 class NodePatternBuilder {
@@ -138,6 +139,15 @@ class NodePatternBuilder {
             states = nextStates
         }
         topElement.finalState.installAction(action)
+    }
+
+    infix fun thenMapTokens(tokenMapper: (List<Token>) -> List<Token>) {
+        val topElement = elementStack.pop()
+        val initialState =
+            State().addTransition(EpsilonTransition(topElement.initialState))
+        initialState.installPushTokens()
+        topElement.finalState.installTokenMapper(tokenMapper)
+        elementStack.push(Element(initialState, topElement.finalState))
     }
 
     internal fun build(): NodePattern {

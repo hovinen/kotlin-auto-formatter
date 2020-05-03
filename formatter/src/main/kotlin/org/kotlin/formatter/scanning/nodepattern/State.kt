@@ -2,6 +2,7 @@ package org.kotlin.formatter.scanning.nodepattern
 
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.kotlin.formatter.Token
+import java.util.Stack
 
 class State(private val id: Int = idCounter++) {
     private val transitions = mutableListOf<Transition>()
@@ -22,12 +23,20 @@ class State(private val id: Int = idCounter++) {
     internal fun matchingNextStates(node: ASTNode): List<State> =
         transitions.filter { it is MatchingTransition && it.matcher(node) }.map { it.state }
 
-    infix fun installAction(action: Action) {
+    internal fun installAction(action: Action) {
         this.action = Evaluation.consumingAction(action)
     }
 
+    internal fun installPushTokens() {
+        action = Evaluation.tokenPushingAction
+    }
+
+    internal fun installTokenMapper(mapper: (List<Token>) -> List<Token>) {
+        action = action andThen Evaluation.tokenMappingAction(mapper)
+    }
+
     internal fun accumulate() {
-        this.action = Evaluation.accumulate
+        action = Evaluation.accumulate
     }
 
     internal fun combineWith(other: State) {
@@ -54,19 +63,38 @@ private infix fun EvaluationAction.andThen(other: EvaluationAction): EvaluationA
         else -> { evaluation, astNode -> other(this(evaluation, astNode), astNode) }
     }
 
-internal data class Evaluation(private val nodes: List<ASTNode>, internal val tokens: List<Token>) {
+internal data class Evaluation(
+    private val nodes: List<ASTNode>,
+    private val tokenStack: Stack<List<Token>>
+) {
+    internal val tokens: List<Token> get() = tokenStack.peek()
+
     companion object {
         internal val accumulate: EvaluationAction =
             { evaluation, astNode ->
-                Evaluation(evaluation.nodes.plusIfNonNull(astNode), evaluation.tokens)
+                Evaluation(evaluation.nodes.plusIfNonNull(astNode), evaluation.tokenStack)
             }
 
         internal val consume: EvaluationAction =
-            { evaluation, _ -> Evaluation(listOf(), evaluation.tokens) }
+            { evaluation, _ -> Evaluation(listOf(), evaluation.tokenStack) }
 
         internal fun consumingAction(action: Action): EvaluationAction =
             { evaluation, _ ->
-                Evaluation(listOf(), evaluation.tokens.plus(action(evaluation.nodes)))
+                evaluation.tokenStack.push(evaluation.tokenStack.pop().plus(action(evaluation.nodes)))
+                Evaluation(listOf(), evaluation.tokenStack)
+            }
+
+        val tokenPushingAction: EvaluationAction =
+            { evaluation, _ ->
+                evaluation.tokenStack.push(listOf())
+                Evaluation(evaluation.nodes, evaluation.tokenStack)
+            }
+
+        fun tokenMappingAction(mapper: (List<Token>) -> List<Token>): EvaluationAction =
+            { evaluation, _ ->
+                val topTokens = evaluation.tokenStack.pop()
+                evaluation.tokenStack.push(evaluation.tokenStack.pop().plus(mapper(topTokens)))
+                Evaluation(evaluation.nodes, evaluation.tokenStack)
             }
     }
 }

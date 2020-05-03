@@ -3,6 +3,7 @@ package org.kotlin.formatter.scanning
 import org.jetbrains.kotlin.KtNodeTypes
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.psi.psiUtil.children
+import org.kotlin.formatter.ClosingForcedBreakToken
 import org.kotlin.formatter.ForcedBreakToken
 import org.kotlin.formatter.Token
 import org.kotlin.formatter.scanning.nodepattern.nodePattern
@@ -14,11 +15,14 @@ internal class ModifierListScanner(private val kotlinScanner: KotlinScanner) : N
                 nodeOfType(KtNodeTypes.ANNOTATION_ENTRY) andThen { nodes ->
                     listOf(
                         *kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT).toTypedArray(),
-                        ForcedBreakToken(count = 1)
+                        ClosingForcedBreakToken
                     )
                 }
+                possibleWhitespace()
             } or {
-                anyNode()
+                anyNode() andThen { nodes ->
+                    kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
+                }
             }
         }
         end()
