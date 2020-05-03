@@ -23,7 +23,7 @@ internal fun nodeScannerForElementType(
             BlockScanner(kotlinScanner)
         }
         KtNodeTypes.WHEN -> {
-            WhenExpressionScanner(WhenForExpressionScanner(kotlinScanner))
+            WhenExpressionScanner(kotlinScanner)
         }
         KtNodeTypes.IF -> {
             IfExpressionScanner(kotlinScanner)
@@ -62,7 +62,7 @@ internal fun nodeScannerForElementType(
             ConditionScanner(kotlinScanner)
         }
         KtNodeTypes.FOR -> {
-            WhenForExpressionScanner(kotlinScanner)
+            ForExpressionScanner(kotlinScanner)
         }
         KtNodeTypes.BINARY_EXPRESSION -> {
             BinaryExpressionScanner(kotlinScanner)

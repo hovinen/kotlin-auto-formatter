@@ -626,7 +626,7 @@ internal class KotlinScannerTest {
         assertThat(result)
             .containsSubsequence(
                 BeginToken(State.CODE),
-                LeafNodeToken("when"),
+                LeafNodeToken("when ("),
                 LeafNodeToken("}"),
                 EndToken
             )
@@ -642,10 +642,11 @@ internal class KotlinScannerTest {
         assertThat(result)
             .containsSubsequence(
                 BeginToken(State.CODE),
+                LeafNodeToken("when ("),
                 LeafNodeToken("variable"),
                 ClosingSynchronizedBreakToken(whitespaceLength = 0),
-                EndToken,
-                LeafNodeToken(")")
+                LeafNodeToken(") {"),
+                EndToken
             )
     }
 

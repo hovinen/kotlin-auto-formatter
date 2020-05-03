@@ -1,34 +1,61 @@
 package org.kotlin.formatter.scanning
 
+import org.jetbrains.kotlin.KtNodeTypes
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
+import org.jetbrains.kotlin.lexer.KtTokens
+import org.jetbrains.kotlin.psi.psiUtil.children
+import org.kotlin.formatter.BeginToken
 import org.kotlin.formatter.ClosingForcedBreakToken
+import org.kotlin.formatter.ClosingSynchronizedBreakToken
 import org.kotlin.formatter.EndToken
 import org.kotlin.formatter.ForcedBreakToken
+import org.kotlin.formatter.LeafNodeToken
 import org.kotlin.formatter.State
 import org.kotlin.formatter.Token
+import org.kotlin.formatter.scanning.nodepattern.nodePattern
 
-internal class WhenExpressionScanner(private val whenForExpressionScanner: WhenForExpressionScanner): NodeScanner {
-    override fun scan(node: ASTNode, scannerState: ScannerState): List<Token> {
-        val innerTokens = whenForExpressionScanner.scan(node, scannerState)
-        val tokens = inBeginEndBlock(innerTokens, State.CODE)
-        return replaceTerminalForcedBreakTokenWithClosingForcedBreakToken(tokens)
-    }
-
-    private fun replaceTerminalForcedBreakTokenWithClosingForcedBreakToken(
-        tokens: List<Token>
-    ): List<Token> {
-        var index = tokens.size - 1
-        while (index > 0 && tokens[index] is EndToken) {
-            index--
-        }
-        return if (index > 0 && tokens[index - 1] is ForcedBreakToken) {
+internal class WhenExpressionScanner(private val kotlinScanner: KotlinScanner): NodeScanner {
+    private val nodePattern = nodePattern {
+        nodeOfType(KtTokens.WHEN_KEYWORD)
+        possibleWhitespace()
+        nodeOfType(KtTokens.LPAR)
+        possibleWhitespace()
+        anyNode() andThen { nodes ->
             listOf(
-                *tokens.subList(0, index - 1).toTypedArray(),
-                ClosingForcedBreakToken,
-                *tokens.subList(index, tokens.size).toTypedArray()
+                BeginToken(State.CODE),
+                LeafNodeToken("when ("),
+                *kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT).toTypedArray()
             )
-        } else {
-            tokens
         }
+        possibleWhitespace()
+        nodeOfType(KtTokens.RPAR)
+        possibleWhitespace()
+        nodeOfType(KtTokens.LBRACE) andThen {
+            listOf(
+                ClosingSynchronizedBreakToken(whitespaceLength = 0),
+                LeafNodeToken(") {"),
+                EndToken
+            )
+        }
+        possibleWhitespace()
+        zeroOrMore {
+            nodeOfType(KtNodeTypes.WHEN_ENTRY) andThen { nodes ->
+                listOf(
+                    ForcedBreakToken(count = 1),
+                    *kotlinScanner.scanNodes(nodes, ScannerState.BLOCK).toTypedArray()
+                )
+            }
+            possibleWhitespace()
+        }
+        nodeOfType(KtTokens.RBRACE) andThen {
+            listOf(
+                ClosingForcedBreakToken,
+                LeafNodeToken("}")
+            )
+        }
+        end()
     }
+
+    override fun scan(node: ASTNode, scannerState: ScannerState): List<Token> =
+        inBeginEndBlock(nodePattern.matchSequence(node.children().asIterable()), State.CODE)
 }
