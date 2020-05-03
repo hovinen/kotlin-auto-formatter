@@ -21,7 +21,7 @@ internal class WhenForExpressionScanner(private val kotlinScanner: KotlinScanner
             val tokens = kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
             listOf(
                 LeafNodeToken("("),
-                BeginToken(length = lengthOfTokens(tokens), state = State.CODE),
+                BeginToken(State.CODE),
                 *tokens.toTypedArray(),
                 ClosingSynchronizedBreakToken(whitespaceLength = 0),
                 EndToken,

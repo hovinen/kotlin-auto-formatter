@@ -14,9 +14,9 @@ internal class KDocSectionScanner(private val kotlinScanner: KotlinScanner): Nod
                 State.LONG_COMMENT
             )
         return listOf(
-            WhitespaceToken(length = lengthOfTokensForWhitespace(innerTokens), content = " "),
+            WhitespaceToken(" "),
             *innerTokens.toTypedArray(),
-            WhitespaceToken(length = 1, content = " ")
+            WhitespaceToken(" ")
         )
     }
 }

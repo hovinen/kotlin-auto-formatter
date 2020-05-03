@@ -29,7 +29,7 @@ internal class BlockScanner(private val kotlinScanner: KotlinScanner): NodeScann
                 }
             listOf(
                 LeafNodeToken("{"),
-                BeginToken(length = lengthOfTokens(innerTokens), state = State.CODE),
+                BeginToken(State.CODE),
                 *innerTokensWithClosingBreakToken.toTypedArray(),
                 EndToken,
                 LeafNodeToken("}")

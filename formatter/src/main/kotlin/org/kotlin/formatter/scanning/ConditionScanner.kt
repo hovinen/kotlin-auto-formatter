@@ -10,10 +10,9 @@ import org.kotlin.formatter.Token
 
 internal class ConditionScanner(private val kotlinScanner: KotlinScanner): NodeScanner {
     override fun scan(node: ASTNode, scannerState: ScannerState): List<Token> {
-        val innerTokens = kotlinScanner.scanNodes(node.children().asIterable(), ScannerState.STATEMENT)
         return listOf(
-            BeginToken(length = lengthOfTokens(innerTokens), state = State.CODE),
-            *innerTokens.toTypedArray(),
+            BeginToken(state = State.CODE),
+            *kotlinScanner.scanNodes(node.children().asIterable(), ScannerState.STATEMENT).toTypedArray(),
             ClosingSynchronizedBreakToken(whitespaceLength = 0),
             EndToken
         )

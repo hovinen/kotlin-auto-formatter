@@ -6,7 +6,6 @@ import org.jetbrains.kotlin.kdoc.lexer.KDocTokens
 import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.psi.psiUtil.children
 import org.kotlin.formatter.ClosingForcedBreakToken
-import org.kotlin.formatter.ForcedBreakToken
 import org.kotlin.formatter.LeafNodeToken
 import org.kotlin.formatter.State
 import org.kotlin.formatter.Token
@@ -79,7 +78,7 @@ private fun insertWhitespaceIfNoForcedBreakIsPresent(tokens: List<Token>): List<
     } else {
         listOf(
             *tokens.subList(0, tokens.size - 1).toTypedArray(),
-            WhitespaceToken(length = lengthOfTokens(listOf(tokens.last())), content = " "),
+            WhitespaceToken(" "),
             tokens.last()
         )
     }
@@ -94,7 +93,7 @@ internal fun NodePatternBuilder.propertyInitializer(kotlinScanner: KotlinScanner
         listOf(
             nonBreakingSpaceToken(),
             LeafNodeToken("="),
-            WhitespaceToken(length = 1 + lengthOfTokens(tokens), content = " "),
+            WhitespaceToken(" "),
             *tokens.toTypedArray()
         )
     }

@@ -2,6 +2,7 @@ package org.kotlin.formatter
 
 import org.kotlin.formatter.loading.KotlinFileLoader
 import org.kotlin.formatter.output.Printer
+import org.kotlin.formatter.output.TokenPreprocessor
 import org.kotlin.formatter.scanning.KotlinScanner
 import java.nio.file.Files
 import java.nio.file.Path
@@ -27,13 +28,14 @@ class KotlinFormatter(
      */
     fun format(input: String): String {
         val kotlinScanner = KotlinScanner()
+        val tokenPreprocessor = TokenPreprocessor()
         val printer =
             Printer(
                 maxLineLength = maxLineLength,
                 standardIndent = standardIndentSize,
                 continuationIndent = continuationIndentSize
             )
-        return printer.print(kotlinScanner.scan(kotlinLoader.parseKotlin(input)))
+        return printer.print(tokenPreprocessor.preprocess(kotlinScanner.scan(kotlinLoader.parseKotlin(input))))
     }
 
     /**

@@ -18,14 +18,14 @@ internal class LeafScanner {
         when (node.elementType) {
             KtTokens.EOL_COMMENT -> {
                 listOf(
-                    BeginToken(node.textLength, stateBasedOnCommentContent(node.text)),
+                    BeginToken(stateBasedOnCommentContent(node.text)),
                     *tokenizeString(node.text).toTypedArray(),
                     EndToken
                 )
             }
             KtTokens.BLOCK_COMMENT -> {
                 listOf(
-                    BeginToken(node.textLength, State.LONG_COMMENT),
+                    BeginToken(State.LONG_COMMENT),
                     *tokenizeNodeContentInBlockComment(node).toTypedArray(),
                     EndToken
                 )
@@ -52,7 +52,7 @@ internal class LeafScanner {
             LeafNodeToken(parts.first()),
             *parts.tail().flatMap {
                 listOf(
-                    WhitespaceToken(it.length + 1, " "),
+                    WhitespaceToken(" "),
                     LeafNodeToken(it)
                 )
             }.toTypedArray()

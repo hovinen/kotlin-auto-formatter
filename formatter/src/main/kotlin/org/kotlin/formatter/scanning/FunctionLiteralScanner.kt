@@ -14,12 +14,11 @@ internal class FunctionLiteralScanner(private val kotlinScanner: KotlinScanner) 
     private val nodePattern = nodePattern {
         nodeOfType(KtTokens.LBRACE)
         possibleWhitespace()
-        zeroOrMore { anyNode() } andThen { nodes ->
-            val tokens = kotlinScanner.scanNodes(nodes, ScannerState.BLOCK)
+        zeroOrMoreFrugal { anyNode() } andThen { nodes ->
             listOf(
                 LeafNodeToken("{"),
-                WhitespaceToken(length = lengthOfTokens(tokens), content = " "),
-                *tokens.toTypedArray(),
+                WhitespaceToken(content = " "),
+                *kotlinScanner.scanNodes(nodes, ScannerState.BLOCK).toTypedArray(),
                 ClosingSynchronizedBreakToken(whitespaceLength = 1),
                 LeafNodeToken("}")
             )

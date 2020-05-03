@@ -5,7 +5,6 @@ import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.LeafPsiElement
 import org.jetbrains.kotlin.kdoc.lexer.KDocTokens
 import org.jetbrains.kotlin.lexer.KtTokens
 import org.kotlin.formatter.ForcedBreakToken
-import org.kotlin.formatter.LeafNodeToken
 import org.kotlin.formatter.Token
 import org.kotlin.formatter.WhitespaceToken
 
@@ -17,64 +16,38 @@ class KotlinScanner {
     internal fun scanInState(node: ASTNode, scannerState: ScannerState): List<Token> {
         return when (node) {
             is LeafPsiElement -> LeafScanner().scanLeaf(node)
-            else -> scanNodeWithChildren(node, scannerState)
+            else -> nodeScannerForElementType(this, node.elementType).scan(node, scannerState)
         }
     }
 
-    private fun scanNodeWithChildren(node: ASTNode, scannerState: ScannerState): List<Token> {
-        return nodeScannerForElementType(this, node.elementType).scan(node, scannerState)
-    }
-
-    internal fun scanNodes(
-        nodes: Iterable<ASTNode>,
-        scannerState: ScannerState
-    ): List<Token> {
-        val childIterator = nodes.iterator()
-        val tokens = mutableListOf<Token>()
-        while (childIterator.hasNext()) {
-            val child = childIterator.next()
-            if (child is LeafPsiElement && child.elementType == KtTokens.WHITE_SPACE) {
-                val nextChildTokens =
-                    if (childIterator.hasNext()) {
-                        scanInState(childIterator.next(), scannerState)
-                    } else {
-                        listOf()
-                    }
-                tokens.addAll(whitespaceElementToTokens(child, scannerState, nextChildTokens))
-                tokens.addAll(nextChildTokens)
+    internal fun scanNodes(nodes: Iterable<ASTNode>, scannerState: ScannerState): List<Token> =
+        nodes.flatMap { node ->
+            if (node is LeafPsiElement && node.elementType == KtTokens.WHITE_SPACE) {
+                whitespaceElementToTokens(node, scannerState)
             } else {
-                tokens.addAll(scanInState(child, scannerState))
+                scanInState(node, scannerState)
             }
         }
-        return tokens
-    }
 
     private fun whitespaceElementToTokens(
         node: LeafPsiElement,
-        scannerState: ScannerState,
-        nextTokens: List<Token>
+        scannerState: ScannerState
     ) = if (node.isAtEndOfFile || hasNewlineInBlockState(node, scannerState)) {
             listOf(ForcedBreakToken(count = if (hasDoubleNewline(node)) 2 else 1))
         } else if (hasDoubleNewlineInKDocState(node, scannerState)) {
             listOf(ForcedBreakToken(count = 2))
         } else if (scannerState == ScannerState.KDOC) {
             if (!node.textContains('\n')) {
-                listOf(WhitespaceToken(1 + lengthOfTokensForWhitespace(nextTokens), " "))
+                listOf(WhitespaceToken(" "))
             } else {
                 listOf()
             }
         } else {
-            listOf(WhitespaceToken(1 + lengthOfTokensForWhitespace(nextTokens), node.text))
+            listOf(WhitespaceToken(node.text))
         }
 
     private fun hasDoubleNewline(node: LeafPsiElement): Boolean =
         node.text.matches(Regex(".*\n.*\n.*", RegexOption.DOT_MATCHES_ALL))
-
-    private fun lengthOfTokensForWhitespace(nextTokens: List<Token>): Int =
-        when (val firstToken = nextTokens.firstOrNull()) {
-            is LeafNodeToken -> firstToken.textLength
-            else -> lengthOfTokens(nextTokens)
-        }
 
     private val ASTNode.isAtEndOfFile: Boolean get() = treeNext == null
     

@@ -25,20 +25,19 @@ internal class DotQualifiedExpressionScanner(private val kotlinScanner: KotlinSc
         end()
     }
 
-    override fun scan(node: ASTNode, scannerState: ScannerState): List<Token> {
+    override fun scan(node: ASTNode, scannerState: ScannerState): List<Token> =
         if (dotExpressionTypes.contains(node.firstChildNode.elementType)) {
             val tokens = scanInnerDotQualifiedExpression(node)
-            return inBeginEndBlock(tokens, stateForDotQualifiedExpression(scannerState))
+            inBeginEndBlock(tokens, stateForDotQualifiedExpression(scannerState))
         } else {
-            return inBeginEndBlock(
+            inBeginEndBlock(
                 singleDotExpression.matchSequence(node.children().asIterable()),
                 stateForDotQualifiedExpression(scannerState)
             )
         }
-    }
 
-    private fun scanInnerDotQualifiedExpression(node: ASTNode): List<Token> {
-        return if (dotExpressionTypes.contains(node.firstChildNode.elementType)) {
+    private fun scanInnerDotQualifiedExpression(node: ASTNode): List<Token> =
+        if (dotExpressionTypes.contains(node.firstChildNode.elementType)) {
             listOf(
                 *scanInnerDotQualifiedExpression(node.firstChildNode).toTypedArray(),
                 *kotlinScanner.scanNodes(node.children().toList().tail(), ScannerState.STATEMENT).toTypedArray()
@@ -46,7 +45,6 @@ internal class DotQualifiedExpressionScanner(private val kotlinScanner: KotlinSc
         } else {
             kotlinScanner.scanNodes(node.children().asIterable(), ScannerState.STATEMENT)
         }
-    }
 
     private fun stateForDotQualifiedExpression(scannerState: ScannerState) =
         if (scannerState == ScannerState.PACKAGE_IMPORT) State.PACKAGE_IMPORT else State.CODE
