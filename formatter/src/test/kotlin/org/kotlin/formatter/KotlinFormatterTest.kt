@@ -121,7 +121,7 @@ class KotlinFormatterTest {
     }
 
     @Test
-    fun `does not break around parameters based on the length of the function body`() {
+    fun `does not break around parameters based on the length of the function initializer`() {
         val result = KotlinFormatter(maxLineLength = 50).format("""
             fun aFunction(aParameter: String) = aFunctionCall().anotherFunctionCall()
         """.trimIndent())
@@ -129,6 +129,23 @@ class KotlinFormatterTest {
         assertThat(result).isEqualTo("""
             fun aFunction(aParameter: String) =
                 aFunctionCall().anotherFunctionCall()
+        """.trimIndent())
+    }
+
+    @Test
+    fun `does not break around parameters based on the length of the KDoc`() {
+        val result = KotlinFormatter(maxLineLength = 50).format("""
+            /** Some long KDoc which should not wrap */
+            fun aFunction(aParameter: String) {
+                aFunctionCall().anotherFunctionCall()
+            }
+        """.trimIndent())
+
+        assertThat(result).isEqualTo("""
+            /** Some long KDoc which should not wrap */
+            fun aFunction(aParameter: String) {
+                aFunctionCall().anotherFunctionCall()
+            }
         """.trimIndent())
     }
 

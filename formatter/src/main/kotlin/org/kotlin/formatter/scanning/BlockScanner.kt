@@ -4,6 +4,7 @@ import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.psi.psiUtil.children
 import org.kotlin.formatter.BeginToken
+import org.kotlin.formatter.BlockFromLastForcedBreakToken
 import org.kotlin.formatter.ClosingForcedBreakToken
 import org.kotlin.formatter.EndToken
 import org.kotlin.formatter.LeafNodeToken
@@ -18,6 +19,7 @@ internal class BlockScanner(private val kotlinScanner: KotlinScanner): NodeScann
             zeroOrMoreFrugal { anyNode() } andThen { nodes ->
                 listOf(
                     LeafNodeToken("{"),
+                    BlockFromLastForcedBreakToken,
                     BeginToken(State.CODE),
                     *kotlinScanner.scanNodes(nodes, ScannerState.BLOCK).toTypedArray()
                 )
