@@ -7,8 +7,11 @@ import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import org.junit.jupiter.params.provider.ValueSource
 import org.kotlin.formatter.BeginToken
+import org.kotlin.formatter.BlockFromLastForcedBreakToken
+import org.kotlin.formatter.ClosingForcedBreakToken
 import org.kotlin.formatter.ClosingSynchronizedBreakToken
 import org.kotlin.formatter.EndToken
+import org.kotlin.formatter.ForcedBreakToken
 import org.kotlin.formatter.LeafNodeToken
 import org.kotlin.formatter.State
 import org.kotlin.formatter.SynchronizedBreakToken
@@ -127,6 +130,51 @@ internal class TokenPreprocessorTest {
         assertThat(result).contains(BeginToken(length = 9, state = State.STRING_LITERAL))
     }
 
+    @Test
+    fun `outputs BeginToken, EndToken pair for BlockFromLastForcedBreakToken`() {
+        val subject = TokenPreprocessor()
+        val input = listOf(
+            LeafNodeToken("any token"),
+            BlockFromLastForcedBreakToken
+        )
+
+        val result = subject.preprocess(input)
+
+        assertThat(result).isEqualTo(
+            listOf(
+                BeginToken(length = 9, state = State.CODE),
+                LeafNodeToken("any token"),
+                EndToken
+            )
+        )
+    }
+
+    @ParameterizedTest
+    @MethodSource("blockFromLastForcedBreakTokenCases")
+    fun `outputs BeginToken, EndToken pair after forced break for BlockFromLastForcedBreakToken`(
+        token: Token
+    ) {
+        val subject = TokenPreprocessor()
+        val input = listOf(
+            LeafNodeToken("token on previous line"),
+            token,
+            LeafNodeToken("any token"),
+            BlockFromLastForcedBreakToken
+        )
+
+        val result = subject.preprocess(input)
+
+        assertThat(result).isEqualTo(
+            listOf(
+                LeafNodeToken("token on previous line"),
+                token,
+                BeginToken(length = 9, state = State.CODE),
+                LeafNodeToken("any token"),
+                EndToken
+            )
+        )
+    }
+
     companion object {
         @JvmStatic
         fun tokenLengthCases(): List<Arguments> =
@@ -135,6 +183,13 @@ internal class TokenPreprocessorTest {
                 Arguments.of(WhitespaceToken(length = 0, content = "  "), 1),
                 Arguments.of(WhitespaceToken(length = 0, content = ""), 0),
                 Arguments.of(SynchronizedBreakToken(whitespaceLength = 2), 2)
+            )
+
+        @JvmStatic
+        fun blockFromLastForcedBreakTokenCases(): List<Arguments> =
+            listOf(
+                Arguments.of(ForcedBreakToken(count = 1)),
+                Arguments.of(ClosingForcedBreakToken)
             )
     }
 }

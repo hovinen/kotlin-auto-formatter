@@ -121,6 +121,18 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `does not break around parameters based on the length of the function body`() {
+        val result = KotlinFormatter(maxLineLength = 50).format("""
+            fun aFunction(aParameter: String) = aFunctionCall().anotherFunctionCall()
+        """.trimIndent())
+
+        assertThat(result).isEqualTo("""
+            fun aFunction(aParameter: String) =
+                aFunctionCall().anotherFunctionCall()
+        """.trimIndent())
+    }
+
+    @Test
     fun `format breaks a property before its getter`() {
         val result = KotlinFormatter(maxLineLength = 55).format("""
             class AClass {

@@ -25,3 +25,5 @@ data class ClosingSynchronizedBreakToken(internal val whitespaceLength: Int) : T
 data class BeginToken(internal val state: State, internal val length: Int = 0) : Token()
 
 object EndToken : Token()
+
+object BlockFromLastForcedBreakToken : Token()

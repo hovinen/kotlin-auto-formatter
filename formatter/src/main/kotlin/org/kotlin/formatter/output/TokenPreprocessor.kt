@@ -1,7 +1,10 @@
 package org.kotlin.formatter.output
 
 import org.kotlin.formatter.BeginToken
+import org.kotlin.formatter.BlockFromLastForcedBreakToken
+import org.kotlin.formatter.ClosingForcedBreakToken
 import org.kotlin.formatter.EndToken
+import org.kotlin.formatter.ForcedBreakToken
 import org.kotlin.formatter.LeafNodeToken
 import org.kotlin.formatter.State
 import org.kotlin.formatter.SynchronizedBreakToken
@@ -29,6 +32,14 @@ class TokenPreprocessor {
                     topElement.tokens.addAll(blockElement.tokens)
                     topElement.tokens.add(EndToken)
                 }
+                is BlockFromLastForcedBreakToken -> {
+                    val topElement = popBlock()
+                    val index = topElement.tokens.indexOfFirst { it is ForcedBreakToken || it is ClosingForcedBreakToken }
+                    val length = BlockStackElement(topElement.state, topElement.tokens.subList(index + 1, topElement.tokens.size)).textLength
+                    topElement.tokens.add(index + 1, BeginToken(length = length, state = topElement.state))
+                    topElement.tokens.add(EndToken)
+                    resultStack.push(topElement)
+                }
                 else -> resultStack.peek().tokens.add(token)
             }
         }
@@ -49,9 +60,7 @@ class TokenPreprocessor {
         }
 }
 
-private sealed class StackElement {
-    internal val tokens = mutableListOf<Token>()
-
+private sealed class StackElement(internal val tokens: MutableList<Token> = mutableListOf()) {
     internal val textLength: Int get() =
         tokens.map {
             when (it) {
@@ -63,7 +72,10 @@ private sealed class StackElement {
         }.sum()
 }
 
-private class BlockStackElement(internal val state: State): StackElement()
+private class BlockStackElement(
+    internal val state: State,
+    tokens: MutableList<Token> = mutableListOf()
+): StackElement(tokens)
 
 private class WhitespaceStackElement(internal val content: String): StackElement()
 

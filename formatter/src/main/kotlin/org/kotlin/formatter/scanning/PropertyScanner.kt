@@ -5,6 +5,7 @@ import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.kdoc.lexer.KDocTokens
 import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.psi.psiUtil.children
+import org.kotlin.formatter.BlockFromLastForcedBreakToken
 import org.kotlin.formatter.ClosingForcedBreakToken
 import org.kotlin.formatter.LeafNodeToken
 import org.kotlin.formatter.State
@@ -93,6 +94,7 @@ internal fun NodePatternBuilder.propertyInitializer(kotlinScanner: KotlinScanner
         listOf(
             nonBreakingSpaceToken(),
             LeafNodeToken("="),
+            BlockFromLastForcedBreakToken,
             WhitespaceToken(" "),
             *tokens.toTypedArray()
         )
