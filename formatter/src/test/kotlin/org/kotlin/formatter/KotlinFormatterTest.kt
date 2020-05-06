@@ -127,6 +127,25 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `format does not indent a class after a class after a package declaration`() {
+        val result = KotlinFormatter(maxLineLength = 50).format("""
+            package apackage
+
+            class AClass
+
+            class AnotherClass
+        """.trimIndent())
+
+        assertThat(result).isEqualTo("""
+            package apackage
+
+            class AClass
+
+            class AnotherClass
+        """.trimIndent())
+    }
+
+    @Test
     fun `format breaks at parameters of function declarations`() {
         val result = KotlinFormatter(maxLineLength = 50).format("""
             fun aFunction(aParameter: String, anotherParameter: String, aThirdParameter: String) {

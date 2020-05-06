@@ -34,7 +34,7 @@ class TokenPreprocessor {
                 }
                 is BlockFromLastForcedBreakToken -> {
                     val topElement = popBlock()
-                    val index = topElement.tokens.indexOfFirst { it is ForcedBreakToken || it is ClosingForcedBreakToken }
+                    val index = topElement.tokens.indexOfLast { it is ForcedBreakToken || it is ClosingForcedBreakToken }
                     val length = BlockStackElement(topElement.state, topElement.tokens.subList(index + 1, topElement.tokens.size)).textLength
                     topElement.tokens.add(index + 1, BeginToken(length = length, state = topElement.state))
                     topElement.tokens.add(EndToken)

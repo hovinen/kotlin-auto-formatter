@@ -175,6 +175,33 @@ internal class TokenPreprocessorTest {
         )
     }
 
+    @Test
+    fun `outputs BeginToken, EndToken pair after last forced break`() {
+        val subject = TokenPreprocessor()
+        val input = listOf(
+            LeafNodeToken("token on previous line"),
+            ForcedBreakToken(count = 1),
+            LeafNodeToken("token on previous line"),
+            ForcedBreakToken(count = 1),
+            LeafNodeToken("any token"),
+            BlockFromLastForcedBreakToken
+        )
+
+        val result = subject.preprocess(input)
+
+        assertThat(result).isEqualTo(
+            listOf(
+                LeafNodeToken("token on previous line"),
+                ForcedBreakToken(count = 1),
+                LeafNodeToken("token on previous line"),
+                ForcedBreakToken(count = 1),
+                BeginToken(length = 9, state = State.CODE),
+                LeafNodeToken("any token"),
+                EndToken
+            )
+        )
+    }
+
     companion object {
         @JvmStatic
         fun tokenLengthCases(): List<Arguments> =
