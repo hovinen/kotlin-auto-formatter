@@ -5,6 +5,7 @@ import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.ElementType
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.LeafPsiElement
 import org.junit.jupiter.api.Test
 import org.kotlin.formatter.BeginToken
+import org.kotlin.formatter.BlockFromLastForcedBreakToken
 import org.kotlin.formatter.ClosingForcedBreakToken
 import org.kotlin.formatter.ClosingSynchronizedBreakToken
 import org.kotlin.formatter.EndToken
@@ -761,13 +762,12 @@ internal class KotlinScannerTest {
 
         assertThat(result)
             .containsSubsequence(
-                BeginToken(State.CODE),
                 LeafNodeToken("class"),
                 LeafNodeToken("MyClass"),
                 LeafNodeToken("AnInterface"),
                 WhitespaceToken(" "),
-                EndToken,
-                LeafNodeToken("{")
+                LeafNodeToken("{"),
+                BlockFromLastForcedBreakToken
             )
     }
 
@@ -1361,10 +1361,10 @@ internal class KotlinScannerTest {
         assertThat(result).containsSubsequence(
             listOf(
                 LeafNodeToken("*/"),
-                BeginToken(State.CODE),
+                ForcedBreakToken(count = 1),
                 LeafNodeToken("class"),
                 LeafNodeToken("MyClass"),
-                EndToken
+                BlockFromLastForcedBreakToken
             )
         )
     }

@@ -104,6 +104,29 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `format does not break before a class declaration based on length of body`() {
+        val result = KotlinFormatter(maxLineLength = 50).format("""
+            internal class ALongClass(aParameter: String, anotherParameter: String, aThirdParameter: String) {
+                fun aFunction() {
+                    aFunctionCall()
+                }
+            }
+        """.trimIndent())
+
+        assertThat(result).isEqualTo("""
+            internal class ALongClass(
+                aParameter: String,
+                anotherParameter: String,
+                aThirdParameter: String
+            ) {
+                fun aFunction() {
+                    aFunctionCall()
+                }
+            }
+        """.trimIndent())
+    }
+
+    @Test
     fun `format breaks at parameters of function declarations`() {
         val result = KotlinFormatter(maxLineLength = 50).format("""
             fun aFunction(aParameter: String, anotherParameter: String, aThirdParameter: String) {
