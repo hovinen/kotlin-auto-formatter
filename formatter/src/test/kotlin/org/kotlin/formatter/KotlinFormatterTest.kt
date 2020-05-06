@@ -863,6 +863,24 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `format preserves newlines between directives`() {
+        val result = KotlinFormatter(maxLineLength = 60).format("""
+            /**
+             * @param parameter an input parameter with a particularly long description
+             * @param anotherParameter another input parameter
+             */
+        """.trimIndent())
+
+        assertThat(result).isEqualTo("""
+            /**
+             * @param parameter an input parameter with a particularly
+             *     long description
+             * @param anotherParameter another input parameter
+             */
+        """.trimIndent())
+    }
+
+    @Test
     fun `does not insert line breaks in the package statement`() {
         val result = KotlinFormatter(maxLineLength = 20).format("""
             package org.kotlin.a.very.long.package.name.which.should.not.wrap
@@ -1009,6 +1027,44 @@ class KotlinFormatterTest {
                 /** Some KDoc. */
                 A_VALUE
             }
+        """.trimIndent())
+    }
+
+    @Test
+    fun `places an initial asterix on blank KDoc lines`() {
+        val subject = KotlinFormatter(maxLineLength = 40)
+
+        val result = subject.format("""
+            /**
+             * Some KDoc.
+             *
+             * Some further explanation.
+             */
+            class AClass
+        """.trimIndent())
+
+        assertThat(result).isEqualTo("""
+            /**
+             * Some KDoc.
+             *
+             * Some further explanation.
+             */
+            class AClass
+        """.trimIndent())
+    }
+
+    @Test
+    fun `maintains spacing between KDoc elements`() {
+        val subject = KotlinFormatter(maxLineLength = 60)
+
+        val result = subject.format("""
+            /** Some KDoc with an [element] and more text. */
+            class AClass
+        """.trimIndent())
+
+        assertThat(result).isEqualTo("""
+            /** Some KDoc with an [element] and more text. */
+            class AClass
         """.trimIndent())
     }
 

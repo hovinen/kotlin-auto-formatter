@@ -30,9 +30,9 @@ internal class LeafScanner {
                     EndToken
                 )
             }
-            KDocTokens.TEXT -> tokenizeString(node.text.trim())
+            KDocTokens.TEXT -> tokenizeString(node.text)
             KDocTokens.LEADING_ASTERISK -> listOf()
-            KDocTokens.END -> listOf(ClosingSynchronizedBreakToken(whitespaceLength = 1), LeafNodeToken(node.text))
+            KDocTokens.END -> listOf(LeafNodeToken(node.text))
             KtTokens.REGULAR_STRING_PART -> tokenizeString(node.text)
             KtTokens.DOT, KtTokens.SAFE_ACCESS -> {
                 listOf(

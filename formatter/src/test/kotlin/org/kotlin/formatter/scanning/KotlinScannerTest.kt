@@ -1188,6 +1188,21 @@ internal class KotlinScannerTest {
     }
 
     @Test
+    fun `outputs SynchronizedBreakToken after start of KDoc comment`() {
+        val subject = subject()
+        val node = kotlinLoader.parseKotlin("/** A comment */")
+
+        val result = subject.scan(node)
+
+        assertThat(result)
+            .containsSubsequence(
+                LeafNodeToken("/**"),
+                SynchronizedBreakToken(whitespaceLength = 0),
+                LeafNodeToken("A")
+            )
+    }
+
+    @Test
     fun `outputs ClosingSynchronizedBreakToken before closing of KDoc comment`() {
         val subject = subject()
         val node = kotlinLoader.parseKotlin("/** A comment */")
@@ -1197,7 +1212,7 @@ internal class KotlinScannerTest {
         assertThat(result)
             .containsSubsequence(
                 LeafNodeToken("comment"),
-                ClosingSynchronizedBreakToken(whitespaceLength = 1),
+                ClosingSynchronizedBreakToken(whitespaceLength = 0),
                 LeafNodeToken("*/")
             )
     }

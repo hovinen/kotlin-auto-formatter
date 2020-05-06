@@ -32,7 +32,8 @@ class Printer(
     private var spaceRemaining: Int = maxLineLength
     private var currentLineIndent: Int = 0
     private var result = StringBuilder()
-    private val inStringLiteral get() = STRING_LITERAL_STATES.contains(blockStack.peek().state)
+    private val inStringLiteral: Boolean get() = STRING_LITERAL_STATES.contains(blockStack.peek().state)
+    private val inComment: Boolean get() = COMMENT_STATES.contains(blockStack.peek().state)
 
     fun print(tokens: List<Token>): String {
         blockStack.push(
@@ -98,11 +99,20 @@ class Printer(
                     if (inStringLiteral && !whitespaceFitsOnFirstLine) {
                         result.append(token.content)
                     }
+                    if (inComment) {
+                        result.append(" ")
+                    }
                 }
             }
             is ForcedBreakToken -> {
-                result.append("\n".repeat(token.count - 1))
-                indent(if (blockStack.peek().isInitial) 0 else standardIndent)
+                if (inComment) {
+                    for (i in 0 until token.count) {
+                        indent(if (blockStack.peek().isInitial) 0 else standardIndent)
+                    }
+                } else {
+                    result.append("\n".repeat(token.count - 1))
+                    indent(if (blockStack.peek().isInitial) 0 else standardIndent)
+                }
             }
             is ClosingForcedBreakToken -> {
                 indent(0)
@@ -161,7 +171,7 @@ class Printer(
                 indentForComment("//  ")
             }
             State.LONG_COMMENT -> {
-                indentForComment(" * ")
+                indentForComment(" *")
             }
             State.KDOC_DIRECTIVE -> {
                 indentForComment(" *     ")
@@ -195,5 +205,6 @@ class Printer(
     companion object {
         private const val STRING_BREAK_TERMINATOR = "\" +"
         private val STRING_LITERAL_STATES = setOf(State.STRING_LITERAL, State.MULTILINE_STRING_LITERAL)
+        private val COMMENT_STATES = setOf(State.LONG_COMMENT, State.KDOC_DIRECTIVE, State.LINE_COMMENT, State.TODO_COMMENT)
     }
 }

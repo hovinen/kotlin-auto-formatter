@@ -350,6 +350,25 @@ internal class PrinterTest {
         assertThat(result).isEqualTo("\n${commentPrefix}Comment")
     }
 
+    @ParameterizedTest
+    @MethodSource("commentCases")
+    fun `breaks comment with forced break by adding comment marker`(
+        commentState: State,
+        commentPrefix: String
+    ) {
+        val subject = subject(maxLineLength = 80)
+
+        val result = subject.print(
+            listOf(
+                BeginToken(length = 0, state = commentState),
+                ForcedBreakToken(count = 2),
+                LeafNodeToken("Comment")
+            )
+        )
+
+        assertThat(result).isEqualTo("\n${commentPrefix}\n${commentPrefix}Comment")
+    }
+
     @Test
     fun `does not insert comment marker on ClosingSynchronizedBreakToken in long comment`() {
         val subject = subject(maxLineLength = 80)

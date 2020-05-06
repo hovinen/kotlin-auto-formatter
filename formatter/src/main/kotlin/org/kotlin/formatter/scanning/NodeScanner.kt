@@ -29,7 +29,7 @@ internal fun nodeScannerForElementType(
             IfExpressionScanner(kotlinScanner)
         }
         KDocTokens.KDOC -> {
-            SimpleBlockScanner(kotlinScanner, ScannerState.KDOC, State.LONG_COMMENT)
+            KDocScanner(kotlinScanner)
         }
         KDocElementTypes.KDOC_TAG, KDocTokens.MARKDOWN_LINK, KDocElementTypes.KDOC_NAME -> {
             SimpleBlockScanner(kotlinScanner, ScannerState.KDOC, State.KDOC_DIRECTIVE)
