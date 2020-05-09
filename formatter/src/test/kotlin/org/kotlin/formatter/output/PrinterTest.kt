@@ -45,11 +45,36 @@ internal class PrinterTest {
     @ParameterizedTest
     @MethodSource("breakTokenCases")
     fun `does not output whitespace immediately before a line break`(token: Token) {
+        val subject = subject(maxLineLength = 10)
+
+        val result =
+            subject.print(
+                listOf(
+                    BeginToken(length = 11, state = State.CODE),
+                    LeafNodeToken("before whitespace"),
+                    WhitespaceToken(length = 2, content = " "),
+                    token,
+                    EndToken
+                )
+            )
+
+        assertThat(result).doesNotContain(" \n")
+    }
+
+    @ParameterizedTest
+    @MethodSource("synchronizedBreakTokenCases")
+    fun `preserves whitespace when line break does not occur`(token: Token) {
         val subject = subject()
 
-        val result = subject.print(listOf(WhitespaceToken(length = 1, content = "   "), token))
+        val result =
+            subject.print(
+                listOf(
+                    WhitespaceToken(length = 1, content = "   "),
+                    token
+                )
+            )
 
-        assertThat(result).doesNotContain("   ")
+        assertThat(result).contains("   ")
     }
 
     @Test
@@ -382,7 +407,7 @@ internal class PrinterTest {
             listOf(
                 BeginToken(length = 0, state = commentState),
                 ForcedBreakToken(count = 2),
-                LeafNodeToken("Comment")
+                LeafNodeToken(" Comment")
             )
         )
 
@@ -607,6 +632,13 @@ internal class PrinterTest {
                 Arguments.of(ForcedBreakToken(count = 1)),
                 Arguments.of(SynchronizedBreakToken(whitespaceLength = 1)),
                 Arguments.of(ClosingForcedBreakToken),
+                Arguments.of(ClosingSynchronizedBreakToken(whitespaceLength = 1))
+            )
+
+        @JvmStatic
+        fun synchronizedBreakTokenCases(): List<Arguments> =
+            listOf(
+                Arguments.of(SynchronizedBreakToken(whitespaceLength = 1)),
                 Arguments.of(ClosingSynchronizedBreakToken(whitespaceLength = 1))
             )
     }

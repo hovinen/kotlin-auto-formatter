@@ -51,25 +51,50 @@ class Printer(
 
     private fun cleanUpWhitespace(tokens: List<Token>): List<Token> {
         val cleanedUpTokens = mutableListOf<Token>()
-        var lastToken: Token? = null
+        var lastToken: WhitespaceToken? = null
         for (token in tokens) {
             when (token) {
                 is WhitespaceToken -> {
                     lastToken = token
                 }
                 is ForcedBreakToken,
-                is SynchronizedBreakToken,
-                is ClosingForcedBreakToken,
-                is ClosingSynchronizedBreakToken -> {
+                is ClosingForcedBreakToken -> {
                     cleanedUpTokens.add(token)
                     lastToken = null
+                }
+                is SynchronizedBreakToken -> {
+                    if (lastToken != null) {
+                        cleanedUpTokens.add(
+                            SynchronizedBreakToken(
+                                whitespaceLength = lastToken.content.length + token.whitespaceLength
+                            )
+                        )
+                        lastToken = null
+                    } else {
+                        cleanedUpTokens.add(token)
+                    }
+                }
+                is ClosingSynchronizedBreakToken -> {
+                    if (lastToken != null) {
+                        cleanedUpTokens.add(
+                            ClosingSynchronizedBreakToken(
+                                whitespaceLength = lastToken.content.length + token.whitespaceLength
+                            )
+                        )
+                        lastToken = null
+                    } else {
+                        cleanedUpTokens.add(token)
+                    }
+                }
+                is EndToken -> {
+                    cleanedUpTokens.add(token)
                 }
                 else -> {
                     if (lastToken != null) {
                         cleanedUpTokens.add(lastToken)
+                        lastToken = null
                     }
                     cleanedUpTokens.add(token)
-                    lastToken = null
                 }
             }
         }
