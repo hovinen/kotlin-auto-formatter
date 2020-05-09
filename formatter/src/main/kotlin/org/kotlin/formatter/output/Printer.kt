@@ -34,6 +34,7 @@ class Printer(
     private var result = StringBuilder()
     private val inStringLiteral: Boolean get() = STRING_LITERAL_STATES.contains(blockStack.peek().state)
     private val inComment: Boolean get() = COMMENT_STATES.contains(blockStack.peek().state)
+    private var atStartOfLine = true
 
     fun print(tokens: List<Token>): String {
         blockStack.push(
@@ -80,6 +81,9 @@ class Printer(
             is LeafNodeToken -> {
                 result.append(token.text)
                 spaceRemaining -= token.textLength
+                if (token.text.isNotEmpty()) {
+                    atStartOfLine = false
+                }
             }
             is WhitespaceToken -> {
                 if (!breakingAllowed || whitespacePlusFollowingTokenFitOnLine(token)) {
@@ -90,14 +94,16 @@ class Printer(
                     }
                     spaceRemaining--
                 } else {
-                    val whitespaceFitsOnFirstLine =
-                        spaceRemaining >= "${token.content}$STRING_BREAK_TERMINATOR".length
-                    if (inStringLiteral && whitespaceFitsOnFirstLine) {
-                        result.append(token.content)
-                    }
-                    indent(continuationIndent)
-                    if (inStringLiteral && !whitespaceFitsOnFirstLine) {
-                        result.append(token.content)
+                    if (!atStartOfLine) {
+                        val whitespaceFitsOnFirstLine =
+                            spaceRemaining >= "${token.content}$STRING_BREAK_TERMINATOR".length
+                        if (inStringLiteral && whitespaceFitsOnFirstLine) {
+                            result.append(token.content)
+                        }
+                        indent(continuationIndent)
+                        if (inStringLiteral && !whitespaceFitsOnFirstLine) {
+                            result.append(token.content)
+                        }
                     }
                     if (inComment) {
                         result.append(" ")
@@ -106,9 +112,10 @@ class Printer(
             }
             is ForcedBreakToken -> {
                 if (inComment) {
-                    for (i in 0 until token.count) {
-                        indent(if (blockStack.peek().isInitial) 0 else standardIndent)
+                    for (i in 0 until token.count - 1) {
+                        writeLineStartMarker()
                     }
+                    indent(if (blockStack.peek().isInitial) 0 else standardIndent)
                 } else {
                     result.append("\n".repeat(token.count - 1))
                     indent(if (blockStack.peek().isInitial) 0 else standardIndent)
@@ -123,6 +130,7 @@ class Printer(
                 } else {
                     result.append(" ".repeat(token.whitespaceLength))
                 }
+                atStartOfLine = true
             }
             is ClosingSynchronizedBreakToken -> {
                 if (!blockStack.peek().topBlockFitsOnLine(maxLineLength)) {
@@ -159,22 +167,36 @@ class Printer(
             else -> token.length <= spaceRemaining
         }
 
+    private fun writeLineStartMarker() {
+        when (blockStack.peek().state) {
+            State.LINE_COMMENT, State.TODO_COMMENT -> {
+                indentForComment("//")
+            }
+            State.LONG_COMMENT, State.KDOC_DIRECTIVE -> {
+                indentForComment(" *")
+            }
+            else -> {
+                result.append("\n")
+            }
+        }
+    }
+
     private fun indent(amount: Int) {
         when (blockStack.peek().state) {
             State.CODE -> {
                 indentCode(amount)
             }
             State.LINE_COMMENT -> {
-                indentForComment("// ")
+                indentForComment("//")
             }
             State.TODO_COMMENT -> {
-                indentForComment("//  ")
+                indentForComment("// ")
             }
             State.LONG_COMMENT -> {
                 indentForComment(" *")
             }
             State.KDOC_DIRECTIVE -> {
-                indentForComment(" *     ")
+                indentForComment(" *    ")
             }
             State.STRING_LITERAL -> {
                 result.append(STRING_BREAK_TERMINATOR)

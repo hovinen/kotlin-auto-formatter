@@ -30,7 +30,7 @@ internal class LeafScanner {
                     EndToken
                 )
             }
-            KDocTokens.TEXT -> tokenizeString(node.text)
+            KDocTokens.TEXT, KDocTokens.CODE_BLOCK_TEXT -> tokenizeString(node.text)
             KDocTokens.LEADING_ASTERISK -> listOf()
             KDocTokens.END -> listOf(LeafNodeToken(node.text))
             KtTokens.REGULAR_STRING_PART -> tokenizeString(node.text)
@@ -47,16 +47,18 @@ internal class LeafScanner {
         if (content.startsWith("// TODO")) State.TODO_COMMENT else State.LINE_COMMENT
 
     private fun tokenizeString(text: String): List<Token> {
-        val parts = text.split(" ")
-        return listOf(
-            LeafNodeToken(parts.first()),
-            *parts.tail().flatMap {
-                listOf(
-                    WhitespaceToken(" "),
-                    LeafNodeToken(it)
-                )
-            }.toTypedArray()
-        )
+        val whitespaceRegex = Regex("\\s+")
+        var match = whitespaceRegex.find(text)
+        val result = mutableListOf<Token>()
+        var start = 0
+        while (match != null) {
+            result.add(LeafNodeToken(text.substring(start, match.range.first)))
+            result.add(WhitespaceToken(match.value))
+            start = match.range.last + 1
+            match = match.next()
+        }
+        result.add(LeafNodeToken(text.substring(start)))
+        return result
     }
 
     private fun tokenizeNodeContentInBlockComment(node: ASTNode): List<Token> =

@@ -1316,6 +1316,26 @@ internal class KotlinScannerTest {
     }
 
     @Test
+    fun `outputs a ForcedBreakToken between KDoc tags on separate lines`() {
+        val subject = subject()
+        val node = kotlinLoader.parseKotlin("""
+            /**
+             * @param Some parameter
+             * @param Some other parameter
+             */
+        """)
+
+        val result = subject.scan(node)
+
+        assertThat(result)
+            .containsSubsequence(
+                LeafNodeToken("parameter"),
+                ForcedBreakToken(count = 1),
+                LeafNodeToken("@param")
+            )
+    }
+
+    @Test
     fun `outputs a BeginToken with state KDOC_DIRECTIVE on KDoc directive inside comment`() {
         val subject = subject()
         val node = kotlinLoader.parseKotlin("""
@@ -1342,6 +1362,25 @@ internal class KotlinScannerTest {
         val result = subject.scan(node)
 
         assertThat(result).doesNotContain(BeginToken(State.CODE))
+    }
+
+    @Test
+    fun `does not output ForcedBreakToken followed by ClosingSynchronizedBreakToken in KDoc`() {
+        val subject = subject()
+        val node = kotlinLoader.parseKotlin("""
+            /**
+             * @param parameter A parameter
+             */
+        """)
+
+        val result = subject.scan(node)
+
+        assertThat(result).doesNotContainSubsequence(
+            LeafNodeToken("parameter"),
+            ForcedBreakToken(count = 1),
+            ClosingSynchronizedBreakToken(whitespaceLength = 0),
+            LeafNodeToken("*/")
+        )
     }
 
     @Test

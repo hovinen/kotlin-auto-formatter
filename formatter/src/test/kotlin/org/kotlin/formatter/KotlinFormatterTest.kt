@@ -863,6 +863,22 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `format consolidates continuation indentation in KDoc tags`() {
+        val result = KotlinFormatter(maxLineLength = 75).format("""
+            /**
+             * @param parameter an input parameter with a particularly
+             *     long description
+             */
+        """.trimIndent())
+
+        assertThat(result).isEqualTo("""
+            /**
+             * @param parameter an input parameter with a particularly long description
+             */
+        """.trimIndent())
+    }
+
+    @Test
     fun `format preserves newlines between directives`() {
         val result = KotlinFormatter(maxLineLength = 60).format("""
             /**

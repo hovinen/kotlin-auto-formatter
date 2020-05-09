@@ -59,12 +59,28 @@ internal class PrinterTest {
         val result =
             subject.print(
                 listOf(
+                    LeafNodeToken("Before whitespace"),
                     WhitespaceToken(length = 81, content = " "),
                     LeafNodeToken("After whitespace")
                 )
             )
 
-        assertThat(result).isEqualTo("\n    After whitespace")
+        assertThat(result).isEqualTo("Before whitespace\n    After whitespace")
+    }
+
+    @Test
+    fun `does not break at whitespace if at beginning of line`() {
+        val subject = subject(maxLineLength = 80)
+
+        val result =
+            subject.print(
+                listOf(
+                    WhitespaceToken(length = 81, content = " "),
+                    LeafNodeToken("After whitespace")
+                )
+            )
+
+        assertThat(result).isEqualTo("After whitespace")
     }
 
     @Test
@@ -73,6 +89,7 @@ internal class PrinterTest {
 
         val result = subject.print(
             listOf(
+                LeafNodeToken("Before whitespace"),
                 WhitespaceToken(length = 81, content = " "),
                 BeginToken(length = 0, state = State.CODE),
                 LeafNodeToken("variable"),
@@ -81,7 +98,7 @@ internal class PrinterTest {
             )
         )
 
-        assertThat(result).isEqualTo("\n    variable\n        variable")
+        assertThat(result).isEqualTo("Before whitespace\n    variable\n        variable")
     }
 
     @Test
@@ -90,6 +107,7 @@ internal class PrinterTest {
 
         val result = subject.print(
             listOf(
+                LeafNodeToken("Before whitespace"),
                 WhitespaceToken(length = 81, content = " "),
                 BeginToken(length = 0, state = State.CODE),
                 LeafNodeToken("variable"),
@@ -99,7 +117,7 @@ internal class PrinterTest {
             )
         )
 
-        assertThat(result).isEqualTo("\n    variable\n    variable")
+        assertThat(result).isEqualTo("Before whitespace\n    variable\n    variable")
     }
 
     @Test
@@ -139,6 +157,7 @@ internal class PrinterTest {
 
         val result = subject.print(
             listOf(
+                LeafNodeToken("Before whitespace"),
                 WhitespaceToken(length = 81, content = " "),
                 LeafNodeToken("variable"),
                 WhitespaceToken(length = 69, content = " "),
@@ -146,7 +165,7 @@ internal class PrinterTest {
             )
         )
 
-        assertThat(result).isEqualTo("\n    variable\n    variable")
+        assertThat(result).isEqualTo("Before whitespace\n    variable\n    variable")
     }
 
     @Test
@@ -341,13 +360,14 @@ internal class PrinterTest {
 
         val result = subject.print(
             listOf(
+                LeafNodeToken("Before whitespace"),
                 BeginToken(length = 0, state = commentState),
                 WhitespaceToken(length = 81, content = " "),
                 LeafNodeToken("Comment")
             )
         )
 
-        assertThat(result).isEqualTo("\n${commentPrefix}Comment")
+        assertThat(result).isEqualTo("Before whitespace\n${commentPrefix}Comment")
     }
 
     @ParameterizedTest
@@ -366,7 +386,7 @@ internal class PrinterTest {
             )
         )
 
-        assertThat(result).isEqualTo("\n${commentPrefix}\n${commentPrefix}Comment")
+        assertThat(result).isEqualTo("\n${commentPrefix.trimEnd()}\n${commentPrefix}Comment")
     }
 
     @Test
