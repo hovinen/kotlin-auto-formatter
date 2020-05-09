@@ -781,6 +781,17 @@ class KotlinFormatterTest {
         """.trimIndent())
     }
 
+    @Test
+    fun `does not insert whitespace into an empty block`() {
+        val result = KotlinFormatter().format("""
+            val object = MyInterface {}
+        """.trimIndent())
+
+        assertThat(result).isEqualTo("""
+            val object = MyInterface {}
+        """.trimIndent())
+    }
+
     @ParameterizedTest
     @ValueSource(strings = [".", "?."])
     fun `does not break on a single dot expression`(operator: String) {
