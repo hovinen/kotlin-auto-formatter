@@ -20,7 +20,9 @@ class TokenPreprocessor {
         for (token in input) {
             when (token) {
                 is WhitespaceToken -> {
-                    resultStack.push(WhitespaceStackElement(token.content))
+                    if (token.content.isNotEmpty() || !(resultStack.peek() is WhitespaceStackElement)) {
+                        resultStack.push(WhitespaceStackElement(token.content))
+                    }
                 }
                 is BeginToken -> {
                     resultStack.push(BlockStackElement(token.state))
@@ -52,7 +54,7 @@ class TokenPreprocessor {
             is WhitespaceStackElement -> {
                 val textLength = topElement.tokens.firstOrNull()?.textLength ?: 0
                 resultStack.peek().tokens.add(
-                    WhitespaceToken(length = textLength + 1, content = topElement.content)
+                    WhitespaceToken(length = textLength + topElement.contentLength, content = topElement.content)
                 )
                 resultStack.peek().tokens.addAll(topElement.tokens)
                 popBlock()
@@ -77,7 +79,9 @@ private class BlockStackElement(
     tokens: MutableList<Token> = mutableListOf()
 ): StackElement(tokens)
 
-private class WhitespaceStackElement(internal val content: String): StackElement()
+private class WhitespaceStackElement(internal val content: String): StackElement() {
+    internal val contentLength: Int = if (content.isEmpty()) 0 else 1
+}
 
 private val Token.textLength: Int
     get() =

@@ -57,7 +57,9 @@ internal class LeafScanner {
             start = match.range.last + 1
             match = match.next()
         }
-        result.add(LeafNodeToken(text.substring(start)))
+        if (start < text.length) {
+            result.add(LeafNodeToken(text.substring(start)))
+        }
         return result
     }
 

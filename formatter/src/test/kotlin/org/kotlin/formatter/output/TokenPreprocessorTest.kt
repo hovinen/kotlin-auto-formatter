@@ -17,6 +17,7 @@ import org.kotlin.formatter.State
 import org.kotlin.formatter.SynchronizedBreakToken
 import org.kotlin.formatter.Token
 import org.kotlin.formatter.WhitespaceToken
+import org.kotlin.formatter.scanning.emptyBreakPoint
 
 internal class TokenPreprocessorTest {
     @Test
@@ -63,6 +64,43 @@ internal class TokenPreprocessorTest {
         val result = subject.preprocess(input)
 
         assertThat(result).contains(WhitespaceToken(length = 10, content = " "))
+    }
+
+    @Test
+    fun `consolidates WhitespaceToken with emptyBreakPoint`() {
+        val subject = TokenPreprocessor()
+        val input = listOf(
+            WhitespaceToken(length = 0, content = " "),
+            emptyBreakPoint(),
+            LeafNodeToken("any token")
+        )
+
+        val result = subject.preprocess(input)
+
+        assertThat(result).isEqualTo(
+            listOf(
+                WhitespaceToken(length = 10, content = " "),
+                LeafNodeToken("any token")
+            )
+        )
+    }
+
+    @Test
+    fun `preserves emptyBreakPoint when not immediately preceeded by a WhitespaceToken`() {
+        val subject = TokenPreprocessor()
+        val input = listOf(
+            emptyBreakPoint(),
+            LeafNodeToken("any token")
+        )
+
+        val result = subject.preprocess(input)
+
+        assertThat(result).isEqualTo(
+            listOf(
+                WhitespaceToken(length = 9, content = ""),
+                LeafNodeToken("any token")
+            )
+        )
     }
 
     @Test
