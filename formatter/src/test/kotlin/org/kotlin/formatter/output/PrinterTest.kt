@@ -11,6 +11,7 @@ import org.kotlin.formatter.SynchronizedBreakToken
 import org.kotlin.formatter.Token
 import org.kotlin.formatter.WhitespaceToken
 import org.assertj.core.api.Assertions.assertThat
+import org.jetbrains.kotlin.lexer.KtTokens
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -69,12 +70,12 @@ internal class PrinterTest {
         val result =
             subject.print(
                 listOf(
-                    WhitespaceToken(length = 1, content = "   "),
+                    WhitespaceToken(length = 1, content = " "),
                     token
                 )
             )
 
-        assertThat(result).contains("   ")
+        assertThat(result).contains("  ")
     }
 
     @Test
