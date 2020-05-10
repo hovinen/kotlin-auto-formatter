@@ -12,6 +12,7 @@ import org.kotlin.formatter.SynchronizedBreakToken
 import org.kotlin.formatter.Token
 import org.kotlin.formatter.scanning.nodepattern.nodePattern
 
+/** A [NodeScanner] for KDoc. */
 internal class KDocScanner(private val kotlinScanner: KotlinScanner) : NodeScanner {
     private val nodePattern = nodePattern {
         nodeOfType(KDocTokens.START) andThen {

@@ -10,10 +10,23 @@ import org.jetbrains.kotlin.psi.stubs.elements.KtScriptElementType
 import org.kotlin.formatter.State
 import org.kotlin.formatter.Token
 
+/**
+ * An abstract scanner for a particular type of [ASTNode].
+ */
 internal interface NodeScanner {
+    /**
+     * Scans an [ASTNode] of a particular type in the state [ScannerState], returning the resulting
+     * list of [Token].
+     */
     fun scan(node: ASTNode, scannerState: ScannerState): List<Token>
 }
 
+/**
+ * Returns a [NodeScanner] to scan [ASTNode] of the given [elementType].
+ *
+ * The parameter [kotlinScanner] is a top-level scanner for all Kotlin constructions for use when
+ * scanning [ASTNode] recursively.
+ */
 internal fun nodeScannerForElementType(
     kotlinScanner: KotlinScanner,
     elementType: IElementType
@@ -32,7 +45,7 @@ internal fun nodeScannerForElementType(
             KDocScanner(kotlinScanner)
         }
         KDocElementTypes.KDOC_TAG, KDocTokens.MARKDOWN_LINK, KDocElementTypes.KDOC_NAME -> {
-            SimpleBlockScanner(kotlinScanner, ScannerState.KDOC, State.KDOC_DIRECTIVE)
+            SimpleBlockScanner(kotlinScanner, ScannerState.KDOC, State.KDOC_TAG)
         }
         KDocElementTypes.KDOC_SECTION -> {
             KDocSectionScanner(kotlinScanner)

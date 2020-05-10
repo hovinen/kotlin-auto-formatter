@@ -15,6 +15,7 @@ import org.kotlin.formatter.nonBreakingSpaceToken
 import org.kotlin.formatter.scanning.nodepattern.NodePatternBuilder
 import org.kotlin.formatter.scanning.nodepattern.nodePattern
 
+/** A [NodeScanner] for property declarations. */
 internal class PropertyScanner(private val kotlinScanner: KotlinScanner): NodeScanner {
     private val nodePattern = nodePattern {
         exactlyOne {
@@ -28,6 +29,10 @@ internal class PropertyScanner(private val kotlinScanner: KotlinScanner): NodeSc
         nodePattern.matchSequence(node.children().asIterable())
 }
 
+/**
+ * Adds to the receiver [NodePatternBuilder] a sequence matching a class, function, or property
+ * declaration which be preceded by a modifier list.
+ */
 internal fun NodePatternBuilder.declarationWithOptionalModifierList(kotlinScanner: KotlinScanner) {
     optionalKDoc(kotlinScanner)
     either {
@@ -52,6 +57,9 @@ internal fun NodePatternBuilder.declarationWithOptionalModifierList(kotlinScanne
     }
 }
 
+/**
+ * Adds to the receiver [NodePatternBuilder] a sequence matching optionally present KDoc.
+ */
 internal fun NodePatternBuilder.optionalKDoc(kotlinScanner: KotlinScanner) {
     zeroOrOne {
         nodeOfType(KDocTokens.KDOC)
@@ -85,6 +93,10 @@ private fun insertWhitespaceIfNoForcedBreakIsPresent(tokens: List<Token>): List<
     }
 }
 
+/**
+ * Adds to the receiver [NodePatternBuilder] a sequence matching the initializer for a property or
+ * function.
+ */
 internal fun NodePatternBuilder.propertyInitializer(kotlinScanner: KotlinScanner) {
     possibleWhitespace()
     nodeOfType(KtTokens.EQ)

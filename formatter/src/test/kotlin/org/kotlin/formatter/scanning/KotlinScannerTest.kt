@@ -1174,7 +1174,7 @@ internal class KotlinScannerTest {
     }
 
     @Test
-    fun `does not output leading astrix on multi-line block comment`() {
+    fun `does not output leading astrisk on multi-line block comment`() {
         val subject = subject()
         val node = kotlinLoader.parseKotlin("""
             /*
@@ -1261,7 +1261,7 @@ internal class KotlinScannerTest {
     }
 
     @Test
-    fun `does not output initial astrix on KDoc comments`() {
+    fun `does not output initial astrisk on KDoc comments`() {
         val subject = subject()
         val node = kotlinLoader.parseKotlin("""
             /**
@@ -1347,7 +1347,7 @@ internal class KotlinScannerTest {
         val result = subject.scan(node)
 
         assertThat(result)
-            .containsAll(listOf(BeginToken(State.KDOC_DIRECTIVE), EndToken))
+            .containsAll(listOf(BeginToken(State.KDOC_TAG), EndToken))
     }
 
     @Test

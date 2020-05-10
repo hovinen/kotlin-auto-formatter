@@ -9,6 +9,7 @@ import org.kotlin.formatter.State
 import org.kotlin.formatter.Token
 import org.kotlin.formatter.scanning.nodepattern.nodePattern
 
+/** A [NodeScanner] for member access and safe member access expressions. */
 internal class DotQualifiedExpressionScanner(private val kotlinScanner: KotlinScanner): NodeScanner {
     private val singleDotExpression = nodePattern {
         anyNode() andThen { nodes ->
@@ -45,6 +46,8 @@ internal class DotQualifiedExpressionScanner(private val kotlinScanner: KotlinSc
         } else {
             kotlinScanner.scanNodes(node.children().asIterable(), ScannerState.STATEMENT)
         }
+
+    private fun <T> List<T>.tail() = this.subList(1, this.size)
 
     private fun stateForDotQualifiedExpression(scannerState: ScannerState) =
         if (scannerState == ScannerState.PACKAGE_IMPORT) State.PACKAGE_IMPORT else State.CODE

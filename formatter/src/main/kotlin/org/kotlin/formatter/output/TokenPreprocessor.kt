@@ -12,9 +12,36 @@ import org.kotlin.formatter.Token
 import org.kotlin.formatter.WhitespaceToken
 import java.util.Stack
 
+/**
+ * Prepares a list of [Token] for output.
+ *
+ * This assigns lengths to the [WhitespaceToken] and [BeginToken] in the list based on the lengths
+ * of the following tokens. With these data, a [Printer] can decide whether to introduce a line
+ * break at a given [WhitespaceToken].
+ *
+ * This implementation is based loosely on the "scan" operation of the "Prettyprinting" algorithm of
+ * Derek Oppen [1] with some inspiration from the
+ * [Google Java formatter](https://github.com/google/google-java-format).
+ *
+ * [1] Oppen, Derek C. "Prettyprinting". ACM Transactions on Programming Languages and Systems,
+ * Volume 2 Issue 4, Oct. 1980, pp. 465–483.
+ */
 class TokenPreprocessor {
     private val resultStack = Stack<StackElement>()
 
+    /**
+     * Returns a list of [Token] with the lengths of all [WhitespaceToken] and [BeginToken]
+     * assigned.
+     *
+     * Replaces all instances of [BlockFromLastForcedBreakToken] with a [BeginToken], [EndToken]
+     * pair stretching from the previous forced break (either [ForcedBreakToken] or
+     * [ClosingForcedBreakToken]) in the current block, or from the previous [BeginToken] if there
+     * is no forced break in the current block. Thus the output contains no instances of
+     * [BlockFromLastForcedBreakToken].
+     *
+     * Any existing values of [WhitespaceToken.length] and [BeginToken.length] in [input] are
+     * ignored by this process.
+     */
     fun preprocess(input: List<Token>): List<Token> {
         resultStack.push(BlockStackElement(State.CODE))
         for (token in input) {

@@ -7,6 +7,7 @@ import org.kotlin.formatter.ClosingForcedBreakToken
 import org.kotlin.formatter.Token
 import org.kotlin.formatter.scanning.nodepattern.nodePattern
 
+/** A [NodeScanner] for the list of annotations and modifiers on a type or function declaration. */
 internal class ModifierListScanner(private val kotlinScanner: KotlinScanner) : NodeScanner {
     private val nodePattern = nodePattern {
         oneOrMore {

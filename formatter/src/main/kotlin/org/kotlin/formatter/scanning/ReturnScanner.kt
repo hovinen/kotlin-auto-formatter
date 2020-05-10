@@ -6,8 +6,10 @@ import org.jetbrains.kotlin.psi.psiUtil.children
 import org.kotlin.formatter.LeafNodeToken
 import org.kotlin.formatter.State
 import org.kotlin.formatter.Token
+import org.kotlin.formatter.scanning.nodepattern.NodePatternBuilder
 import org.kotlin.formatter.scanning.nodepattern.nodePattern
 
+/** A [NodeScanner] for `return` expressions. */
 internal class ReturnScanner(private val kotlinScanner: KotlinScanner) : NodeScanner {
     private val nodePattern = nodePattern {
         nodeOfType(KtTokens.RETURN_KEYWORD) andThen { listOf(LeafNodeToken("return")) }

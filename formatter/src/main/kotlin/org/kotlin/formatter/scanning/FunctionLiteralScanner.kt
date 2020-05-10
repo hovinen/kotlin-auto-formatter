@@ -10,6 +10,7 @@ import org.kotlin.formatter.Token
 import org.kotlin.formatter.WhitespaceToken
 import org.kotlin.formatter.scanning.nodepattern.nodePattern
 
+/** A [NodeScanner] for anonymous function literals, i.e. lambda expressions. */
 internal class FunctionLiteralScanner(private val kotlinScanner: KotlinScanner) : NodeScanner {
     private val nodePattern = nodePattern {
         nodeOfType(KtTokens.LBRACE)

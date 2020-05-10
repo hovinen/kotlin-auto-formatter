@@ -8,6 +8,7 @@ import org.kotlin.formatter.State
 import org.kotlin.formatter.Token
 import org.kotlin.formatter.scanning.nodepattern.nodePattern
 
+/** A [NodeScanner] for individual sections of KDoc. */
 internal class KDocSectionScanner(private val kotlinScanner: KotlinScanner): NodeScanner {
     private val nodePattern = nodePattern {
         possibleWhitespace()

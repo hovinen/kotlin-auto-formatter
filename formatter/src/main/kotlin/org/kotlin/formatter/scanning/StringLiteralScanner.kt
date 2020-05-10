@@ -7,6 +7,7 @@ import org.kotlin.formatter.State
 import org.kotlin.formatter.Token
 import org.kotlin.formatter.WhitespaceToken
 
+/** A [NodeScanner] for string templates. */
 internal class StringLiteralScanner(private val kotlinScanner: KotlinScanner): NodeScanner {
     override fun scan(node: ASTNode, scannerState: ScannerState): List<Token> {
         val tokens = mutableListOf<Token>()

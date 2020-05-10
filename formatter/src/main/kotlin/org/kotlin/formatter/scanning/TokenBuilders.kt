@@ -6,6 +6,10 @@ import org.kotlin.formatter.State
 import org.kotlin.formatter.Token
 import org.kotlin.formatter.WhitespaceToken
 
+/**
+ * Returns a sequence of [Token] which wraps [innerTokens] inside a [BeginToken], [EndToken] pair
+ * with the given [State].
+ */
 internal fun inBeginEndBlock(innerTokens: List<Token>, state: State): List<Token> =
     listOf(
         BeginToken(state),
@@ -13,6 +17,8 @@ internal fun inBeginEndBlock(innerTokens: List<Token>, state: State): List<Token
         EndToken
     )
 
+/**
+ * Returns a [Token] which inserts a point where a line break may be introduced but produces no
+ * output if no line break occurs.
+ */
 internal fun emptyBreakPoint() = WhitespaceToken("")
-
-internal fun <T> List<T>.tail() = this.subList(1, this.size)

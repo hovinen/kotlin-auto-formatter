@@ -18,6 +18,7 @@ import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.idea.KotlinLanguage
 import sun.reflect.ReflectionFactory
 
+/** Parses Kotlin content into an abstract syntax tree. */
 class KotlinFileLoader {
     private val psiFileFactory: PsiFileFactory
 
@@ -31,6 +32,7 @@ class KotlinFileLoader {
         psiFileFactory = PsiFileFactory.getInstance(environment.project)
     }
 
+    /** Parses the given [code], returning the corresponding top-level [ASTNode]. */
     fun parseKotlin(code: String): ASTNode {
         val file = psiFileFactory.createFileFromText(KotlinLanguage.INSTANCE, code)
         return file.node

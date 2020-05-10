@@ -143,7 +143,7 @@ class NodePatternBuilder {
      * An input sequence with whitespace at the end may be matched either via `anyNode()` in the
      * `zeroOrMoreGreedy` block or by `possibleWhitesapce()`. The "greedy" in `zeroOrMoreGreedy`
      * prefers the former behaviour, so that the whitespace nodes are attached to `zeroOrMoreGreedy`
-     * and not `possibleWhitespace`. In particular, any [actions](andThen) attached to
+     * and not `possibleWhitespace`. In particular, any [actions][andThen] attached to
      * `zeroOrMoreGreedy` see the following whitespace nodes.
      */
     fun zeroOrMoreGreedy(init: NodePatternBuilder.() -> Unit): NodePatternBuilder {

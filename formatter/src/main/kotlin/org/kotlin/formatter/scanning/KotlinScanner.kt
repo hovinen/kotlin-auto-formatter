@@ -8,11 +8,32 @@ import org.kotlin.formatter.ForcedBreakToken
 import org.kotlin.formatter.Token
 import org.kotlin.formatter.WhitespaceToken
 
+/**
+ * Scans a tree of [ASTNode] representing the abstract syntax tree of a Kotlin source file or
+ * fragment thereof to produce a sequence of [Token] representing the logical structure of the file
+ * for the purpose of line breaking.
+ *
+ * This implementation is based loosely on the "scan" operation of the "Prettyprinting" algorithm of
+ * Derek Oppen [1] with some inspiration from the
+ * [Google Java formatter](https://github.com/google/google-java-format).
+ *
+ * [1] Oppen, Derek C. "Prettyprinting". ACM Transactions on Programming Languages and Systems,
+ * Volume 2 Issue 4, Oct. 1980, pp. 465–483.
+ */
 class KotlinScanner {
+    /**
+     * Returns a list of [Token] derived from the given [ASTNode].
+     *
+     * Performs scanning in [ScannerState.BLOCK], which assumes that the given [ASTNode] represents
+     * a larger syntactic unit such as a file.
+     */
     fun scan(node: ASTNode): List<Token> {
         return scanInState(node, ScannerState.BLOCK)
     }
 
+    /**
+     * Returns a list of [Token] derived from the given [ASTNode] using the given [ScannerState].
+     */
     internal fun scanInState(node: ASTNode, scannerState: ScannerState): List<Token> {
         return when (node) {
             is LeafPsiElement -> LeafScanner().scanLeaf(node)
@@ -20,6 +41,10 @@ class KotlinScanner {
         }
     }
 
+    /**
+     * Returns a list of [Token] derived from the given sequence of [ASTNode] using the given
+     * [ScannerState].
+     */
     internal fun scanNodes(nodes: Iterable<ASTNode>, scannerState: ScannerState): List<Token> =
         nodes.flatMap { node ->
             if (node is LeafPsiElement && node.elementType == KtTokens.WHITE_SPACE) {

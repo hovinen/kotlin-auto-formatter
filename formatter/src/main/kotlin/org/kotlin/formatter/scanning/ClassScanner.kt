@@ -8,6 +8,7 @@ import org.kotlin.formatter.BlockFromLastForcedBreakToken
 import org.kotlin.formatter.Token
 import org.kotlin.formatter.scanning.nodepattern.nodePattern
 
+/** A [NodeScanner] for class and interface definitions. */
 internal class ClassScanner(private val kotlinScanner: KotlinScanner): NodeScanner {
     private val nodePattern = nodePattern {
         zeroOrMore { anyNode() } andThen { nodes ->

@@ -10,6 +10,10 @@ import org.kotlin.formatter.State
 import org.kotlin.formatter.SynchronizedBreakToken
 import org.kotlin.formatter.Token
 
+/**
+ * A [NodeScanner] for a list of parameters in a function or class declaration, or the arguments of
+ * a function call expression.
+ */
 internal class ParameterListScanner(private val kotlinScanner: KotlinScanner): NodeScanner {
     private var isFirstEntry = false
 

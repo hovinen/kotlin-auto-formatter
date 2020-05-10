@@ -8,6 +8,7 @@ import org.kotlin.formatter.Token
 import org.kotlin.formatter.nonBreakingSpaceToken
 import org.kotlin.formatter.scanning.nodepattern.nodePattern
 
+/** A [NodeScanner] for function declarations. */
 internal class FunctionDeclarationScanner(private val kotlinScanner: KotlinScanner): NodeScanner {
     private val nodePattern = nodePattern {
         either {

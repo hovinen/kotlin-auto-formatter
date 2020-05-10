@@ -12,6 +12,29 @@ import org.kotlin.formatter.Token
 import org.kotlin.formatter.WhitespaceToken
 import java.util.Stack
 
+/**
+ * Outputs a sequence of [Token], applying line breaks to keep as much as possible within a
+ * specified column limit.
+ *
+ * @property maxLineLength the column limit to which output source code should be held as much as
+ *     possible. The [Google Kotlin style guide](https://developer.android.com/kotlin/style-guide)
+ *     specifies 100 for this value.
+ * @property standardIndent the amount in spaces by which to indent blocks, such as class and method
+ *     content. The
+ *     [Kotlin coding conventions](https://kotlinlang.org/docs/reference/coding-conventions.html)
+ *     specify 4 for this value.
+ * @property continuationIndent the amount in spaces by which to indent when inserting a line break
+ *     within statement. The
+ *     [Kotlin coding conventions](https://kotlinlang.org/docs/reference/coding-conventions.html)
+ *     specify 4 for this value.
+ *
+ * This implementation is based loosely on the "print" operation of the "Prettyprinting" algorithm
+ * of Derek Oppen [1] with some inspiration from the
+ * [Google Java formatter](https://github.com/google/google-java-format).
+ *
+ * [1] Oppen, Derek C. "Prettyprinting". ACM Transactions on Programming Languages and Systems,
+ * Volume 2 Issue 4, Oct. 1980, pp. 465–483.
+ */
 class Printer(
     private val maxLineLength: Int,
     private val standardIndent: Int,
@@ -36,6 +59,31 @@ class Printer(
     private val inComment: Boolean get() = COMMENT_STATES.contains(blockStack.peek().state)
     private var atStartOfLine = true
 
+    /**
+     * Converts the given [tokens] into a formatted String.
+     *
+     * This method outputs the tokens in sequence, with [WhitespaceToken] converted into line breaks
+     * at points where the whitespace content plus the following token would no longer fit on one
+     * line. Extra whitespace and non-essential breaks, represented by [WhitespaceToken] whose
+     * content contains a newline character, are consolidated to a single space. Trailing whitespace
+     * is trimmed from a line.
+     *
+     * Forced line breaks which occur at the highest level of syntax do not result in indentation.
+     * All other line breaks result in indentation either by [standardIndent] (for forced breaks) or
+     * [continuationIndent] (for inserted breaks).
+     *
+     * Line breaks inside single-line string literals and long comments are treated properly. The
+     * string literal is broken with a concatenation operator, while an initial asterisk is inserted
+     * at the start of each line of a long comment. This behaviour is governed by the [State] of
+     * the current syntactic block as given by the most recent [BeginToken].
+     *
+     * This method does not support [org.kotlin.formatter.BlockFromLastForcedBreakToken] and ignores
+     * any such tokens encountered. The [TokenPreprocessor] replaces any such tokens with tokens
+     * supported by this class.
+     *
+     * See the documentation of [Token] and its subclasses for more information on the printing
+     * behaviour of each token.
+     */
     fun print(tokens: List<Token>): String {
         blockStack.push(
             BlockStackEntry(
@@ -197,7 +245,7 @@ class Printer(
             State.LINE_COMMENT, State.TODO_COMMENT -> {
                 indentForComment("//")
             }
-            State.LONG_COMMENT, State.KDOC_DIRECTIVE -> {
+            State.LONG_COMMENT, State.KDOC_TAG -> {
                 indentForComment(" *")
             }
             else -> {
@@ -220,7 +268,7 @@ class Printer(
             State.LONG_COMMENT -> {
                 indentForComment(" *")
             }
-            State.KDOC_DIRECTIVE -> {
+            State.KDOC_TAG -> {
                 indentForComment(" *    ")
             }
             State.STRING_LITERAL -> {
@@ -252,6 +300,6 @@ class Printer(
     companion object {
         private const val STRING_BREAK_TERMINATOR = "\" +"
         private val STRING_LITERAL_STATES = setOf(State.STRING_LITERAL, State.MULTILINE_STRING_LITERAL)
-        private val COMMENT_STATES = setOf(State.LONG_COMMENT, State.KDOC_DIRECTIVE, State.LINE_COMMENT, State.TODO_COMMENT)
+        private val COMMENT_STATES = setOf(State.LONG_COMMENT, State.KDOC_TAG, State.LINE_COMMENT, State.TODO_COMMENT)
     }
 }

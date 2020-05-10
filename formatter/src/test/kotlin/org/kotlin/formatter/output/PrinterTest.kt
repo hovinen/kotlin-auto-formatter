@@ -11,8 +11,6 @@ import org.kotlin.formatter.SynchronizedBreakToken
 import org.kotlin.formatter.Token
 import org.kotlin.formatter.WhitespaceToken
 import org.assertj.core.api.Assertions.assertThat
-import org.jetbrains.kotlin.lexer.KtTokens
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
@@ -624,7 +622,7 @@ internal class PrinterTest {
                 Arguments.of(State.LINE_COMMENT, "// "),
                 Arguments.of(State.TODO_COMMENT, "//  "),
                 Arguments.of(State.LONG_COMMENT, " * "),
-                Arguments.of(State.KDOC_DIRECTIVE, " *     ")
+                Arguments.of(State.KDOC_TAG, " *     ")
             )
 
         @JvmStatic

@@ -11,6 +11,7 @@ import org.kotlin.formatter.State
 import org.kotlin.formatter.Token
 import org.kotlin.formatter.scanning.nodepattern.nodePattern
 
+/** A [NodeScanner] for `for` loop expressions. */
 internal class ForExpressionScanner(private val kotlinScanner: KotlinScanner): NodeScanner {
     private val whenForPattern = nodePattern {
         oneOrMore { anyNode() } andThen { nodes ->

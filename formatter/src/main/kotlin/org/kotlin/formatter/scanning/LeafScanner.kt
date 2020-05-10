@@ -5,7 +5,6 @@ import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.LeafPsiElement
 import org.jetbrains.kotlin.kdoc.lexer.KDocTokens
 import org.jetbrains.kotlin.lexer.KtTokens
 import org.kotlin.formatter.BeginToken
-import org.kotlin.formatter.ClosingSynchronizedBreakToken
 import org.kotlin.formatter.EndToken
 import org.kotlin.formatter.LeafNodeToken
 import org.kotlin.formatter.State
@@ -13,7 +12,9 @@ import org.kotlin.formatter.SynchronizedBreakToken
 import org.kotlin.formatter.Token
 import org.kotlin.formatter.WhitespaceToken
 
+/** Scans leaf nodes in the Kotlin abstract syntax tree. */
 internal class LeafScanner {
+    /** Scans the given [LeafPsiElement], returning the corresponding list of [Token]. */
     fun scanLeaf(node: LeafPsiElement): List<Token> =
         when (node.elementType) {
             KtTokens.EOL_COMMENT -> {

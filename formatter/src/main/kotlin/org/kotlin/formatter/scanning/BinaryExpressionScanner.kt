@@ -9,6 +9,7 @@ import org.kotlin.formatter.WhitespaceToken
 import org.kotlin.formatter.nonBreakingSpaceToken
 import org.kotlin.formatter.scanning.nodepattern.nodePattern
 
+/** A [NodeScanner] for binary expressions. */
 internal class BinaryExpressionScanner(private val kotlinScanner: KotlinScanner): NodeScanner {
     private val expressionPattern = nodePattern {
         anyNode() andThen { firstNode ->
