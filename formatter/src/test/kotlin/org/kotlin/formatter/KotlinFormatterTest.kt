@@ -224,9 +224,6 @@ class KotlinFormatterTest {
         """.trimIndent())
     }
 
-    var aProperty: String = "Something"
-        private set
-
     @Test
     fun `format breaks a parameter list preceeded by a blank line`() {
         val result = KotlinFormatter(maxLineLength = 55).format("""
