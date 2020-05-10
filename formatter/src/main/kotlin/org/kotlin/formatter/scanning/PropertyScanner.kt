@@ -110,7 +110,7 @@ internal fun NodePatternBuilder.propertyInitializer(kotlinScanner: KotlinScanner
     possibleWhitespace()
     nodeOfType(KtTokens.EQ)
     possibleWhitespace()
-    zeroOrMore { anyNode() } andThen { nodes ->
+    zeroOrMoreFrugal { anyNode() } andThen { nodes ->
         val tokens = kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
         listOf(
             nonBreakingSpaceToken(),

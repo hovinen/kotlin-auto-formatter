@@ -209,16 +209,16 @@ class KotlinFormatterTest {
 
     @Test
     fun `format breaks a property before its setter`() {
-        val result = KotlinFormatter(maxLineLength = 55).format("""
+        val result = KotlinFormatter(maxLineLength = 80).format("""
             class AClass {
-                var aProperty: String
+                var aProperty: AType = aValue
                     private set
             }
         """.trimIndent())
 
         assertThat(result).isEqualTo("""
             class AClass {
-                var aProperty: String
+                var aProperty: AType = aValue
                     private set
             }
         """.trimIndent())
