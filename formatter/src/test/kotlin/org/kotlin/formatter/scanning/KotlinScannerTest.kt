@@ -627,7 +627,31 @@ internal class KotlinScannerTest {
         assertThat(result)
             .containsSubsequence(
                 BeginToken(State.CODE),
-                LeafNodeToken("when ("),
+                LeafNodeToken("when "),
+                LeafNodeToken("("),
+                LeafNodeToken("variable"),
+                LeafNodeToken(") "),
+                LeafNodeToken("{"),
+                LeafNodeToken("}"),
+                EndToken
+            )
+    }
+
+    @Test
+    fun `handles a when without expression`() {
+        val subject = subject()
+        val node = kotlinLoader.parseKotlin("""
+            when {
+            }
+        """.trimIndent())
+
+        val result = subject.scan(node)
+
+        assertThat(result)
+            .containsSubsequence(
+                BeginToken(State.CODE),
+                LeafNodeToken("when "),
+                LeafNodeToken("{"),
                 LeafNodeToken("}"),
                 EndToken
             )
@@ -643,10 +667,10 @@ internal class KotlinScannerTest {
         assertThat(result)
             .containsSubsequence(
                 BeginToken(State.CODE),
-                LeafNodeToken("when ("),
+                LeafNodeToken("when "),
                 LeafNodeToken("variable"),
                 ClosingSynchronizedBreakToken(whitespaceLength = 0),
-                LeafNodeToken(") {"),
+                LeafNodeToken(") "),
                 EndToken
             )
     }
