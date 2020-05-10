@@ -43,7 +43,7 @@ class KotlinFormatter(
      * replacing the content of that file with the formatted output.
      */
     fun formatFile(path: Path) {
-        Files.writeString(path, format(Files.readString(path)))
+        Files.writeString(path, format(Files.readString(path, Charsets.UTF_8)), Charsets.UTF_8)
     }
 }
 

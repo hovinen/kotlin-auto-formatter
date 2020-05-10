@@ -225,7 +225,7 @@ class KotlinFormatterTest {
     }
 
     @Test
-    fun `format breaks a parameter list preceeded by a blank line`() {
+    fun `format breaks a parameter list preceded by a blank line`() {
         val result = KotlinFormatter(maxLineLength = 55).format("""
             class MyClass {
 
