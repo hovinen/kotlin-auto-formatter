@@ -17,14 +17,15 @@ import org.kotlin.formatter.scanning.nodepattern.nodePattern
 /** A [NodeScanner] for `when` expressions. */
 internal class WhenExpressionScanner(private val kotlinScanner: KotlinScanner): NodeScanner {
     private val nodePattern = nodePattern {
-        nodeOfType(KtTokens.WHEN_KEYWORD) andThen { listOf(LeafNodeToken("when ")) }
+        nodeOfType(KtTokens.WHEN_KEYWORD) andThen {
+            listOf(BeginToken(State.CODE), LeafNodeToken("when "))
+        }
         possibleWhitespace()
         zeroOrOne {
             nodeOfType(KtTokens.LPAR)
             possibleWhitespace()
             anyNode() andThen { nodes ->
                 listOf(
-                    BeginToken(State.CODE),
                     LeafNodeToken("("),
                     *kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT).toTypedArray(),
                     ClosingSynchronizedBreakToken(whitespaceLength = 0),

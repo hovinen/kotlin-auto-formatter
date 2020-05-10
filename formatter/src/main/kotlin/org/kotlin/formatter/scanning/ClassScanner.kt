@@ -15,7 +15,7 @@ internal class ClassScanner(private val kotlinScanner: KotlinScanner): NodeScann
             kotlinScanner.scanNodes(nodes, ScannerState.BLOCK)
         }
         exactlyOne {
-            nodeOfType(KtTokens.CLASS_KEYWORD)
+            nodeOfOneOfTypes(KtTokens.CLASS_KEYWORD, KtTokens.INTERFACE_KEYWORD)
             oneOrMoreFrugal { anyNode() }
         } andThen { nodes ->
             kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)

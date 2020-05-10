@@ -796,6 +796,26 @@ internal class KotlinScannerTest {
     }
 
     @Test
+    fun `outputs BeginToken, EndToken pair around interface declaration`() {
+        val subject = subject()
+        val node = kotlinLoader.parseKotlin("""
+            interface AnInterface {
+            }
+        """)
+
+        val result = subject.scan(node)
+
+        assertThat(result)
+            .containsSubsequence(
+                LeafNodeToken("interface"),
+                LeafNodeToken("AnInterface"),
+                WhitespaceToken(" "),
+                LeafNodeToken("{"),
+                BlockFromLastForcedBreakToken
+            )
+    }
+
+    @Test
     fun `does not include terminating whitespace in function declaration block`() {
         val subject = subject()
         val node = kotlinLoader.parseKotlin("""
