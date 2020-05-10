@@ -7,6 +7,7 @@ import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.psi.psiUtil.children
 import org.kotlin.formatter.BlockFromLastForcedBreakToken
 import org.kotlin.formatter.ClosingForcedBreakToken
+import org.kotlin.formatter.ForcedBreakToken
 import org.kotlin.formatter.LeafNodeToken
 import org.kotlin.formatter.State
 import org.kotlin.formatter.Token
@@ -21,6 +22,14 @@ internal class PropertyScanner(private val kotlinScanner: KotlinScanner): NodeSc
         exactlyOne {
             declarationWithOptionalModifierList(kotlinScanner)
             zeroOrOne { propertyInitializer(kotlinScanner) }
+            zeroOrMore {
+                nodeOfType(KtNodeTypes.PROPERTY_ACCESSOR) andThen { nodes ->
+                    listOf(
+                        ForcedBreakToken(count = 1),
+                        *kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT).toTypedArray()
+                    )
+                }
+            }
         } thenMapTokens { inBeginEndBlock(it, State.CODE) }
         end()
     }

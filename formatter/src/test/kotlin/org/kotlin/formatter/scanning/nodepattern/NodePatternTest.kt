@@ -372,6 +372,61 @@ class NodePatternTest {
     }
 
     @Test
+    fun `accepts two matching tokens with Kleene star (frugal mode)`() {
+        var accumulatedNodes = listOf<ASTNode>()
+        val subject = nodePattern {
+            zeroOrMoreFrugal {
+                nodeOfType(KtTokens.CLASS_KEYWORD)
+            } andThen {
+                accumulatedNodes = it
+                listOf()
+            }
+            end()
+        }
+        val classElement = LeafPsiElement(KtTokens.CLASS_KEYWORD, "class")
+
+        subject.matchSequence(listOf(classElement, classElement))
+
+        assertThat(accumulatedNodes).isEqualTo(listOf(classElement, classElement))
+    }
+
+    @Test
+    fun `invokes inner action only if tokens matched`() {
+        var actionInvoked = false
+        val subject = nodePattern {
+            zeroOrMore {
+                nodeOfType(KtTokens.IDENTIFIER) andThen {
+                    actionInvoked = true
+                    listOf()
+                }
+            }
+            end()
+        }
+
+        subject.matchSequence(listOf())
+
+        assertThat(actionInvoked).isFalse()
+    }
+
+    @Test
+    fun `invokes inner action only if tokens matched on frugal matcher`() {
+        var actionInvoked = false
+        val subject = nodePattern {
+            zeroOrMoreFrugal {
+                nodeOfType(KtTokens.IDENTIFIER) andThen {
+                    actionInvoked = true
+                    listOf()
+                }
+            }
+            end()
+        }
+
+        subject.matchSequence(listOf())
+
+        assertThat(actionInvoked).isFalse()
+    }
+
+    @Test
     fun `accepts as many matching nodes as possible on Kleene star`() {
         var accumulatedNodes = listOf<ASTNode>()
         val subject = nodePattern {

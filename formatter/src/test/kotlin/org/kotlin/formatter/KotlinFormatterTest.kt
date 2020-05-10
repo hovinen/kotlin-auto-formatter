@@ -208,6 +208,26 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `format breaks a property before its setter`() {
+        val result = KotlinFormatter(maxLineLength = 55).format("""
+            class AClass {
+                var aProperty: String
+                    private set
+            }
+        """.trimIndent())
+
+        assertThat(result).isEqualTo("""
+            class AClass {
+                var aProperty: String
+                    private set
+            }
+        """.trimIndent())
+    }
+
+    var aProperty: String = "Something"
+        private set
+
+    @Test
     fun `format breaks a parameter list preceeded by a blank line`() {
         val result = KotlinFormatter(maxLineLength = 55).format("""
             class MyClass {

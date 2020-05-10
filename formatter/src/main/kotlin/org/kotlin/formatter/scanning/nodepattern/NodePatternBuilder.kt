@@ -149,10 +149,12 @@ class NodePatternBuilder {
     fun zeroOrMoreGreedy(init: NodePatternBuilder.() -> Unit): NodePatternBuilder {
         val subgraphElement = buildSubgraph(init)
         val finalState = terminalState()
-        subgraphElement.finalState
-            .addTransition(EpsilonTransition(subgraphElement.initialState))
-            .addTransition(EpsilonTransition(finalState))
-        elementStack.push(Element(subgraphElement.finalState, finalState))
+        val initialState =
+            State()
+                .addTransition(EpsilonTransition(subgraphElement.initialState))
+                .addTransition(EpsilonTransition(finalState))
+        subgraphElement.finalState.addTransition(EpsilonTransition(initialState))
+        elementStack.push(Element(initialState, finalState))
         return this
     }
 
@@ -176,10 +178,12 @@ class NodePatternBuilder {
     fun zeroOrMoreFrugal(init: NodePatternBuilder.() -> Unit): NodePatternBuilder {
         val subgraphElement = buildSubgraph(init)
         val finalState = terminalState()
-        subgraphElement.finalState
-            .addTransition(EpsilonTransition(finalState))
-            .addTransition(EpsilonTransition(subgraphElement.initialState))
-        elementStack.push(Element(subgraphElement.finalState, finalState))
+        val initialState =
+            State()
+                .addTransition(EpsilonTransition(finalState))
+                .addTransition(EpsilonTransition(subgraphElement.initialState))
+        subgraphElement.finalState.addTransition(EpsilonTransition(initialState))
+        elementStack.push(Element(initialState, finalState))
         return this
     }
 

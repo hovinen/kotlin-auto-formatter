@@ -24,7 +24,7 @@ import java.util.Stack
  * [Google Java formatter](https://github.com/google/google-java-format).
  *
  * [1] Oppen, Derek C. "Prettyprinting". ACM Transactions on Programming Languages and Systems,
- * Volume 2 Issue 4, Oct. 1980, pp. 465–483.
+ * Volume 2 Issue 4, Oct. 1980, pp. 465-483.
  */
 class TokenPreprocessor {
     private val resultStack = Stack<StackElement>()
