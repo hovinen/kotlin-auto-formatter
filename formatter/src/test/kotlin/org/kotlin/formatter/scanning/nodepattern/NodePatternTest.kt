@@ -391,7 +391,7 @@ class NodePatternTest {
     }
 
     @Test
-    fun `invokes inner action only if tokens matched`() {
+    fun `invokes inner action of zeroOrMore only if tokens matched`() {
         var actionInvoked = false
         val subject = nodePattern {
             zeroOrMore {

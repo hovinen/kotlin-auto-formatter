@@ -1,39 +1,61 @@
 package org.kotlin.formatter.scanning
 
+import org.jetbrains.kotlin.KtNodeTypes
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.psi.psiUtil.children
 import org.kotlin.formatter.ClosingSynchronizedBreakToken
 import org.kotlin.formatter.LeafNodeToken
 import org.kotlin.formatter.State
+import org.kotlin.formatter.SynchronizedBreakToken
 import org.kotlin.formatter.Token
 import org.kotlin.formatter.WhitespaceToken
+import org.kotlin.formatter.nonBreakingSpaceToken
 import org.kotlin.formatter.scanning.nodepattern.nodePattern
 
 /** A [NodeScanner] for anonymous function literals, i.e. lambda expressions. */
 internal class FunctionLiteralScanner(private val kotlinScanner: KotlinScanner) : NodeScanner {
     private val nodePattern = nodePattern {
-        nodeOfType(KtTokens.LBRACE)
+        nodeOfType(KtTokens.LBRACE) andThen { listOf(LeafNodeToken("{")) }
         possibleWhitespace()
-        zeroOrMoreFrugal { anyNode() } andThen { nodes ->
-            val tokens = kotlinScanner.scanNodes(nodes, ScannerState.BLOCK)
-            if (tokens.isNotEmpty()) {
+        zeroOrOne {
+            nodeOfType(KtNodeTypes.VALUE_PARAMETER_LIST) andThen { nodes ->
                 listOf(
-                    LeafNodeToken("{"),
-                    WhitespaceToken(content = " "),
-                    *tokens.toTypedArray(),
-                    ClosingSynchronizedBreakToken(whitespaceLength = 1),
-                    LeafNodeToken("}")
+                    nonBreakingSpaceToken(),
+                    *inBeginEndBlock(
+                        kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT),
+                        State.CODE
+                    ).toTypedArray()
                 )
-            } else {
-                listOf(LeafNodeToken("{}"))
+            }
+            possibleWhitespace()
+            nodeOfType(KtTokens.ARROW) andThen {
+                listOf(
+                    nonBreakingSpaceToken(),
+                    LeafNodeToken("->")
+                )
+            }
+            possibleWhitespace()
+        }
+        zeroOrOne {
+            nodeOfType(KtNodeTypes.BLOCK) andThen { nodes ->
+                val tokens = kotlinScanner.scanNodes(nodes, ScannerState.BLOCK)
+                if (tokens.isNotEmpty()) {
+                    listOf(
+                        SynchronizedBreakToken(whitespaceLength = 1),
+                        *tokens.toTypedArray(),
+                        ClosingSynchronizedBreakToken(whitespaceLength = 1)
+                    )
+                } else {
+                    listOf()
+                }
             }
         }
         possibleWhitespace()
-        nodeOfType(KtTokens.RBRACE)
+        nodeOfType(KtTokens.RBRACE) andThen { listOf(LeafNodeToken("}")) }
         end()
     }
 
     override fun scan(node: ASTNode, scannerState: ScannerState): List<Token> =
-        inBeginEndBlock(nodePattern.matchSequence(node.children().asIterable()), State.CODE)
+        nodePattern.matchSequence(node.children().asIterable())
 }

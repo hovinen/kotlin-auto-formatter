@@ -4,6 +4,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
+import kotlin.math.max
 
 class KotlinFormatterTest {
     @Test
@@ -581,6 +582,22 @@ class KotlinFormatterTest {
                     aValue + anotherValue + yetAnotherValue +
                         andYetAnotherValue + moreStuff
             }
+        """.trimIndent())
+    }
+
+    @Test
+    fun `format breaks function literal after arguments`() {
+        val result = KotlinFormatter(maxLineLength = 50).format("""
+            val aFunction = { aParameter, anotherParameter ->
+                anotherFunction()
+            }
+        """.trimIndent())
+
+        assertThat(result).isEqualTo("""
+            val aFunction =
+                { aParameter, anotherParameter ->
+                    anotherFunction()
+                }
         """.trimIndent())
     }
 

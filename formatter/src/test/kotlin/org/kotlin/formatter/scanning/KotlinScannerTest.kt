@@ -15,6 +15,7 @@ import org.kotlin.formatter.State
 import org.kotlin.formatter.SynchronizedBreakToken
 import org.kotlin.formatter.WhitespaceToken
 import org.kotlin.formatter.loading.KotlinFileLoader
+import org.kotlin.formatter.nonBreakingSpaceToken
 
 internal class KotlinScannerTest {
     private val kotlinLoader = KotlinFileLoader()
@@ -600,7 +601,7 @@ internal class KotlinScannerTest {
     }
 
     @Test
-    fun `outputs a WhitespaceToken after opening brace on function literal`() {
+    fun `outputs a SynchronizedBreakToken after opening brace on function literal`() {
         val subject = subject()
         val node = kotlinLoader.parseKotlin("map {aFunction() }")
 
@@ -609,7 +610,7 @@ internal class KotlinScannerTest {
         assertThat(result)
             .containsSubsequence(
                 LeafNodeToken("{"),
-                WhitespaceToken(" "),
+                SynchronizedBreakToken(whitespaceLength = 1),
                 LeafNodeToken("aFunction")
             )
     }
