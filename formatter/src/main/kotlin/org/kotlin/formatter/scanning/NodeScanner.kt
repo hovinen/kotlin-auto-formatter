@@ -56,7 +56,7 @@ internal fun nodeScannerForElementType(
         KtNodeTypes.VALUE_PARAMETER_LIST, KtNodeTypes.VALUE_ARGUMENT_LIST -> {
             ParameterListScanner(kotlinScanner)
         }
-        KtNodeTypes.CLASS -> {
+        KtNodeTypes.CLASS, KtNodeTypes.OBJECT_DECLARATION -> {
             ClassScanner(kotlinScanner)
         }
         KtNodeTypes.FUN -> {
