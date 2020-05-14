@@ -35,12 +35,6 @@ internal class LeafScanner {
             KDocTokens.LEADING_ASTERISK -> listOf()
             KDocTokens.END -> listOf(LeafNodeToken(node.text))
             KtTokens.REGULAR_STRING_PART -> tokenizeString(node.text)
-            KtTokens.DOT, KtTokens.SAFE_ACCESS -> {
-                listOf(
-                    SynchronizedBreakToken(whitespaceLength = 0),
-                    LeafNodeToken(node.text)
-                )
-            }
             else -> listOf(LeafNodeToken(node.text))
         }
 

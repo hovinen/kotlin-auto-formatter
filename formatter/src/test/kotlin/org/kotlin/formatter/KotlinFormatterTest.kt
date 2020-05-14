@@ -281,6 +281,21 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `does not break before property name in extension property`() {
+        val result = KotlinFormatter(maxLineLength = 50).format("""
+            val AClass.aProperty: String
+                get() =
+                    aFunction(aParameter, anotherParameter)
+        """.trimIndent())
+
+        assertThat(result).isEqualTo("""
+            val AClass.aProperty: String
+                get() =
+                    aFunction(aParameter, anotherParameter)
+        """.trimIndent())
+    }
+
+    @Test
     fun `includes space between modifiers and property`() {
         val result = KotlinFormatter(maxLineLength = 50).format("""
             private val aProperty: String = "A long string which should wrap"
@@ -406,8 +421,7 @@ class KotlinFormatterTest {
 
         assertThat(result).isEqualTo("""
             fun myFunction() {
-                aVariable
-                    .aMethod()
+                aVariable.aMethod()
                     .anotherMethod()
                     .aThirdMethod()
             }
@@ -424,8 +438,7 @@ class KotlinFormatterTest {
 
         assertThat(result).isEqualTo("""
             fun myFunction() {
-                aVariable
-                    .aMethod()
+                aVariable.aMethod()
                     ?.anotherMethod()
                     ?.aThirdMethod()
             }
@@ -715,8 +728,7 @@ class KotlinFormatterTest {
         assertThat(result).isEqualTo("""
             fun myFunction() {
                 val aNewVariable =
-                    aVariable
-                        .aMethod()
+                    aVariable.aMethod()
                         ?.anotherMethod()
                         ?.aThirdMethod()
             }
@@ -733,8 +745,7 @@ class KotlinFormatterTest {
 
         assertThat(result).isEqualTo("""
             fun myFunction() {
-                return aVariable
-                    .aMethod()
+                return aVariable.aMethod()
                     .anotherMethod()
                     .aThirdMethod()
             }
@@ -773,8 +784,7 @@ class KotlinFormatterTest {
                 if (aCondition) {
                     doSomething()
                 } else {
-                    doSomethingElse()
-                        .andThenSomethingElse()
+                    doSomethingElse().andThenSomethingElse()
                         .andThenSomethingElse()
                 }
             }

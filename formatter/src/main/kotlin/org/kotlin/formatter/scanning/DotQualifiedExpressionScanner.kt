@@ -6,18 +6,32 @@ import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.psi.psiUtil.children
 import org.kotlin.formatter.LeafNodeToken
 import org.kotlin.formatter.State
+import org.kotlin.formatter.SynchronizedBreakToken
 import org.kotlin.formatter.Token
 import org.kotlin.formatter.scanning.nodepattern.nodePattern
 
 /** A [NodeScanner] for member access and safe member access expressions. */
 internal class DotQualifiedExpressionScanner(private val kotlinScanner: KotlinScanner): NodeScanner {
     private val singleDotExpression = nodePattern {
-        anyNode() andThen { nodes ->
-            kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
-        }
-        possibleWhitespace()
-        nodeOfOneOfTypes(KtTokens.DOT, KtTokens.SAFE_ACCESS) andThen { nodes ->
-            listOf(LeafNodeToken(nodes.first().text))
+        either {
+            nodeOfOneOfTypes(KtNodeTypes.DOT_QUALIFIED_EXPRESSION, KtNodeTypes.SAFE_ACCESS_EXPRESSION) andThen { nodes ->
+                scanInner(nodes[0])
+            }
+            possibleWhitespace()
+            nodeOfOneOfTypes(KtTokens.DOT, KtTokens.SAFE_ACCESS) andThen { nodes ->
+                listOf(
+                    SynchronizedBreakToken(whitespaceLength = 0),
+                    LeafNodeToken(nodes.first().text)
+                )
+            }
+        } or {
+            anyNode() andThen { nodes ->
+                kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
+            }
+            possibleWhitespace()
+            nodeOfOneOfTypes(KtTokens.DOT, KtTokens.SAFE_ACCESS) andThen { nodes ->
+                listOf(LeafNodeToken(nodes.first().text))
+            }
         }
         possibleWhitespace()
         oneOrMore { anyNode() } andThen { nodes ->
@@ -27,33 +41,14 @@ internal class DotQualifiedExpressionScanner(private val kotlinScanner: KotlinSc
     }
 
     override fun scan(node: ASTNode, scannerState: ScannerState): List<Token> =
-        if (dotExpressionTypes.contains(node.firstChildNode.elementType)) {
-            val tokens = scanInnerDotQualifiedExpression(node)
-            inBeginEndBlock(tokens, stateForDotQualifiedExpression(scannerState))
-        } else {
-            inBeginEndBlock(
-                singleDotExpression.matchSequence(node.children().asIterable()),
-                stateForDotQualifiedExpression(scannerState)
-            )
-        }
+        inBeginEndBlock(
+            singleDotExpression.matchSequence(node.children().asIterable()),
+            stateForDotQualifiedExpression(scannerState)
+        )
 
-    private fun scanInnerDotQualifiedExpression(node: ASTNode): List<Token> =
-        if (dotExpressionTypes.contains(node.firstChildNode.elementType)) {
-            listOf(
-                *scanInnerDotQualifiedExpression(node.firstChildNode).toTypedArray(),
-                *kotlinScanner.scanNodes(node.children().toList().tail(), ScannerState.STATEMENT).toTypedArray()
-            )
-        } else {
-            kotlinScanner.scanNodes(node.children().asIterable(), ScannerState.STATEMENT)
-        }
-
-    private fun <T> List<T>.tail() = this.subList(1, this.size)
+    fun scanInner(node: ASTNode): List<Token> =
+        singleDotExpression.matchSequence(node.children().asIterable())
 
     private fun stateForDotQualifiedExpression(scannerState: ScannerState) =
         if (scannerState == ScannerState.PACKAGE_IMPORT) State.PACKAGE_IMPORT else State.CODE
-
-    companion object {
-        private val dotExpressionTypes =
-            setOf(KtNodeTypes.DOT_QUALIFIED_EXPRESSION, KtNodeTypes.SAFE_ACCESS_EXPRESSION)
-    }
 }

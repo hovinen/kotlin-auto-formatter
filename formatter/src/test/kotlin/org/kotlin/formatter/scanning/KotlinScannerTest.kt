@@ -988,8 +988,6 @@ internal class KotlinScannerTest {
 
         assertThat(result)
                 .containsSubsequence(
-                LeafNodeToken("myObject"),
-                SynchronizedBreakToken(whitespaceLength = 0),
                 LeafNodeToken("myProperty"),
                 SynchronizedBreakToken(whitespaceLength = 0),
                 LeafNodeToken("myOtherProperty")
@@ -1041,9 +1039,9 @@ internal class KotlinScannerTest {
 
         assertThat(result)
             .containsSubsequence(
-                LeafNodeToken("myNullableObject"),
+                LeafNodeToken("myProperty"),
                 SynchronizedBreakToken(whitespaceLength = 0),
-                LeafNodeToken("myProperty")
+                LeafNodeToken("anotherProperty")
             )
     }
 
