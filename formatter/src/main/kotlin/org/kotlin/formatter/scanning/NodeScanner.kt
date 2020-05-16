@@ -62,6 +62,9 @@ internal fun nodeScannerForElementType(
         KtNodeTypes.FUN -> {
             FunctionDeclarationScanner(kotlinScanner)
         }
+        KtNodeTypes.TYPEALIAS -> {
+            TypealiasScanner(kotlinScanner)
+        }
         KtNodeTypes.ENUM_ENTRY -> {
             EnumEntryScanner(kotlinScanner)
         }

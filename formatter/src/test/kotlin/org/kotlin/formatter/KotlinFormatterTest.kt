@@ -4,7 +4,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
-import kotlin.math.max
 
 class KotlinFormatterTest {
     @Test
@@ -1068,6 +1067,34 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `maintains a line break between KDoc and typealias declaration`() {
+        val subject = KotlinFormatter(maxLineLength = 40)
+
+        val result = subject.format("""
+            /** Some KDoc. */
+            typealias AType = Int
+        """.trimIndent())
+
+        assertThat(result).isEqualTo("""
+            /** Some KDoc. */
+            typealias AType = Int
+        """.trimIndent())
+    }
+
+    @Test
+    fun `supports modifiers on typealias declaration`() {
+        val subject = KotlinFormatter(maxLineLength = 40)
+
+        val result = subject.format("""
+            internal typealias AType = Int
+        """.trimIndent())
+
+        assertThat(result).isEqualTo("""
+            internal typealias AType = Int
+        """.trimIndent())
+    }
+
+    @Test
     fun `maintains a line break between KDoc and function declaration`() {
         val subject = KotlinFormatter(maxLineLength = 40)
 
@@ -1136,6 +1163,123 @@ class KotlinFormatterTest {
              * Some further explanation.
              */
             class AClass
+        """.trimIndent())
+    }
+    
+    @Test
+    fun `maintains original formatting in code blocks in KDoc`() {
+        val subject = KotlinFormatter(maxLineLength = 40)
+
+        val result = subject.format("""
+            /**
+             * ```
+             * val aVariable
+             * val anotherVariable
+             * ```
+             */
+        """.trimIndent())
+
+        assertThat(result).isEqualTo("""
+            /**
+             * ```
+             * val aVariable
+             * val anotherVariable
+             * ```
+             */
+        """.trimIndent())
+    }
+
+    @Test
+    fun `breaks KDoc at exactly the column limit`() {
+        val subject = KotlinFormatter(maxLineLength = 16)
+
+        val result = subject.format("""
+            /**
+             * aaaa aaaa
+             * aaaa aaaa aaaa
+             */
+        """.trimIndent())
+
+        assertThat(result).isEqualTo("""
+            /**
+             * aaaa aaaa
+             * aaaa aaaa
+             * aaaa
+             */
+        """.trimIndent())
+    }
+
+    @Test
+    fun `inserts whitespace before closing KDoc marker when converting to one-line form`() {
+        val subject = KotlinFormatter(maxLineLength = 40)
+
+        val result = subject.format("""
+            /**
+             * Some KDoc.
+             */
+        """.trimIndent())
+
+        assertThat(result).isEqualTo("""
+            /** Some KDoc. */
+        """.trimIndent())
+    }
+
+    @Test
+    fun `preserves newlines in bullet lists in KDoc`() {
+        val subject = KotlinFormatter(maxLineLength = 40)
+
+        val result = subject.format("""
+            /**
+             *  * An item
+             *  * Another item
+             */
+        """.trimIndent())
+
+        assertThat(result).isEqualTo("""
+            /**
+             *  * An item
+             *  * Another item
+             */
+        """.trimIndent())
+    }
+
+    @Test
+    fun `preserves newlines in numbered lists in KDoc`() {
+        val subject = KotlinFormatter(maxLineLength = 40)
+
+        val result = subject.format("""
+            /**
+             *  1. An item
+             *  2. Another item
+             */
+        """.trimIndent())
+
+        assertThat(result).isEqualTo("""
+            /**
+             *  1. An item
+             *  2. Another item
+             */
+        """.trimIndent())
+    }
+
+    @Test
+    fun `restores original indentation after KDoc tag`() {
+        val subject = KotlinFormatter(maxLineLength = 40)
+
+        val result = subject.format("""
+            /**
+             * @param parameter A parameter
+             *
+             * An unrelated paragraph
+             */
+        """.trimIndent())
+
+        assertThat(result).isEqualTo("""
+            /**
+             * @param parameter A parameter
+             *
+             * An unrelated paragraph
+             */
         """.trimIndent())
     }
 
