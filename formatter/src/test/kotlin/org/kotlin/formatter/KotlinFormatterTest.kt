@@ -1263,27 +1263,6 @@ class KotlinFormatterTest {
     }
 
     @Test
-    fun `restores original indentation after KDoc tag`() {
-        val subject = KotlinFormatter(maxLineLength = 40)
-
-        val result = subject.format("""
-            /**
-             * @param parameter A parameter
-             *
-             * An unrelated paragraph
-             */
-        """.trimIndent())
-
-        assertThat(result).isEqualTo("""
-            /**
-             * @param parameter A parameter
-             *
-             * An unrelated paragraph
-             */
-        """.trimIndent())
-    }
-
-    @Test
     fun `maintains spacing between KDoc elements`() {
         val subject = KotlinFormatter(maxLineLength = 60)
 

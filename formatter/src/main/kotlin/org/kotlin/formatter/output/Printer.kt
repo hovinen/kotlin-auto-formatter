@@ -16,6 +16,13 @@ import java.util.Stack
  * Outputs a sequence of [Token], applying line breaks to keep as much as possible within a
  * specified column limit.
  *
+ * This implementation is based loosely on the "print" operation of the "Prettyprinting" algorithm
+ * of Derek Oppen [1] with some inspiration from the
+ * [Google Java formatter](https://github.com/google/google-java-format).
+ *
+ * [1] Oppen, Derek C. "Prettyprinting". ACM Transactions on Programming Languages and Systems,
+ * Volume 2 Issue 4, Oct. 1980, pp. 465-483.
+ *
  * @property maxLineLength the column limit to which output source code should be held as much as
  *     possible. The [Google Kotlin style guide](https://developer.android.com/kotlin/style-guide)
  *     specifies 100 for this value.
@@ -27,13 +34,6 @@ import java.util.Stack
  *     within statement. The
  *     [Kotlin coding conventions](https://kotlinlang.org/docs/reference/coding-conventions.html)
  *     specify 4 for this value.
- *
- * This implementation is based loosely on the "print" operation of the "Prettyprinting" algorithm
- * of Derek Oppen [1] with some inspiration from the
- * [Google Java formatter](https://github.com/google/google-java-format).
- *
- * [1] Oppen, Derek C. "Prettyprinting". ACM Transactions on Programming Languages and Systems,
- * Volume 2 Issue 4, Oct. 1980, pp. 465-483.
  */
 class Printer(
     private val maxLineLength: Int,
