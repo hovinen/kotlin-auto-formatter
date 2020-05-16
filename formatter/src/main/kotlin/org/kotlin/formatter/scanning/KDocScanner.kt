@@ -27,7 +27,7 @@ internal class KDocScanner(private val kotlinScanner: KotlinScanner) : NodeScann
         }
         nodeOfType(KDocTokens.END) andThen {
             listOf(
-                ClosingSynchronizedBreakToken(whitespaceLength = 0),
+                ClosingSynchronizedBreakToken(whitespaceLength = 1),
                 LeafNodeToken("*/"),
                 EndToken
             )

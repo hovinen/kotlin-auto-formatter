@@ -6,6 +6,7 @@ import org.jetbrains.kotlin.psi.psiUtil.children
 import org.kotlin.formatter.ForcedBreakToken
 import org.kotlin.formatter.State
 import org.kotlin.formatter.Token
+import org.kotlin.formatter.WhitespaceToken
 import org.kotlin.formatter.scanning.nodepattern.nodePattern
 
 /** A [NodeScanner] for individual sections of KDoc. */
@@ -34,7 +35,14 @@ internal class KDocSectionScanner(private val kotlinScanner: KotlinScanner): Nod
 
     override fun scan(node: ASTNode, scannerState: ScannerState): List<Token> =
         inBeginEndBlock(
-            nodePattern.matchSequence(node.children().toList()),
+            trimTrailingWhitespace(nodePattern.matchSequence(node.children().toList())),
             State.LONG_COMMENT
         )
+
+    private fun trimTrailingWhitespace(tokens: List<Token>): List<Token> =
+        if (tokens.lastOrNull() is WhitespaceToken) {
+            tokens.subList(0, tokens.size - 1)
+        } else {
+            tokens
+        }
 }
