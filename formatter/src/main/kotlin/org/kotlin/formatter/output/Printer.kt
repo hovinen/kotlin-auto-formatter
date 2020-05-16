@@ -152,8 +152,7 @@ class Printer(
     private fun printToken(token: Token) {
         when (token) {
             is LeafNodeToken -> {
-                result.append(token.text)
-                spaceRemaining -= token.textLength
+                appendTextOnSameLine(token.text)
                 if (token.text.isNotEmpty()) {
                     atStartOfLine = false
                 }
@@ -161,25 +160,24 @@ class Printer(
             is WhitespaceToken -> {
                 if (!breakingAllowed || whitespacePlusFollowingTokenFitOnLine(token)) {
                     if (inStringLiteral) {
-                        result.append(token.content)
+                        appendTextOnSameLine(token.content)
                     } else {
-                        result.append(" ")
+                        appendTextOnSameLine(" ")
                     }
-                    spaceRemaining--
                 } else {
                     if (!atStartOfLine) {
                         val whitespaceFitsOnFirstLine =
                             spaceRemaining >= "${token.content}$STRING_BREAK_TERMINATOR".length
                         if (inStringLiteral && whitespaceFitsOnFirstLine) {
-                            result.append(token.content)
+                            appendTextOnSameLine(token.content)
                         }
                         indent(continuationIndent)
                         if (inStringLiteral && !whitespaceFitsOnFirstLine) {
-                            result.append(token.content)
+                            appendTextOnSameLine(token.content)
                         }
                     }
                     if (inComment) {
-                        result.append(" ")
+                        appendTextOnSameLine(" ")
                     }
                 }
             }
@@ -201,7 +199,7 @@ class Printer(
                 if (breakingAllowed && !blockStack.peek().topBlockFitsOnLine(maxLineLength)) {
                     indent(continuationIndent)
                 } else {
-                    result.append(" ".repeat(token.whitespaceLength))
+                    appendTextOnSameLine(" ".repeat(token.whitespaceLength))
                 }
                 atStartOfLine = true
             }
@@ -213,7 +211,7 @@ class Printer(
                         indent(0)
                     }
                 } else {
-                    result.append(" ".repeat(token.whitespaceLength))
+                    appendTextOnSameLine(" ".repeat(token.whitespaceLength))
                 }
             }
             is BeginToken -> {
@@ -229,6 +227,11 @@ class Printer(
                 blockStack.pop()
             }
         }
+    }
+
+    private fun appendTextOnSameLine(text: String) {
+        result.append(text)
+        spaceRemaining -= text.length
     }
 
     private val breakingAllowed: Boolean get() = blockStack.peek().state != State.PACKAGE_IMPORT
@@ -274,7 +277,7 @@ class Printer(
             State.STRING_LITERAL -> {
                 result.append(STRING_BREAK_TERMINATOR)
                 indentCode(amount)
-                result.append('"')
+                appendTextOnSameLine("\"")
             }
             State.PACKAGE_IMPORT -> {
                 result.append("\n")

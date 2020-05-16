@@ -450,6 +450,22 @@ internal class PrinterTest {
         assertThat(result).isEqualTo("outside block\n        \n        ${commentPrefix}Comment")
     }
 
+    @Test
+    fun `breaks in comment state at the correct point`() {
+        val subject = subject(maxLineLength = 80)
+
+        val result = subject.print(
+            listOf(
+                BeginToken(state = State.LONG_COMMENT),
+                LeafNodeToken("Before whitespace"),
+                WhitespaceToken(content = " ", length = 64),
+                LeafNodeToken("After whitespace")
+            )
+        )
+
+        assertThat(result).isEqualTo("Before whitespace\n * After whitespace")
+    }
+
     @ParameterizedTest
     @MethodSource("commentCases")
     fun `sets remaining space according to current indent when breaking line comment`(
