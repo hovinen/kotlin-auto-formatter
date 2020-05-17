@@ -30,8 +30,6 @@ internal class LeafScanner {
                     EndToken
                 )
             }
-            KDocTokens.TEXT, KDocTokens.CODE_BLOCK_TEXT -> tokenizeString(node.text)
-            KDocTokens.LEADING_ASTERISK -> listOf()
             KDocTokens.END -> listOf(LeafNodeToken(node.text))
             KtTokens.REGULAR_STRING_PART -> tokenizeString(node.text)
             else -> listOf(LeafNodeToken(node.text))

@@ -44,12 +44,6 @@ internal fun nodeScannerForElementType(
         KDocTokens.KDOC -> {
             KDocScanner(kotlinScanner)
         }
-        KDocElementTypes.KDOC_TAG, KDocTokens.MARKDOWN_LINK, KDocElementTypes.KDOC_NAME -> {
-            SimpleBlockScanner(kotlinScanner, ScannerState.KDOC, State.KDOC_TAG)
-        }
-        KDocElementTypes.KDOC_SECTION -> {
-            KDocSectionScanner(kotlinScanner)
-        }
         KtNodeTypes.STRING_TEMPLATE -> {
             StringLiteralScanner(kotlinScanner)
         }
