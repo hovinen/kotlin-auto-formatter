@@ -3,6 +3,7 @@ package org.kotlin.formatter.output
 import org.kotlin.formatter.BeginToken
 import org.kotlin.formatter.BlockFromLastForcedBreakToken
 import org.kotlin.formatter.ClosingForcedBreakToken
+import org.kotlin.formatter.ClosingSynchronizedBreakToken
 import org.kotlin.formatter.EndToken
 import org.kotlin.formatter.ForcedBreakToken
 import org.kotlin.formatter.LeafNodeToken
@@ -39,6 +40,12 @@ class TokenPreprocessor {
      * is no forced break in the current block. Thus the output contains no instances of
      * [BlockFromLastForcedBreakToken].
      *
+     * Also replaces [SynchronizedBreakToken] and [ClosingSynchronizedBreakToken] instances by
+     * equivalent [ForcedBreakToken] respectively [ClosingForcedBreakToken] whenever there is
+     * already a [ForcedBreakToken] or a [ClosingForcedBreakToken] in the same block. This is
+     * particularly the case with KDoc, where the beginning and end are marked by synchronized break
+     * tokens to allow the KDoc to be collapsed into a single line if it is short enough.
+     *
      * Any existing values of [WhitespaceToken.length] and [BeginToken.length] in [input] are
      * ignored by this process.
      */
@@ -55,7 +62,7 @@ class TokenPreprocessor {
                     resultStack.push(BlockStackElement(token.state))
                 }
                 is EndToken -> {
-                    val blockElement = popBlock()
+                    val blockElement = popBlock().apply { replaceSynchronizedBreaks() }
                     val topElement = resultStack.peek()
                     topElement.tokens.add(BeginToken(length = blockElement.textLength, state = blockElement.state))
                     topElement.tokens.addAll(blockElement.tokens)
@@ -104,7 +111,28 @@ private sealed class StackElement(internal val tokens: MutableList<Token> = muta
 private class BlockStackElement(
     internal val state: State,
     tokens: MutableList<Token> = mutableListOf()
-): StackElement(tokens)
+): StackElement(tokens) {
+    internal fun replaceSynchronizedBreaks() {
+        if (tokens.any { it is ForcedBreakToken || it is ClosingForcedBreakToken }) {
+            var level = 0
+            tokens.replaceAll {
+                when {
+                    it is SynchronizedBreakToken && level == 0 -> ForcedBreakToken(count = 1)
+                    it is ClosingSynchronizedBreakToken && level == 0 -> ClosingForcedBreakToken
+                    it is BeginToken -> {
+                        level++
+                        it
+                    }
+                    it is EndToken -> {
+                        level--
+                        it
+                    }
+                    else -> it
+                }
+            }
+        }
+    }
+}
 
 private class WhitespaceStackElement(internal val content: String): StackElement() {
     internal val contentLength: Int = if (content.isEmpty()) 0 else 1

@@ -9,6 +9,7 @@ import org.kotlin.formatter.Token
 import org.kotlin.formatter.WhitespaceToken
 import org.kotlin.formatter.scanning.nodepattern.nodePattern
 
+/** A [NodeScanner] for `typealias` declarations. */
 internal class TypealiasScanner(private val kotlinScanner: KotlinScanner) : NodeScanner {
     private val nodePattern = nodePattern {
         optionalKDoc(kotlinScanner)

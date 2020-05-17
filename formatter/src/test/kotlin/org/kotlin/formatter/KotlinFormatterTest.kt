@@ -1190,6 +1190,27 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `does not collapse KDoc with line break into short form`() {
+        val subject = KotlinFormatter(maxLineLength = 40)
+
+        val result = subject.format("""
+            /**
+             * Some KDoc.
+             *
+             * Some further text.
+             */
+        """.trimIndent())
+
+        assertThat(result).isEqualTo("""
+            /**
+             * Some KDoc.
+             *
+             * Some further text.
+             */
+        """.trimIndent())
+    }
+
+    @Test
     fun `breaks KDoc at exactly the column limit`() {
         val subject = KotlinFormatter(maxLineLength = 16)
 
@@ -1274,6 +1295,27 @@ class KotlinFormatterTest {
         assertThat(result).isEqualTo("""
             /** Some KDoc with an [element] and more text. */
             class AClass
+        """.trimIndent())
+    }
+
+    @Test
+    fun `maintains spacing before KDoc tag`() {
+        val subject = KotlinFormatter(maxLineLength = 60)
+
+        val result = subject.format("""
+            /**
+             * A summary fragment with some content.
+             *
+             * @property property A property
+             */
+        """.trimIndent())
+
+        assertThat(result).isEqualTo("""
+            /**
+             * A summary fragment with some content.
+             *
+             * @property property A property
+             */
         """.trimIndent())
     }
 

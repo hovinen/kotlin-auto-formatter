@@ -12,9 +12,7 @@ import org.kotlin.formatter.scanning.nodepattern.nodePattern
 internal class FunctionDeclarationScanner(private val kotlinScanner: KotlinScanner): NodeScanner {
     private val nodePattern = nodePattern {
         either {
-            exactlyOne {
-                declarationWithOptionalModifierList(kotlinScanner)
-            } thenMapTokens { inBeginEndBlock(it, State.CODE) }
+            declarationWithOptionalModifierList(kotlinScanner)
             possibleWhitespace()
             nodeOfType(KtNodeTypes.BLOCK) andThen { nodes ->
                 listOf(

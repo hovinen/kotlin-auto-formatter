@@ -240,6 +240,85 @@ internal class TokenPreprocessorTest {
         )
     }
 
+    @ParameterizedTest
+    @MethodSource("synchronizedBreakTokenCases")
+    fun `converts synchronized break tokens into forced break tokens when other forced break tokens are in the same block`(
+        synchronizedBreakToken: Token, breakToken: Token, expectedBreakToken: Token
+    ) {
+        val subject = TokenPreprocessor()
+        val input = listOf(
+            BeginToken(length = 0, state = State.LONG_COMMENT),
+            synchronizedBreakToken,
+            breakToken,
+            EndToken
+        )
+
+        val result = subject.preprocess(input)
+
+        assertThat(result).isEqualTo(
+            listOf(
+                BeginToken(length = 0, state = State.LONG_COMMENT),
+                expectedBreakToken,
+                breakToken,
+                EndToken
+            )
+        )
+    }
+
+    @ParameterizedTest
+    @MethodSource("synchronizedBreakTokenCases")
+    fun `does not convert synchronized break tokens in a subblock into forced break tokens`(
+        synchronizedBreakToken: Token, breakToken: Token, unused: Token
+    ) {
+        val subject = TokenPreprocessor()
+        val input = listOf(
+            BeginToken(length = 0, state = State.LONG_COMMENT),
+            BeginToken(length = 0, state = State.LONG_COMMENT),
+            synchronizedBreakToken,
+            EndToken,
+            breakToken,
+            EndToken
+        )
+
+        val result = subject.preprocess(input)
+
+        assertThat(result).isEqualTo(
+            listOf(
+                BeginToken(length = 0, state = State.LONG_COMMENT),
+                BeginToken(length = 0, state = State.LONG_COMMENT),
+                synchronizedBreakToken,
+                EndToken,
+                breakToken,
+                EndToken
+            )
+        )
+    }
+
+    @Test
+    fun `does not convert synchronized break if the block has BlockFromLastForcedBreakToken`() {
+        val subject = TokenPreprocessor()
+        val input = listOf(
+            BeginToken(length = 0, state = State.LONG_COMMENT),
+            ForcedBreakToken(count = 1),
+            SynchronizedBreakToken(whitespaceLength = 0),
+            BlockFromLastForcedBreakToken,
+            EndToken
+        )
+
+        val result = subject.preprocess(input)
+
+        assertThat(result).isEqualTo(
+            listOf(
+                BeginToken(length = 0, state = State.LONG_COMMENT),
+                ForcedBreakToken(count = 1),
+                BeginToken(state = State.LONG_COMMENT),
+                SynchronizedBreakToken(whitespaceLength = 0),
+                EndToken,
+                EndToken
+            )
+        )
+    }
+
     companion object {
         @JvmStatic
         fun tokenLengthCases(): List<Arguments> =
@@ -255,6 +334,15 @@ internal class TokenPreprocessorTest {
             listOf(
                 Arguments.of(ForcedBreakToken(count = 1)),
                 Arguments.of(ClosingForcedBreakToken)
+            )
+
+        @JvmStatic
+        fun synchronizedBreakTokenCases(): List<Arguments> =
+            listOf(
+                Arguments.of(SynchronizedBreakToken(whitespaceLength = 0), ForcedBreakToken(count = 1), ForcedBreakToken(count = 1)),
+                Arguments.of(ClosingSynchronizedBreakToken(whitespaceLength = 0), ForcedBreakToken(count = 1), ClosingForcedBreakToken),
+                Arguments.of(SynchronizedBreakToken(whitespaceLength = 0), ClosingForcedBreakToken, ForcedBreakToken(count = 1)),
+                Arguments.of(ClosingSynchronizedBreakToken(whitespaceLength = 0), ClosingForcedBreakToken, ClosingForcedBreakToken)
             )
     }
 }

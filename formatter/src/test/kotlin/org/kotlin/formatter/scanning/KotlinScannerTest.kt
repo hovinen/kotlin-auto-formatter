@@ -715,29 +715,6 @@ internal class KotlinScannerTest {
     }
 
     @Test
-    fun `outputs BeginToken, EndToken pair around function declaration`() {
-        val subject = subject()
-        val node = kotlinLoader.parseKotlin("""
-            fun myFunction() {
-            }
-        """)
-
-        val result = subject.scan(node)
-
-        assertThat(result)
-            .containsSubsequence(
-                BeginToken(State.CODE),
-                LeafNodeToken("fun"),
-                LeafNodeToken("myFunction"),
-                LeafNodeToken("("),
-                LeafNodeToken(")"),
-                EndToken,
-                LeafNodeToken(" "),
-                LeafNodeToken("{")
-            )
-    }
-
-    @Test
     fun `outputs a ClosingForcedBreakToken between KDoc and function declaration`() {
         val subject = subject()
         val node = kotlinLoader.parseKotlin("""
@@ -1255,7 +1232,7 @@ internal class KotlinScannerTest {
         assertThat(result)
             .containsSubsequence(
                 LeafNodeToken("comment"),
-                ClosingSynchronizedBreakToken(whitespaceLength = 0),
+                ClosingSynchronizedBreakToken(whitespaceLength = 1),
                 LeafNodeToken("*/")
             )
     }
