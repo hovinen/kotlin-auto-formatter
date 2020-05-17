@@ -16,13 +16,31 @@ data class LeafNodeToken(internal val text: String) : Token() {
     /** The length of the [text] in this token in characters. */
     internal val textLength: Int = text.length
 
-    override fun toString(): String {
-        return "LeafNodeToken(text=${text})"
-    }
+    override fun toString(): String = "LeafNodeToken(text='${text}')"
 }
 
 /** A directive to output a single space character without inserting a line break. */
 fun nonBreakingSpaceToken(content: String = " "): Token = LeafNodeToken(text = content)
+
+/**
+ * A directive to output the given [content] as the content of a long comment such as KDoc.
+ * 
+ * All line breaks in the content are indented and prefixed with the long comment marker ` * `. If
+ * the token is immediately preceded by a [ForcedBreakToken], a long comment marker is also output
+ * before the content so that the first line is consistent with the remaining content.
+ * 
+ * The value of [content] is expected to be stripped of leading asterisks as well as the begin and
+ * end markers. In other words, it should be suitable for passing through a separate markdown auto-
+ * formatter.
+ * 
+ * The content is otherwise output unchanged with no additional line breaking.
+ */
+// TODO: Support passing the content through a separate formatter from the Printer.
+data class KDocContentToken(internal val content: String): Token() {
+    internal val textLength: Int = content.length
+
+    override fun toString(): String = "KDocContentToken(content='${content}')"
+}
 
 /**
  * A directive to output whitespace, possibly with a line break.

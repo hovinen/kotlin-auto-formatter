@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
+import org.kotlin.formatter.KDocContentToken
 
 internal class PrinterTest {
     @Test
@@ -619,6 +620,60 @@ internal class PrinterTest {
         )
 
         assertThat(result).isEqualTo("After whitespace")
+    }
+    
+    @Test
+    fun `prints short KDoc without line breaks in single line format`() {
+        val subject = subject(maxLineLength = 40)
+        
+        val result = subject.print(
+            listOf(
+                BeginToken(length = 40, state = State.CODE),
+                LeafNodeToken("/**"),
+                ClosingSynchronizedBreakToken(whitespaceLength = 1),
+                KDocContentToken("Some KDoc."),
+                ClosingSynchronizedBreakToken(whitespaceLength = 0),
+                LeafNodeToken(" */")
+            )
+        )
+        
+        assertThat(result).isEqualTo("/** Some KDoc. */")
+    }
+
+    @Test
+    fun `prints short KDoc with line breaks in multiline format`() {
+        val subject = subject(maxLineLength = 40)
+
+        val result = subject.print(
+            listOf(
+                BeginToken(length = 40, state = State.CODE),
+                LeafNodeToken("/**"),
+                ClosingForcedBreakToken,
+                KDocContentToken("Some KDoc.\nSome more KDoc."),
+                ClosingForcedBreakToken,
+                LeafNodeToken(" */")
+            )
+        )
+
+        assertThat(result).isEqualTo("/**\n * Some KDoc.\n * Some more KDoc.\n */")
+    }
+    
+    @Test
+    fun `prints long KDoc in multiline format`() {
+        val subject = subject(maxLineLength = 40)
+
+        val result = subject.print(
+            listOf(
+                BeginToken(length = 41, state = State.CODE),
+                LeafNodeToken("/**"),
+                ClosingSynchronizedBreakToken(whitespaceLength = 1),
+                KDocContentToken("Some KDoc."),
+                ClosingSynchronizedBreakToken(whitespaceLength = 0),
+                LeafNodeToken(" */")
+            )
+        )
+
+        assertThat(result).isEqualTo("/**\n * Some KDoc.\n */")
     }
 
     private fun subject(

@@ -5,6 +5,7 @@ import org.kotlin.formatter.ClosingForcedBreakToken
 import org.kotlin.formatter.ClosingSynchronizedBreakToken
 import org.kotlin.formatter.EndToken
 import org.kotlin.formatter.ForcedBreakToken
+import org.kotlin.formatter.KDocContentToken
 import org.kotlin.formatter.LeafNodeToken
 import org.kotlin.formatter.State
 import org.kotlin.formatter.SynchronizedBreakToken
@@ -157,6 +158,9 @@ class Printer(
                     atStartOfLine = false
                 }
             }
+            is KDocContentToken -> {
+                appendKDocContent(token.content)
+            }
             is WhitespaceToken -> {
                 if (!breakingAllowed || whitespacePlusFollowingTokenFitOnLine(token)) {
                     if (inStringLiteral) {
@@ -191,17 +195,23 @@ class Printer(
                     result.append("\n".repeat(token.count - 1))
                     indent(if (blockStack.peek().isInitial) 0 else standardIndent)
                 }
+                atStartOfLine = true
             }
             is ClosingForcedBreakToken -> {
-                indent(0)
+                if (inComment) {
+                    indentCode(1)
+                } else {
+                    indent(0)
+                }
+                atStartOfLine = true
             }
             is SynchronizedBreakToken -> {
                 if (breakingAllowed && !blockStack.peek().topBlockFitsOnLine(maxLineLength)) {
                     indent(continuationIndent)
+                    atStartOfLine = true
                 } else {
                     appendTextOnSameLine(" ".repeat(token.whitespaceLength))
                 }
-                atStartOfLine = true
             }
             is ClosingSynchronizedBreakToken -> {
                 if (!blockStack.peek().topBlockFitsOnLine(maxLineLength)) {
@@ -210,6 +220,7 @@ class Printer(
                     } else {
                         indent(0)
                     }
+                    atStartOfLine = true
                 } else {
                     appendTextOnSameLine(" ".repeat(token.whitespaceLength))
                 }
@@ -228,6 +239,20 @@ class Printer(
             }
         }
     }
+
+    private fun appendKDocContent(content: String) {
+        val lines = content.split("\n")
+        if (atStartOfLine) {
+            appendTextOnSameLine(" * ")
+        }
+        appendTextOnSameLine(lines[0])
+        for (line in lines.tail()) {
+            indentForComment(" * ")
+            appendTextOnSameLine(line)
+        }
+    }
+
+    private fun <E> List<E>.tail(): List<E> = subList(1, size)
 
     private fun appendTextOnSameLine(text: String) {
         result.append(text)

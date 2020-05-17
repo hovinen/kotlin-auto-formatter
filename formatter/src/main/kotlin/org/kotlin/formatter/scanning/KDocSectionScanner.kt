@@ -7,6 +7,7 @@ import org.kotlin.formatter.ForcedBreakToken
 import org.kotlin.formatter.State
 import org.kotlin.formatter.Token
 import org.kotlin.formatter.WhitespaceToken
+import org.kotlin.formatter.nonBreakingSpaceToken
 import org.kotlin.formatter.scanning.nodepattern.nodePattern
 
 /** A [NodeScanner] for individual sections of KDoc. */
