@@ -32,6 +32,8 @@ class NodePatternBuilder {
      */
     fun nodeOfType(type: IElementType): NodePatternBuilder = nodeMatching { it.elementType == type }
 
+    fun nodeNotOfType(type: IElementType): NodePatternBuilder = nodeMatching { it.elementType != type }
+
     /**
      * Matches a [ASTNode] whose [ASTNode.getElementType] is any of the given [type].
      */

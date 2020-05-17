@@ -6,6 +6,7 @@ import org.kotlin.formatter.ClosingForcedBreakToken
 import org.kotlin.formatter.ClosingSynchronizedBreakToken
 import org.kotlin.formatter.EndToken
 import org.kotlin.formatter.ForcedBreakToken
+import org.kotlin.formatter.KDocContentToken
 import org.kotlin.formatter.LeafNodeToken
 import org.kotlin.formatter.State
 import org.kotlin.formatter.SynchronizedBreakToken
@@ -42,9 +43,7 @@ class TokenPreprocessor {
      *
      * Also replaces [SynchronizedBreakToken] and [ClosingSynchronizedBreakToken] instances by
      * equivalent [ForcedBreakToken] respectively [ClosingForcedBreakToken] whenever there is
-     * already a [ForcedBreakToken] or a [ClosingForcedBreakToken] in the same block. This is
-     * particularly the case with KDoc, where the beginning and end are marked by synchronized break
-     * tokens to allow the KDoc to be collapsed into a single line if it is short enough.
+     * already a [KDocContentToken] with a newline character in the same block.
      *
      * Any existing values of [WhitespaceToken.length] and [BeginToken.length] in [input] are
      * ignored by this process.
@@ -103,6 +102,7 @@ private sealed class StackElement(internal val tokens: MutableList<Token> = muta
                 is WhitespaceToken -> if (it.content.isEmpty()) 0 else 1
                 is SynchronizedBreakToken -> it.whitespaceLength
                 is LeafNodeToken -> it.textLength
+                is KDocContentToken -> it.textLength
                 else -> 0
             }
         }.sum()
@@ -113,7 +113,7 @@ private class BlockStackElement(
     tokens: MutableList<Token> = mutableListOf()
 ): StackElement(tokens) {
     internal fun replaceSynchronizedBreaks() {
-        if (tokens.any { it is ForcedBreakToken || it is ClosingForcedBreakToken }) {
+        if (tokens.any { it is KDocContentToken && it.content.contains('\n') }) {
             var level = 0
             tokens.replaceAll {
                 when {
@@ -142,6 +142,7 @@ private val Token.textLength: Int
     get() =
         when(this) {
             is LeafNodeToken -> textLength
+            is KDocContentToken -> textLength
             is BeginToken -> length
             else -> 0
         }

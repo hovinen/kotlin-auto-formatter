@@ -243,11 +243,11 @@ class Printer(
     private fun appendKDocContent(content: String) {
         val lines = content.split("\n")
         if (atStartOfLine) {
-            appendTextOnSameLine(" * ")
+            appendTextOnSameLine(if (lines.first().isNotBlank()) " * " else " *")
         }
-        appendTextOnSameLine(lines[0])
+        appendTextOnSameLine(lines.first())
         for (line in lines.tail()) {
-            indentForComment(" * ")
+            indentForComment(if (line.isNotBlank()) " * " else " *")
             appendTextOnSameLine(line)
         }
     }

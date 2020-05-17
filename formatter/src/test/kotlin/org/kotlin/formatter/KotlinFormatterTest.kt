@@ -856,22 +856,6 @@ class KotlinFormatterTest {
     }
 
     @Test
-    fun `format breaks KDoc comment text`() {
-        val result = KotlinFormatter(maxLineLength = 60).format("""
-            /**
-             * An extra long summary fragment which should wrap to a new line.
-             */
-        """.trimIndent())
-
-        assertThat(result).isEqualTo("""
-            /**
-             * An extra long summary fragment which should wrap to a new
-             * line.
-             */
-        """.trimIndent())
-    }
-
-    @Test
     fun `format breaks the short form of the summary fragment`() {
         val result = KotlinFormatter(maxLineLength = 60).format("""
             /** An extra long summary fragment which should wrap to a new line. */
@@ -879,8 +863,7 @@ class KotlinFormatterTest {
 
         assertThat(result).isEqualTo("""
             /**
-             * An extra long summary fragment which should wrap to a new
-             * line.
+             * An extra long summary fragment which should wrap to a new line.
              */
         """.trimIndent())
     }
@@ -901,39 +884,7 @@ class KotlinFormatterTest {
     }
 
     @Test
-    fun `format indents with a continuation indent when breaking at a tag`() {
-        val result = KotlinFormatter(maxLineLength = 60).format("""
-            /**
-             * @param parameter an input parameter with a particularly long description
-             */
-        """.trimIndent())
-
-        assertThat(result).isEqualTo("""
-            /**
-             * @param parameter an input parameter with a particularly
-             *     long description
-             */
-        """.trimIndent())
-    }
-
-    @Test
-    fun `format consolidates continuation indentation in KDoc tags`() {
-        val result = KotlinFormatter(maxLineLength = 75).format("""
-            /**
-             * @param parameter an input parameter with a particularly
-             *     long description
-             */
-        """.trimIndent())
-
-        assertThat(result).isEqualTo("""
-            /**
-             * @param parameter an input parameter with a particularly long description
-             */
-        """.trimIndent())
-    }
-
-    @Test
-    fun `format preserves newlines between directives`() {
+    fun `format preserves newlines between tags`() {
         val result = KotlinFormatter(maxLineLength = 60).format("""
             /**
              * @param parameter an input parameter with a particularly long description
@@ -943,8 +894,7 @@ class KotlinFormatterTest {
 
         assertThat(result).isEqualTo("""
             /**
-             * @param parameter an input parameter with a particularly
-             *     long description
+             * @param parameter an input parameter with a particularly long description
              * @param anotherParameter another input parameter
              */
         """.trimIndent())
@@ -1211,26 +1161,6 @@ class KotlinFormatterTest {
     }
 
     @Test
-    fun `breaks KDoc at exactly the column limit`() {
-        val subject = KotlinFormatter(maxLineLength = 16)
-
-        val result = subject.format("""
-            /**
-             * aaaa aaaa
-             * aaaa aaaa aaaa
-             */
-        """.trimIndent())
-
-        assertThat(result).isEqualTo("""
-            /**
-             * aaaa aaaa
-             * aaaa aaaa
-             * aaaa
-             */
-        """.trimIndent())
-    }
-
-    @Test
     fun `inserts whitespace before closing KDoc marker when converting to one-line form`() {
         val subject = KotlinFormatter(maxLineLength = 40)
 
@@ -1251,6 +1181,7 @@ class KotlinFormatterTest {
 
         val result = subject.format("""
             /**
+             * Some KDoc.
              *  * An item
              *  * Another item
              */
@@ -1258,6 +1189,7 @@ class KotlinFormatterTest {
 
         assertThat(result).isEqualTo("""
             /**
+             * Some KDoc.
              *  * An item
              *  * Another item
              */
@@ -1270,6 +1202,7 @@ class KotlinFormatterTest {
 
         val result = subject.format("""
             /**
+             * Some KDoc.
              *  1. An item
              *  2. Another item
              */
@@ -1277,6 +1210,7 @@ class KotlinFormatterTest {
 
         assertThat(result).isEqualTo("""
             /**
+             * Some KDoc.
              *  1. An item
              *  2. Another item
              */

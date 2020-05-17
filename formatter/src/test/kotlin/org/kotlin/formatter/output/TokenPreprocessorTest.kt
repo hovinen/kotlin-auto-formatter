@@ -12,6 +12,7 @@ import org.kotlin.formatter.ClosingForcedBreakToken
 import org.kotlin.formatter.ClosingSynchronizedBreakToken
 import org.kotlin.formatter.EndToken
 import org.kotlin.formatter.ForcedBreakToken
+import org.kotlin.formatter.KDocContentToken
 import org.kotlin.formatter.LeafNodeToken
 import org.kotlin.formatter.State
 import org.kotlin.formatter.SynchronizedBreakToken
@@ -33,20 +34,20 @@ internal class TokenPreprocessorTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = ["any token", "another token"])
-    fun `outputs a WhitespaceToken with the length of the following token`(token: String) {
+    @MethodSource("whitespaceTokenLengthCases")
+    fun `outputs a WhitespaceToken with the length of the following token`(token: Token, lengthExpected: Int) {
         val subject = TokenPreprocessor()
         val input = listOf(
             WhitespaceToken(length = 0, content = " "),
-            LeafNodeToken(token)
+            token
         )
 
         val result = subject.preprocess(input)
 
         assertThat(result).isEqualTo(
             listOf(
-                WhitespaceToken(length = token.length + 1, content = " "),
-                LeafNodeToken(token)
+                WhitespaceToken(length = lengthExpected, content = " "),
+                token
             )
         )
     }
@@ -242,14 +243,14 @@ internal class TokenPreprocessorTest {
 
     @ParameterizedTest
     @MethodSource("synchronizedBreakTokenCases")
-    fun `converts synchronized break tokens into forced break tokens when other forced break tokens are in the same block`(
-        synchronizedBreakToken: Token, breakToken: Token, expectedBreakToken: Token
+    fun `converts synchronized break into forced break when KDoc token with newline the same block`(
+        synchronizedBreakToken: Token, expectedBreakToken: Token
     ) {
         val subject = TokenPreprocessor()
         val input = listOf(
-            BeginToken(length = 0, state = State.LONG_COMMENT),
+            BeginToken(state = State.CODE),
             synchronizedBreakToken,
-            breakToken,
+            KDocContentToken("\n"),
             EndToken
         )
 
@@ -257,9 +258,9 @@ internal class TokenPreprocessorTest {
 
         assertThat(result).isEqualTo(
             listOf(
-                BeginToken(length = 0, state = State.LONG_COMMENT),
+                BeginToken(length = 1, state = State.CODE),
                 expectedBreakToken,
-                breakToken,
+                KDocContentToken("\n"),
                 EndToken
             )
         )
@@ -268,15 +269,15 @@ internal class TokenPreprocessorTest {
     @ParameterizedTest
     @MethodSource("synchronizedBreakTokenCases")
     fun `does not convert synchronized break tokens in a subblock into forced break tokens`(
-        synchronizedBreakToken: Token, breakToken: Token, unused: Token
+        synchronizedBreakToken: Token, unused: Token
     ) {
         val subject = TokenPreprocessor()
         val input = listOf(
-            BeginToken(length = 0, state = State.LONG_COMMENT),
-            BeginToken(length = 0, state = State.LONG_COMMENT),
+            BeginToken(state = State.CODE),
+            BeginToken(state = State.CODE),
             synchronizedBreakToken,
             EndToken,
-            breakToken,
+            KDocContentToken("\n"),
             EndToken
         )
 
@@ -284,11 +285,11 @@ internal class TokenPreprocessorTest {
 
         assertThat(result).isEqualTo(
             listOf(
-                BeginToken(length = 0, state = State.LONG_COMMENT),
-                BeginToken(length = 0, state = State.LONG_COMMENT),
+                BeginToken(length = 1, state = State.CODE),
+                BeginToken(length = 0, state = State.CODE),
                 synchronizedBreakToken,
                 EndToken,
-                breakToken,
+                KDocContentToken("\n"),
                 EndToken
             )
         )
@@ -298,8 +299,8 @@ internal class TokenPreprocessorTest {
     fun `does not convert synchronized break if the block has BlockFromLastForcedBreakToken`() {
         val subject = TokenPreprocessor()
         val input = listOf(
-            BeginToken(length = 0, state = State.LONG_COMMENT),
-            ForcedBreakToken(count = 1),
+            BeginToken(state = State.CODE),
+            KDocContentToken("\n"),
             SynchronizedBreakToken(whitespaceLength = 0),
             BlockFromLastForcedBreakToken,
             EndToken
@@ -309,9 +310,9 @@ internal class TokenPreprocessorTest {
 
         assertThat(result).isEqualTo(
             listOf(
-                BeginToken(length = 0, state = State.LONG_COMMENT),
-                ForcedBreakToken(count = 1),
-                BeginToken(state = State.LONG_COMMENT),
+                BeginToken(length = 1, state = State.CODE),
+                BeginToken(length = 1, state = State.CODE),
+                KDocContentToken("\n"),
                 SynchronizedBreakToken(whitespaceLength = 0),
                 EndToken,
                 EndToken
@@ -324,9 +325,17 @@ internal class TokenPreprocessorTest {
         fun tokenLengthCases(): List<Arguments> =
             listOf(
                 Arguments.of(LeafNodeToken("any token"), 9),
+                Arguments.of(KDocContentToken("any content"), 11),
                 Arguments.of(WhitespaceToken(length = 0, content = "  "), 1),
                 Arguments.of(WhitespaceToken(length = 0, content = ""), 0),
                 Arguments.of(SynchronizedBreakToken(whitespaceLength = 2), 2)
+            )
+
+        @JvmStatic
+        fun whitespaceTokenLengthCases(): List<Arguments> =
+            listOf(
+                Arguments.of(LeafNodeToken("any token"), 10),
+                Arguments.of(KDocContentToken("any content"), 12)
             )
 
         @JvmStatic
@@ -339,10 +348,10 @@ internal class TokenPreprocessorTest {
         @JvmStatic
         fun synchronizedBreakTokenCases(): List<Arguments> =
             listOf(
-                Arguments.of(SynchronizedBreakToken(whitespaceLength = 0), ForcedBreakToken(count = 1), ForcedBreakToken(count = 1)),
-                Arguments.of(ClosingSynchronizedBreakToken(whitespaceLength = 0), ForcedBreakToken(count = 1), ClosingForcedBreakToken),
-                Arguments.of(SynchronizedBreakToken(whitespaceLength = 0), ClosingForcedBreakToken, ForcedBreakToken(count = 1)),
-                Arguments.of(ClosingSynchronizedBreakToken(whitespaceLength = 0), ClosingForcedBreakToken, ClosingForcedBreakToken)
+                Arguments.of(SynchronizedBreakToken(whitespaceLength = 0), ForcedBreakToken(count = 1)),
+                Arguments.of(ClosingSynchronizedBreakToken(whitespaceLength = 0), ClosingForcedBreakToken),
+                Arguments.of(SynchronizedBreakToken(whitespaceLength = 0), ForcedBreakToken(count = 1)),
+                Arguments.of(ClosingSynchronizedBreakToken(whitespaceLength = 0), ClosingForcedBreakToken)
             )
     }
 }

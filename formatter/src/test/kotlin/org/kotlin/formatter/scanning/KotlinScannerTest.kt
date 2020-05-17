@@ -3,6 +3,7 @@ package org.kotlin.formatter.scanning
 import org.assertj.core.api.Assertions.assertThat
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.ElementType
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.LeafPsiElement
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.kotlin.formatter.BeginToken
 import org.kotlin.formatter.BlockFromLastForcedBreakToken
@@ -10,6 +11,7 @@ import org.kotlin.formatter.ClosingForcedBreakToken
 import org.kotlin.formatter.ClosingSynchronizedBreakToken
 import org.kotlin.formatter.EndToken
 import org.kotlin.formatter.ForcedBreakToken
+import org.kotlin.formatter.KDocContentToken
 import org.kotlin.formatter.LeafNodeToken
 import org.kotlin.formatter.State
 import org.kotlin.formatter.SynchronizedBreakToken
@@ -727,7 +729,7 @@ internal class KotlinScannerTest {
 
         assertThat(result)
             .containsSubsequence(
-                LeafNodeToken("*/"),
+                LeafNodeToken(" */"),
                 ClosingForcedBreakToken,
                 LeafNodeToken("fun")
             )
@@ -1183,224 +1185,134 @@ internal class KotlinScannerTest {
     }
 
     @Test
-    fun `outputs a BeginToken with state LONG_COMMENT on block comment`() {
+    @Disabled("Holding off on implementation for now.")
+    fun `outputs KDocContentToken in a block for a long comment`() {
         val subject = subject()
         val node = kotlinLoader.parseKotlin("/* A comment */")
 
         val result = subject.scan(node)
 
         assertThat(result)
-            .containsAll(listOf(BeginToken(State.LONG_COMMENT), EndToken))
+            .containsSequence(
+                BeginToken(State.CODE),
+                LeafNodeToken("/* "),
+                KDocContentToken(content = "A comment"),
+                ClosingSynchronizedBreakToken(whitespaceLength = 0),
+                LeafNodeToken(" */"),
+                EndToken
+            )
     }
 
     @Test
-    fun `does not output leading astrisk on multi-line block comment`() {
+    fun `outputs KDocContentToken in a block for a KDoc comment`() {
         val subject = subject()
-        val node = kotlinLoader.parseKotlin("""
-            /*
-             * A comment
-             */
-        """)
-
-        val result = subject.scan(node)
-
-        assertThat(result).doesNotContain(LeafNodeToken("*"))
-    }
-
-    @Test
-    fun `outputs SynchronizedBreakToken after start of KDoc comment`() {
-        val subject = subject()
-        val node = kotlinLoader.parseKotlin("/** A comment */")
+        val node = kotlinLoader.parseKotlin("/** Some KDoc */")
 
         val result = subject.scan(node)
 
         assertThat(result)
-            .containsSubsequence(
+            .containsSequence(
+                BeginToken(State.CODE),
                 LeafNodeToken("/**"),
-                SynchronizedBreakToken(whitespaceLength = 0),
-                LeafNodeToken("A")
-            )
-    }
-
-    @Test
-    fun `outputs ClosingSynchronizedBreakToken before closing of KDoc comment`() {
-        val subject = subject()
-        val node = kotlinLoader.parseKotlin("/** A comment */")
-
-        val result = subject.scan(node)
-
-        assertThat(result)
-            .containsSubsequence(
-                LeafNodeToken("comment"),
                 ClosingSynchronizedBreakToken(whitespaceLength = 1),
-                LeafNodeToken("*/")
+                KDocContentToken(content = "Some KDoc"),
+                ClosingSynchronizedBreakToken(whitespaceLength = 0),
+                LeafNodeToken(" */"),
+                EndToken
             )
     }
 
     @Test
-    fun `outputs a BeginToken with state LONG_COMMENT on KDoc comment`() {
+    fun `supports links in KDoc comments`() {
         val subject = subject()
-        val node = kotlinLoader.parseKotlin("/** A comment */")
+        val node = kotlinLoader.parseKotlin("/** Some KDoc [AClass] */")
 
         val result = subject.scan(node)
 
         assertThat(result)
-            .containsAll(listOf(BeginToken(State.LONG_COMMENT), EndToken))
-    }
-
-    @Test
-    fun `outputs a BeginToken with state LONG_COMMENT on KDoc section`() {
-        val subject = subject()
-        val node = kotlinLoader.parseKotlin("/** A comment */")
-
-        val result = subject.scan(node)
-
-        assertThat(result)
-            .containsSubsequence(
-                listOf(
-                    BeginToken(State.LONG_COMMENT),
-                    LeafNodeToken("A"),
-                    LeafNodeToken("comment"),
-                    EndToken
-                )
+            .containsSequence(
+                BeginToken(State.CODE),
+                LeafNodeToken("/**"),
+                ClosingSynchronizedBreakToken(whitespaceLength = 1),
+                KDocContentToken(content = "Some KDoc [AClass]"),
+                ClosingSynchronizedBreakToken(whitespaceLength = 0),
+                LeafNodeToken(" */"),
+                EndToken
             )
     }
 
     @Test
-    fun `does not output extraneous whitespace`() {
+    fun `outputs KDocContentToken without leading asterisks`() {
         val subject = subject()
         val node = kotlinLoader.parseKotlin("""
             /**
-             * A comment
+             * Some KDoc
              */
         """.trimIndent())
 
         val result = subject.scan(node)
 
-        assertThat(result).doesNotContain(WhitespaceToken("\n "))
-    }
-
-    @Test
-    fun `does not output initial astrisk on KDoc comments`() {
-        val subject = subject()
-        val node = kotlinLoader.parseKotlin("""
-            /**
-             * A comment
-             */
-        """)
-
-        val result = subject.scan(node)
-
-        assertThat(result).doesNotContain(LeafNodeToken("*"))
-    }
-
-    @Test
-    fun `does not output a ForcedBreakTokens single line break in KDoc comment`() {
-        val subject = subject()
-        val node = kotlinLoader.parseKotlin("""
-            /**
-             * A comment
-             * Some more text
-             */
-        """)
-
-        val result = subject.scan(node)
-
         assertThat(result)
-            .doesNotContainSubsequence(
-                LeafNodeToken("comment"),
-                ForcedBreakToken(count = 1),
-                LeafNodeToken("Some")
+            .containsSequence(
+                BeginToken(State.CODE),
+                LeafNodeToken("/**"),
+                ClosingSynchronizedBreakToken(whitespaceLength = 1),
+                KDocContentToken(content = "Some KDoc"),
+                ClosingSynchronizedBreakToken(whitespaceLength = 0),
+                LeafNodeToken(" */"),
+                EndToken
             )
     }
 
     @Test
-    fun `outputs two ForcedBreakTokens for vertical whitespace in KDoc comment`() {
+    fun `outputs KDocContentToken with intermediate newlines`() {
         val subject = subject()
         val node = kotlinLoader.parseKotlin("""
             /**
-             * A comment
+             * Some KDoc
              *
-             * Some more text
+             * Some more KDoc
              */
-        """)
+        """.trimIndent())
 
         val result = subject.scan(node)
 
         assertThat(result)
-            .containsSubsequence(
-                LeafNodeToken("comment"),
-                ForcedBreakToken(count = 2),
-                LeafNodeToken("Some")
+            .containsSequence(
+                BeginToken(State.CODE),
+                LeafNodeToken("/**"),
+                ClosingSynchronizedBreakToken(whitespaceLength = 1),
+                KDocContentToken(content = "Some KDoc\n\nSome more KDoc"),
+                ClosingSynchronizedBreakToken(whitespaceLength = 0),
+                LeafNodeToken(" */"),
+                EndToken
             )
     }
 
     @Test
-    fun `outputs a ForcedBreakToken between KDoc tags on separate lines`() {
+    fun `outputs KDocContentToken with tag content`() {
         val subject = subject()
         val node = kotlinLoader.parseKotlin("""
             /**
-             * @param Some parameter
-             * @param Some other parameter
+             * @param parameter A parameter
+             *     with some more content
              */
-        """)
+        """.trimIndent())
 
         val result = subject.scan(node)
 
         assertThat(result)
-            .containsSubsequence(
-                LeafNodeToken("parameter"),
-                ForcedBreakToken(count = 1),
-                LeafNodeToken("@param")
+            .containsSequence(
+                BeginToken(State.CODE),
+                LeafNodeToken("/**"),
+                ClosingSynchronizedBreakToken(whitespaceLength = 1),
+                KDocContentToken(
+                    content = "@param parameter A parameter\n    with some more content"
+                ),
+                ClosingSynchronizedBreakToken(whitespaceLength = 0),
+                LeafNodeToken(" */"),
+                EndToken
             )
-    }
-
-    @Test
-    fun `outputs a BeginToken with state KDOC_DIRECTIVE on KDoc directive inside comment`() {
-        val subject = subject()
-        val node = kotlinLoader.parseKotlin("""
-            /**
-             * @return A return value
-             */
-        """)
-
-        val result = subject.scan(node)
-
-        assertThat(result)
-            .containsAll(listOf(BeginToken(State.KDOC_TAG), EndToken))
-    }
-
-    @Test
-    fun `does not output a BeginToken with state CODE on KDoc directive inside comment`() {
-        val subject = subject()
-        val node = kotlinLoader.parseKotlin("""
-            /**
-             * @param parameter A parameter
-             */
-        """)
-
-        val result = subject.scan(node)
-
-        assertThat(result).doesNotContain(BeginToken(State.CODE))
-    }
-
-    @Test
-    fun `does not output ForcedBreakToken followed by ClosingSynchronizedBreakToken in KDoc`() {
-        val subject = subject()
-        val node = kotlinLoader.parseKotlin("""
-            /**
-             * @param parameter A parameter
-             */
-        """)
-
-        val result = subject.scan(node)
-
-        assertThat(result).doesNotContainSubsequence(
-            LeafNodeToken("parameter"),
-            ForcedBreakToken(count = 1),
-            ClosingSynchronizedBreakToken(whitespaceLength = 0),
-            LeafNodeToken("*/")
-        )
     }
 
     @Test
@@ -1415,7 +1327,7 @@ internal class KotlinScannerTest {
 
         assertThat(result).containsSubsequence(
             listOf(
-                LeafNodeToken("*/"),
+                LeafNodeToken(" */"),
                 ForcedBreakToken(count = 1),
                 LeafNodeToken("class")
             )
@@ -1434,7 +1346,7 @@ internal class KotlinScannerTest {
 
         assertThat(result).containsSubsequence(
             listOf(
-                LeafNodeToken("*/"),
+                LeafNodeToken(" */"),
                 ForcedBreakToken(count = 1),
                 LeafNodeToken("class"),
                 LeafNodeToken("MyClass"),
