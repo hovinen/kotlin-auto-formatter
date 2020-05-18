@@ -45,24 +45,20 @@ internal class KDocScanner(private val kotlinScanner: KotlinScanner) : NodeScann
         sectionNodePattern.matchSequence(nodes).joinToString("") { (it as KDocContentToken).content }
 
     private val sectionNodePattern = nodePattern {
-        zeroOrOne {
-            nodeNotOfType(KDocTokens.LEADING_ASTERISK) andThen { nodes ->
-                listOf(KDocContentToken(content = nodes.first().text.trimStart()))
+        zeroOrMore {
+            oneOrMoreFrugal { nodeNotOfType(KDocTokens.LEADING_ASTERISK) } andThen { nodes ->
+                listOf(KDocContentToken(content = nodes.joinToString("") { it.text }.trimFirstWhitespace()))
             }
-            zeroOrMoreFrugal { anyNode() } andThen { nodes ->
-                listOf(KDocContentToken(content = nodes.joinToString("") { it.text }))
+            zeroOrOne {
+                whitespaceWithNewline() andThen { nodes ->
+                    listOf(KDocContentToken(content = "\n".repeat(nodes.first().text.count { it == '\n' })))
+                }
             }
-            zeroOrOne { whitespaceWithNewline() andThen { listOf(KDocContentToken(content = "\n")) } }
         }
         zeroOrMore {
             nodeOfType(KDocTokens.LEADING_ASTERISK)
-            zeroOrOne {
-                nodeNotOfType(KtTokens.WHITE_SPACE) andThen { nodes ->
-                    listOf(KDocContentToken(content = nodes.first().text.trimFirstWhitespace()))
-                }
-                zeroOrMoreFrugal { anyNode() } andThen { nodes ->
-                    listOf(KDocContentToken(content = nodes.joinToString("") { it.text }))
-                }
+            zeroOrMoreFrugal { anyNode() } andThen { nodes ->
+                listOf(KDocContentToken(content = nodes.joinToString("") { it.text }.trimFirstWhitespace()))
             }
             zeroOrOne {
                 whitespaceWithNewline() andThen { nodes ->

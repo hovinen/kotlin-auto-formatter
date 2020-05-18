@@ -1060,6 +1060,27 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `maintains same indent between KDoc and function declaration inside class`() {
+        val subject = KotlinFormatter()
+
+        val result = subject.format("""
+            class MyClass {
+                /** Some KDoc. */
+                fun aFunction() {
+                }
+            }
+        """.trimIndent())
+
+        assertThat(result).isEqualTo("""
+            class MyClass {
+                /** Some KDoc. */
+                fun aFunction() {
+                }
+            }
+        """.trimIndent())
+    }
+
+    @Test
     fun `maintains a line break between KDoc and property declaration`() {
         val subject = KotlinFormatter(maxLineLength = 40)
 
@@ -1181,7 +1202,6 @@ class KotlinFormatterTest {
 
         val result = subject.format("""
             /**
-             * Some KDoc.
              *  * An item
              *  * Another item
              */
@@ -1189,7 +1209,6 @@ class KotlinFormatterTest {
 
         assertThat(result).isEqualTo("""
             /**
-             * Some KDoc.
              *  * An item
              *  * Another item
              */
@@ -1202,7 +1221,6 @@ class KotlinFormatterTest {
 
         val result = subject.format("""
             /**
-             * Some KDoc.
              *  1. An item
              *  2. Another item
              */
@@ -1210,7 +1228,6 @@ class KotlinFormatterTest {
 
         assertThat(result).isEqualTo("""
             /**
-             * Some KDoc.
              *  1. An item
              *  2. Another item
              */
