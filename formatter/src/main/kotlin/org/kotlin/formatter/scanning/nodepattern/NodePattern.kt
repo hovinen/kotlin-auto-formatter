@@ -32,11 +32,13 @@ class NodePattern internal constructor(private val initialState: State) {
     fun matchSequence(nodes: Iterable<ASTNode>): List<Token> {
         var paths = listOf<PathStep>(InitialPathStep(initialState))
         for (node in nodes) {
-            paths = epsilonStep(paths)
+            val states = paths.filterIsInstance<PathStepOnState>().map { it.state }.toMutableSet()
+            paths = epsilonStep(paths, states)
             paths = setNodeOnPaths(paths, node)
             paths = step(paths, node)
         }
-        paths = epsilonStep(paths)
+        val states = paths.filterIsInstance<PathStepOnState>().map { it.state }.toMutableSet()
+        paths = epsilonStep(paths, states)
         paths = step(paths, TerminalNode)
         return paths.firstOrNull { it is FinalPathStep }?.runActions()?.tokens
             ?: throw Exception("Could not match node sequence ${nodes.toList()}")
@@ -45,12 +47,12 @@ class NodePattern internal constructor(private val initialState: State) {
     private fun setNodeOnPaths(paths: List<PathStep>, node: ASTNode): List<PathStep> =
         paths.map { it.withNode(node) }
 
-    private fun epsilonStep(paths: List<PathStep>): List<PathStep> =
-        paths.flatMap { if (it is PathStepOnState) epsilonStepForPath(it) else listOf(it) }
+    private fun epsilonStep(paths: List<PathStep>, states: MutableSet<State>): List<PathStep> =
+        paths.flatMap { if (it is PathStepOnState) epsilonStepForPath(it, states) else listOf(it) }
 
     private fun epsilonStepForPath(
         startingPath: PathStepOnState,
-        visitedStates: MutableSet<State> = mutableSetOf(startingPath.state)
+        visitedStates: MutableSet<State>
     ): List<PathStep> {
         val newStates = startingPath.state.immediateNextStates.minus(visitedStates)
         return if (newStates.isNotEmpty()) {

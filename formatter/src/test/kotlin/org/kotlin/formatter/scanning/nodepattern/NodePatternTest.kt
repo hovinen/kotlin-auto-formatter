@@ -767,6 +767,21 @@ class NodePatternTest {
         assertThat(tokens).isEqualTo(listOf(LeafNodeToken("a"), LeafNodeToken("b")))
     }
 
+    @Test
+    fun `handles long input without running out of memory`() {
+        val subject = nodePattern {
+            zeroOrMore { anyNode() }
+            zeroOrMore { anyNode() }
+            zeroOrMore { anyNode() }
+            end()
+        }
+        val element = LeafPsiElement(KtTokens.IDENTIFIER, "anyElement")
+
+        subject.matchSequence((0..1000).map { element })
+
+        // Assert that nothing is thrown.
+    }
+
     companion object {
         @JvmStatic
         fun valVarNodeCases(): List<Arguments> =
