@@ -59,14 +59,6 @@ class KotlinScanner {
         scannerState: ScannerState
     ) = if (node.isAtEndOfFile || hasNewlineInBlockState(node, scannerState)) {
             listOf(ForcedBreakToken(count = if (hasDoubleNewline(node)) 2 else 1))
-        } else if (hasDoubleNewlineInKDocState(node, scannerState)) {
-            listOf(ForcedBreakToken(count = 2))
-        } else if (scannerState == ScannerState.KDOC) {
-            if (!node.textContains('\n')) {
-                listOf(WhitespaceToken(" "))
-            } else {
-                listOf()
-            }
         } else {
             listOf(WhitespaceToken(node.text))
         }
@@ -80,12 +72,4 @@ class KotlinScanner {
         node: LeafPsiElement,
         scannerState: ScannerState
     ) = node.textContains('\n') && setOf(ScannerState.BLOCK, ScannerState.PACKAGE_IMPORT).contains(scannerState)
-
-    private fun hasDoubleNewlineInKDocState(
-        node: LeafPsiElement,
-        scannerState: ScannerState
-    ) = scannerState == ScannerState.KDOC &&
-        node.textContains('\n') &&
-        node.treeNext.elementType == KDocTokens.LEADING_ASTERISK &&
-        node.treeNext.treeNext.text.matches(Regex(" *\n.*"))
 }

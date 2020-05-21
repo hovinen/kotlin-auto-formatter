@@ -16,13 +16,6 @@ internal enum class ScannerState {
     STATEMENT,
 
     /**
-     * Single newlines are transformed into [org.kotlin.formatter.WhitespaceToken], while double
-     * newlines (i.e. paragraph breaks) are transformed into
-     * [org.kotlin.formatter.ForcedBreakToken].
-     */
-    KDOC,
-
-    /**
      * Behaves like [BLOCK], except that [org.kotlin.formatter.BeginToken] are output in state
      * [org.kotlin.formatter.State.PACKAGE_IMPORT] in order to suppress insertion of line breaks.
      */

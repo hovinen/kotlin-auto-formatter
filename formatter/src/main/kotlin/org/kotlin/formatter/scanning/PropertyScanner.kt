@@ -78,7 +78,7 @@ internal fun NodePatternBuilder.optionalKDoc(kotlinScanner: KotlinScanner) {
         possibleWhitespace()
     } thenMapToTokens { nodes ->
         if (nodes.isNotEmpty()) {
-            kotlinScanner.scanNodes(nodes, ScannerState.KDOC).plus(ForcedBreakToken(count = 1))
+            kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT).plus(ForcedBreakToken(count = 1))
         } else {
             listOf()
         }
