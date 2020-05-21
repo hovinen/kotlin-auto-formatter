@@ -25,7 +25,7 @@ internal class KDocScanner(private val kotlinScanner: KotlinScanner) : NodeScann
         }
         possibleWhitespace()
         zeroOrMore { nodeOfType(KDocElementTypes.KDOC_SECTION) } andThen { nodes ->
-            val fullContent = nodes.joinToString("") { scanIntoString(it.children().asIterable()) }
+            val fullContent = nodes.joinToString("") { scanChildrenIntoString(it) }
             listOf(KDocContentToken(content = fullContent.trimOneWhitespace()))
         }
         possibleWhitespace()
@@ -46,47 +46,43 @@ internal class KDocScanner(private val kotlinScanner: KotlinScanner) : NodeScann
             this
         }
 
-    private fun scanIntoString(nodes: Iterable<ASTNode>): String =
-        sectionNodePattern.matchSequence(nodes).joinToString("") { (it as KDocContentToken).content }
+    private fun scanChildrenIntoString(node: ASTNode): String =
+        sectionNodePattern.matchSequence(node.children().asIterable())
+            .joinToString("") { (it as KDocContentToken).content }
 
     private val sectionNodePattern = nodePattern {
-        zeroOrMore {
-            nodeOfType(KDocElementTypes.KDOC_TAG) andThen { nodes ->
-                listOf(
-                    KDocContentToken(
-                        content = scanIntoString(nodes.first().children().asIterable())
-                    )
-                )
-            }
-            possibleWhitespace() andThen { nodes ->
-                listOf(KDocContentToken(content = "\n".repeat(nodes.map { it.text.countNewlines() }.sum())))
-            }
-        }
         zeroOrOne {
             oneOrMoreFrugal { nodeNotOfType(KDocTokens.LEADING_ASTERISK) } andThen { nodes ->
-                listOf(KDocContentToken(content = nodes.joinToString("") { it.text }))
+                listOf(KDocContentToken(content = nodes.joinToString("") { scanNodeToString(it) }))
             }
             zeroOrOne {
                 whitespaceWithNewline() andThen { nodes ->
-                    listOf(KDocContentToken(content = "\n".repeat(nodes.first().text.countNewlines())))
+                    listOf(KDocContentToken(content = "\n".repeat(nodes.first().countNewlines())))
                 }
             }
         }
         zeroOrMore {
             nodeOfType(KDocTokens.LEADING_ASTERISK)
             zeroOrMoreFrugal { anyNode() } andThen { nodes ->
-                listOf(KDocContentToken(content = nodes.joinToString("") { it.text }.trimFirstWhitespace()))
+                listOf(KDocContentToken(content = nodes.joinToString("") { scanNodeToString(it) }.trimFirstWhitespace()))
             }
             zeroOrOne {
                 whitespaceWithNewline() andThen { nodes ->
-                    listOf(KDocContentToken(content = "\n".repeat(nodes.first().text.countNewlines())))
+                    listOf(KDocContentToken(content = "\n".repeat(nodes.first().countNewlines())))
                 }
             }
         }
         end()
     }
 
-    private fun String.countNewlines(): Int = count { it == '\n' }
+    private fun scanNodeToString(node: ASTNode): String =
+        if (node.elementType == KDocElementTypes.KDOC_TAG) {
+            scanChildrenIntoString(node)
+        } else {
+            node.text
+        }
+
+    private fun ASTNode.countNewlines(): Int = text.count { it == '\n' }
 
     private fun String.trimFirstWhitespace(): String =
         if (startsWith(' ')) {
