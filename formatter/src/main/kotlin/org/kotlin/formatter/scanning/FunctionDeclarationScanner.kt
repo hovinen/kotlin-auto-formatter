@@ -19,7 +19,7 @@ internal class FunctionDeclarationScanner(private val kotlinScanner: KotlinScann
         either {
             declarationWithOptionalModifierList(kotlinScanner)
             possibleWhitespace()
-            nodeOfType(KtNodeTypes.BLOCK) andThen { nodes ->
+            nodeOfType(KtNodeTypes.BLOCK) thenMapToTokens { nodes ->
                 listOf(nonBreakingSpaceToken())
                     .plus(kotlinScanner.scanNodes(nodes, ScannerState.BLOCK))
             }
@@ -40,10 +40,10 @@ internal class FunctionDeclarationScanner(private val kotlinScanner: KotlinScann
  */
 private fun NodePatternBuilder.optionalFunctionInitializer(kotlinScanner: KotlinScanner) {
     zeroOrOne {
-        possibleWhitespace() andThen { listOf(nonBreakingSpaceToken()) }
-        nodeOfType(KtTokens.EQ) andThen { listOf(LeafNodeToken("="), BlockFromMarkerToken) }
-        possibleWhitespace() andThen { listOf(WhitespaceToken(" ")) }
-        zeroOrMoreFrugal { anyNode() } andThen { nodes ->
+        possibleWhitespace() thenMapToTokens { listOf(nonBreakingSpaceToken()) }
+        nodeOfType(KtTokens.EQ) thenMapToTokens { listOf(LeafNodeToken("="), BlockFromMarkerToken) }
+        possibleWhitespace() thenMapToTokens { listOf(WhitespaceToken(" ")) }
+        zeroOrMoreFrugal { anyNode() } thenMapToTokens { nodes ->
             kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
         }
     } thenMapTokens { it.plus(BlockFromMarkerToken) }

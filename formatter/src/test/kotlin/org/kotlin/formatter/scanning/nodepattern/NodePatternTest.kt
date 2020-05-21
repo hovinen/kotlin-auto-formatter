@@ -17,7 +17,7 @@ class NodePatternTest {
     fun `accumulates and consumes single matching node`() {
         val accumulatedNodes = mutableListOf<ASTNode>()
         val subject = nodePattern {
-            nodeOfType(KtTokens.CLASS_KEYWORD) andThen {
+            nodeOfType(KtTokens.CLASS_KEYWORD) thenMapToTokens {
                 accumulatedNodes.addAll(it)
                 listOf()
             }
@@ -35,7 +35,7 @@ class NodePatternTest {
     fun `accepts nodes of given types`(node: ASTNode) {
         val accumulatedNodes = mutableListOf<ASTNode>()
         val subject = nodePattern {
-            nodeOfOneOfTypes(KtTokens.VAL_KEYWORD, KtTokens.VAR_KEYWORD) andThen {
+            nodeOfOneOfTypes(KtTokens.VAL_KEYWORD, KtTokens.VAR_KEYWORD) thenMapToTokens {
                 accumulatedNodes.addAll(it)
                 listOf()
             }
@@ -52,7 +52,7 @@ class NodePatternTest {
     fun `accepts nodes not of a given type`() {
         val accumulatedNodes = mutableListOf<ASTNode>()
         val subject = nodePattern {
-            nodeNotOfType(KtTokens.CLASS_KEYWORD) andThen {
+            nodeNotOfType(KtTokens.CLASS_KEYWORD) thenMapToTokens {
                 accumulatedNodes.addAll(it)
                 listOf()
             }
@@ -69,7 +69,7 @@ class NodePatternTest {
     fun `rejects nodes of a type not being accepted`() {
         val accumulatedNodes = mutableListOf<ASTNode>()
         val subject = nodePattern {
-            nodeNotOfType(KtTokens.CLASS_KEYWORD) andThen {
+            nodeNotOfType(KtTokens.CLASS_KEYWORD) thenMapToTokens {
                 accumulatedNodes.addAll(it)
                 listOf()
             }
@@ -84,7 +84,7 @@ class NodePatternTest {
     fun `throws when sequence is not accepted`() {
         val accumulatedNodes = mutableListOf<ASTNode>()
         val subject = nodePattern {
-            nodeOfType(KtTokens.CLASS_KEYWORD) andThen {
+            nodeOfType(KtTokens.CLASS_KEYWORD) thenMapToTokens {
                 accumulatedNodes.addAll(it)
                 listOf()
             }
@@ -102,7 +102,7 @@ class NodePatternTest {
         val accumulatedNodes = mutableListOf<ASTNode>()
         val subject = nodePattern {
             nodeOfType(KtTokens.CLASS_KEYWORD)
-            nodeOfType(KtTokens.IDENTIFIER) andThen {
+            nodeOfType(KtTokens.IDENTIFIER) thenMapToTokens {
                 accumulatedNodes.addAll(it)
                 listOf()
             }
@@ -125,8 +125,8 @@ class NodePatternTest {
     fun `does not spill node from one action into the next`() {
         var accumulatedNodes = listOf<ASTNode>()
         val subject = nodePattern {
-            anyNode() andThen { listOf() }
-            anyNode() andThen {
+            anyNode() thenMapToTokens { listOf() }
+            anyNode() thenMapToTokens {
                 accumulatedNodes = it
                 listOf()
             }
@@ -152,7 +152,7 @@ class NodePatternTest {
             exactlyOne {
                 nodeOfType(KtTokens.CLASS_KEYWORD)
                 nodeOfType(KtTokens.IDENTIFIER)
-            } andThen {
+            } thenMapToTokens {
                 accumulatedNodes.addAll(it)
                 listOf()
             }
@@ -178,7 +178,7 @@ class NodePatternTest {
                 exactlyOne {
                     nodeOfType(KtTokens.IDENTIFIER)
                 }
-            } andThen {
+            } thenMapToTokens {
                 accumulatedNodes.addAll(it)
                 listOf()
             }
@@ -204,7 +204,7 @@ class NodePatternTest {
                 zeroOrOne {
                     nodeOfType(KtTokens.IDENTIFIER)
                 }
-            } andThen {
+            } thenMapToTokens {
                 accumulatedNodes.addAll(it)
                 listOf()
             }
@@ -225,7 +225,7 @@ class NodePatternTest {
     fun `executes an action on a single node before a Kleene star element`() {
         val accumulatedNodes = mutableListOf<ASTNode>()
         val subject = nodePattern {
-            anyNode() andThen {
+            anyNode() thenMapToTokens {
                 accumulatedNodes.addAll(it)
                 listOf()
             }
@@ -246,7 +246,7 @@ class NodePatternTest {
         val accumulatedNodes = mutableListOf<ASTNode>()
         val subject = nodePattern {
             zeroOrMore { anyNode() }
-            anyNode() andThen {
+            anyNode() thenMapToTokens {
                 accumulatedNodes.addAll(it)
                 listOf()
             }
@@ -266,7 +266,7 @@ class NodePatternTest {
         val accumulatedNodes = mutableListOf<ASTNode>()
         val subject = nodePattern {
             zeroOrOne {
-                zeroOrMore { anyNode() } andThen { nodes ->
+                zeroOrMore { anyNode() } thenMapToTokens { nodes ->
                     accumulatedNodes.addAll(nodes)
                     listOf()
                 }
@@ -289,7 +289,7 @@ class NodePatternTest {
             zeroOrOne {
                 nodeOfType(KtTokens.CLASS_KEYWORD)
                 nodeOfType(KtTokens.IDENTIFIER)
-            } andThen {
+            } thenMapToTokens {
                 accumulatedNodes.addAll(it)
                 listOf()
             }
@@ -313,7 +313,7 @@ class NodePatternTest {
             zeroOrOne {
                 nodeOfType(KtTokens.CLASS_KEYWORD)
                 nodeOfType(KtTokens.IDENTIFIER)
-            } andThen {
+            } thenMapToTokens {
                 accumulatedNodes.addAll(it)
                 listOf()
             }
@@ -334,7 +334,7 @@ class NodePatternTest {
                 zeroOrOne {
                     nodeOfType(KtTokens.IDENTIFIER)
                 }
-            } andThen {
+            } thenMapToTokens {
                 accumulatedNodes.addAll(it)
                 listOf()
             }
@@ -353,7 +353,7 @@ class NodePatternTest {
         val subject = nodePattern {
             zeroOrMore {
                 nodeOfType(KtTokens.CLASS_KEYWORD)
-            } andThen {
+            } thenMapToTokens {
                 accumulatedNodes.addAll(it)
                 listOf()
             }
@@ -371,7 +371,7 @@ class NodePatternTest {
         val subject = nodePattern {
             zeroOrMore {
                 nodeOfType(KtTokens.CLASS_KEYWORD)
-            } andThen {
+            } thenMapToTokens {
                 accumulatedNodes.addAll(it)
                 listOf()
             }
@@ -390,7 +390,7 @@ class NodePatternTest {
         val subject = nodePattern {
             zeroOrMore {
                 nodeOfType(KtTokens.CLASS_KEYWORD)
-            } andThen {
+            } thenMapToTokens {
                 accumulatedNodes = it
                 listOf()
             }
@@ -409,7 +409,7 @@ class NodePatternTest {
         val subject = nodePattern {
             zeroOrMoreFrugal {
                 nodeOfType(KtTokens.CLASS_KEYWORD)
-            } andThen {
+            } thenMapToTokens {
                 accumulatedNodes = it
                 listOf()
             }
@@ -427,7 +427,7 @@ class NodePatternTest {
         var actionInvoked = false
         val subject = nodePattern {
             zeroOrMore {
-                nodeOfType(KtTokens.IDENTIFIER) andThen {
+                nodeOfType(KtTokens.IDENTIFIER) thenMapToTokens {
                     actionInvoked = true
                     listOf()
                 }
@@ -445,7 +445,7 @@ class NodePatternTest {
         var actionInvoked = false
         val subject = nodePattern {
             zeroOrMoreFrugal {
-                nodeOfType(KtTokens.IDENTIFIER) andThen {
+                nodeOfType(KtTokens.IDENTIFIER) thenMapToTokens {
                     actionInvoked = true
                     listOf()
                 }
@@ -464,7 +464,7 @@ class NodePatternTest {
         val subject = nodePattern {
             zeroOrMore {
                 nodeOfType(KtTokens.IDENTIFIER)
-            } andThen {
+            } thenMapToTokens {
                 accumulatedNodes = it
                 listOf()
             }
@@ -484,7 +484,7 @@ class NodePatternTest {
         val subject = nodePattern {
             zeroOrMoreFrugal {
                 anyNode()
-            } andThen {
+            } thenMapToTokens {
                 accumulatedNodes = it
                 listOf()
             }
@@ -504,7 +504,7 @@ class NodePatternTest {
         val subject = nodePattern {
             oneOrMore {
                 nodeOfType(KtTokens.CLASS_KEYWORD)
-            } andThen {
+            } thenMapToTokens {
                 accumulatedNodes.addAll(it)
                 listOf()
             }
@@ -523,7 +523,7 @@ class NodePatternTest {
         val subject = nodePattern {
             oneOrMore {
                 nodeOfType(KtTokens.CLASS_KEYWORD)
-            } andThen {
+            } thenMapToTokens {
                 accumulatedNodes = it
                 listOf()
             }
@@ -542,7 +542,7 @@ class NodePatternTest {
         val subject = nodePattern {
             oneOrMore {
                 nodeOfType(KtTokens.IDENTIFIER)
-            } andThen {
+            } thenMapToTokens {
                 accumulatedNodes = it
                 listOf()
             }
@@ -562,7 +562,7 @@ class NodePatternTest {
         val subject = nodePattern {
             oneOrMoreFrugal {
                 anyNode()
-            } andThen {
+            } thenMapToTokens {
                 accumulatedNodes = it
                 listOf()
             }
@@ -582,7 +582,7 @@ class NodePatternTest {
         val subject = nodePattern {
             oneOrMore {
                 nodeOfType(KtTokens.CLASS_KEYWORD)
-            } andThen {
+            } thenMapToTokens {
                 calledCount++
                 listOf()
             }
@@ -601,7 +601,7 @@ class NodePatternTest {
         val subject = nodePattern {
             oneOrMore {
                 nodeOfType(KtTokens.CLASS_KEYWORD)
-            } andThen {
+            } thenMapToTokens {
                 accumulatedNodes.addAll(it)
                 listOf()
             }
@@ -618,7 +618,7 @@ class NodePatternTest {
             zeroOrMore { anyNode() }
             zeroOrOne {
                 nodeOfType(KtTokens.EQ)
-                anyNode() andThen {
+                anyNode() thenMapToTokens {
                     wasCalled = true
                     listOf()
                 }
@@ -640,7 +640,7 @@ class NodePatternTest {
                 nodeOfType(KtTokens.VAL_KEYWORD)
             } or {
                 nodeOfType(KtTokens.VAR_KEYWORD)
-            } andThen {
+            } thenMapToTokens {
                 accumulatedNodes = it
                 listOf()
             }
@@ -661,7 +661,7 @@ class NodePatternTest {
                 nodeOfType(KtTokens.VAL_KEYWORD)
             } or {
                 nodeOfType(KtTokens.VAR_KEYWORD)
-            } andThen {
+            } thenMapToTokens {
                 accumulatedNodes = it
                 listOf()
             }
@@ -680,7 +680,7 @@ class NodePatternTest {
         val subject = nodePattern {
             exactlyOne {
                 oneOrMore {
-                    anyNode() andThen { listOf(LeafNodeToken("a")) }
+                    anyNode() thenMapToTokens { listOf(LeafNodeToken("a")) }
                 }
             } thenMapTokens {
                 tokens = it
@@ -702,7 +702,7 @@ class NodePatternTest {
             exactlyOne {
                 oneOrMore {
                     anyNode()
-                } andThen { listOf(LeafNodeToken("a")) }
+                } thenMapToTokens { listOf(LeafNodeToken("a")) }
             } thenMapTokens {
                 tokens = it
                 listOf()
@@ -720,10 +720,10 @@ class NodePatternTest {
     fun `does not include tokens from previous group in input to token mapper`() {
         var tokens = listOf<Token>()
         val subject = nodePattern {
-            anyNode() andThen { listOf(LeafNodeToken("omitted")) }
+            anyNode() thenMapToTokens { listOf(LeafNodeToken("omitted")) }
             exactlyOne {
                 oneOrMore {
-                    anyNode() andThen { listOf(LeafNodeToken("a")) }
+                    anyNode() thenMapToTokens { listOf(LeafNodeToken("a")) }
                 }
             } thenMapTokens {
                 tokens = it
@@ -741,10 +741,10 @@ class NodePatternTest {
     @Test
     fun `does not repeatedly push new empty token lists to the token stack`() {
         val subject = nodePattern {
-            anyNode() andThen { listOf(LeafNodeToken("a")) }
+            anyNode() thenMapToTokens { listOf(LeafNodeToken("a")) }
             exactlyOne {
                 oneOrMore {
-                    anyNode() andThen { listOf(LeafNodeToken("b")) }
+                    anyNode() thenMapToTokens { listOf(LeafNodeToken("b")) }
                 }
             } thenMapTokens {
                 listOf(it.first())
@@ -761,10 +761,10 @@ class NodePatternTest {
     @Test
     fun `passes tokens processed in previous steps to the output`() {
         val subject = nodePattern {
-            anyNode() andThen { listOf(LeafNodeToken("a")) }
+            anyNode() thenMapToTokens { listOf(LeafNodeToken("a")) }
             exactlyOne {
                 oneOrMore {
-                    anyNode() andThen { listOf(LeafNodeToken("b")) }
+                    anyNode() thenMapToTokens { listOf(LeafNodeToken("b")) }
                 }
             } thenMapTokens {
                 it
@@ -781,11 +781,11 @@ class NodePatternTest {
     @Test
     fun `passes tokens processed in previous steps to the output in more complicated case`() {
         val subject = nodePattern {
-            anyNode() andThen { listOf(LeafNodeToken("a")) }
+            anyNode() thenMapToTokens { listOf(LeafNodeToken("a")) }
             possibleWhitespace()
             exactlyOne {
                 oneOrMore {
-                    anyNode() andThen { listOf(LeafNodeToken("b")) }
+                    anyNode() thenMapToTokens { listOf(LeafNodeToken("b")) }
                 }
             } thenMapTokens {
                 it

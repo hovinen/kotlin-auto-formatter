@@ -12,12 +12,12 @@ import org.kotlin.formatter.scanning.nodepattern.nodePattern
 /** A [NodeScanner] for function call expressions. */
 internal class CallExpressionScanner(private val kotlinScanner: KotlinScanner) : NodeScanner {
     private val nodePattern = nodePattern {
-        oneOrMoreFrugal { anyNode() } andThen { nodes ->
+        oneOrMoreFrugal { anyNode() } thenMapToTokens { nodes ->
             kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
         }
         zeroOrOne {
             possibleWhitespace()
-            nodeOfType(KtNodeTypes.LAMBDA_ARGUMENT) andThen { nodes ->
+            nodeOfType(KtNodeTypes.LAMBDA_ARGUMENT) thenMapToTokens { nodes ->
                 listOf(nonBreakingSpaceToken())
                     .plus(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT))
             }

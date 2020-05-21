@@ -3,7 +3,6 @@ package org.kotlin.formatter.scanning
 import org.jetbrains.kotlin.KtNodeTypes
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.psi.psiUtil.children
-import org.kotlin.formatter.ClosingForcedBreakToken
 import org.kotlin.formatter.ForcedBreakToken
 import org.kotlin.formatter.MarkerToken
 import org.kotlin.formatter.Token
@@ -22,14 +21,14 @@ internal class ModifierListScanner(
     private val nodePattern = nodePattern {
         oneOrMore {
             either {
-                nodeOfType(KtNodeTypes.ANNOTATION_ENTRY) andThen { nodes ->
+                nodeOfType(KtNodeTypes.ANNOTATION_ENTRY) thenMapToTokens { nodes ->
                     kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
                         .plus(ForcedBreakToken(count = 1))
                         .plus(List(markerCount) { MarkerToken })
                 }
                 possibleWhitespace()
             } or {
-                anyNode() andThen { nodes ->
+                anyNode() thenMapToTokens { nodes ->
                     kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
                         .plus(WhitespaceToken(" "))
                 }

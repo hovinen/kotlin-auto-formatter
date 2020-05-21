@@ -17,21 +17,21 @@ internal class BlockScanner(private val kotlinScanner: KotlinScanner): NodeScann
     private val nodePattern = nodePattern {
         either {
             nodeOfType(KtTokens.LBRACE)
-            zeroOrMoreFrugal { anyNode() } andThen { nodes ->
+            zeroOrMoreFrugal { anyNode() } thenMapToTokens { nodes ->
                 listOf(LeafNodeToken("{"), BlockFromMarkerToken, BeginToken(State.CODE))
                     .plus(kotlinScanner.scanNodes(nodes, ScannerState.BLOCK))
             }
-            zeroOrOne { whitespaceWithNewline() } andThen { nodes ->
+            zeroOrOne { whitespaceWithNewline() } thenMapToTokens { nodes ->
                 if (nodes.isNotEmpty()) listOf(ClosingForcedBreakToken) else listOf()
             }
-            nodeOfType(KtTokens.RBRACE) andThen {
+            nodeOfType(KtTokens.RBRACE) thenMapToTokens {
                 listOf(EndToken, LeafNodeToken("}"))
             }
         } or {
-            zeroOrMoreFrugal { anyNode() } andThen { nodes ->
+            zeroOrMoreFrugal { anyNode() } thenMapToTokens { nodes ->
                 kotlinScanner.scanNodes(nodes, ScannerState.BLOCK)
             }
-            zeroOrOne { whitespaceWithNewline() } andThen { nodes ->
+            zeroOrOne { whitespaceWithNewline() } thenMapToTokens { nodes ->
                 if (nodes.isNotEmpty()) listOf(ClosingForcedBreakToken) else listOf()
             }
         }

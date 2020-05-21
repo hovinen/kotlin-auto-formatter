@@ -9,7 +9,6 @@ import org.kotlin.formatter.LeafNodeToken
 import org.kotlin.formatter.State
 import org.kotlin.formatter.SynchronizedBreakToken
 import org.kotlin.formatter.Token
-import org.kotlin.formatter.WhitespaceToken
 import org.kotlin.formatter.inBeginEndBlock
 import org.kotlin.formatter.nonBreakingSpaceToken
 import org.kotlin.formatter.scanning.nodepattern.nodePattern
@@ -17,10 +16,10 @@ import org.kotlin.formatter.scanning.nodepattern.nodePattern
 /** A [NodeScanner] for anonymous function literals, i.e. lambda expressions. */
 internal class FunctionLiteralScanner(private val kotlinScanner: KotlinScanner) : NodeScanner {
     private val nodePattern = nodePattern {
-        nodeOfType(KtTokens.LBRACE) andThen { listOf(LeafNodeToken("{")) }
+        nodeOfType(KtTokens.LBRACE) thenMapToTokens { listOf(LeafNodeToken("{")) }
         possibleWhitespace()
         zeroOrOne {
-            nodeOfType(KtNodeTypes.VALUE_PARAMETER_LIST) andThen { nodes ->
+            nodeOfType(KtNodeTypes.VALUE_PARAMETER_LIST) thenMapToTokens { nodes ->
                 listOf(nonBreakingSpaceToken())
                     .plus(
                         inBeginEndBlock(
@@ -30,13 +29,13 @@ internal class FunctionLiteralScanner(private val kotlinScanner: KotlinScanner) 
                     )
             }
             possibleWhitespace()
-            nodeOfType(KtTokens.ARROW) andThen {
+            nodeOfType(KtTokens.ARROW) thenMapToTokens {
                 listOf(nonBreakingSpaceToken(), LeafNodeToken("->"))
             }
             possibleWhitespace()
         }
         zeroOrOne {
-            nodeOfType(KtNodeTypes.BLOCK) andThen { nodes ->
+            nodeOfType(KtNodeTypes.BLOCK) thenMapToTokens { nodes ->
                 val tokens = kotlinScanner.scanNodes(nodes, ScannerState.BLOCK)
                 if (tokens.isNotEmpty()) {
                     listOf(SynchronizedBreakToken(whitespaceLength = 1))
@@ -48,7 +47,7 @@ internal class FunctionLiteralScanner(private val kotlinScanner: KotlinScanner) 
             }
         }
         possibleWhitespace()
-        nodeOfType(KtTokens.RBRACE) andThen { listOf(LeafNodeToken("}")) }
+        nodeOfType(KtTokens.RBRACE) thenMapToTokens { listOf(LeafNodeToken("}")) }
         end()
     }
 

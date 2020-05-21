@@ -14,7 +14,7 @@ internal class ThrowScanner(private val kotlinScanner: KotlinScanner) : NodeScan
     private val nodePattern = nodePattern {
         nodeOfType(KtTokens.THROW_KEYWORD)
         whitespace()
-        oneOrMore { anyNode() } andThen { nodes ->
+        oneOrMore { anyNode() } thenMapToTokens { nodes ->
             listOf(LeafNodeToken("throw "))
                 .plus(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT))
         }

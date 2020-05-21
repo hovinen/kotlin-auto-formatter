@@ -13,16 +13,16 @@ import org.kotlin.formatter.scanning.nodepattern.nodePattern
 /** A [NodeScanner] for binary expressions. */
 internal class BinaryExpressionScanner(private val kotlinScanner: KotlinScanner): NodeScanner {
     private val expressionPattern = nodePattern {
-        anyNode() andThen { firstNode ->
+        anyNode() thenMapToTokens { firstNode ->
             kotlinScanner.scanNodes(firstNode, ScannerState.STATEMENT)
                 .plus(nonBreakingSpaceToken())
         }
         possibleWhitespace()
-        nodeOfType(KtNodeTypes.OPERATION_REFERENCE) andThen { operator ->
+        nodeOfType(KtNodeTypes.OPERATION_REFERENCE) thenMapToTokens { operator ->
             kotlinScanner.scanNodes(operator, ScannerState.STATEMENT)
         }
         possibleWhitespace()
-        anyNode() andThen { nodes ->
+        anyNode() thenMapToTokens { nodes ->
             listOf(WhitespaceToken(" "))
                 .plus(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT))
         }

@@ -15,27 +15,27 @@ import org.kotlin.formatter.scanning.nodepattern.nodePattern
 internal class DotQualifiedExpressionScanner(private val kotlinScanner: KotlinScanner): NodeScanner {
     private val singleDotExpression = nodePattern {
         either {
-            nodeOfOneOfTypes(KtNodeTypes.DOT_QUALIFIED_EXPRESSION, KtNodeTypes.SAFE_ACCESS_EXPRESSION) andThen { nodes ->
+            nodeOfOneOfTypes(KtNodeTypes.DOT_QUALIFIED_EXPRESSION, KtNodeTypes.SAFE_ACCESS_EXPRESSION) thenMapToTokens { nodes ->
                 scanInner(nodes[0])
             }
             possibleWhitespace()
-            nodeOfOneOfTypes(KtTokens.DOT, KtTokens.SAFE_ACCESS) andThen { nodes ->
+            nodeOfOneOfTypes(KtTokens.DOT, KtTokens.SAFE_ACCESS) thenMapToTokens { nodes ->
                 listOf(
                     SynchronizedBreakToken(whitespaceLength = 0),
                     LeafNodeToken(nodes.first().text)
                 )
             }
         } or {
-            anyNode() andThen { nodes ->
+            anyNode() thenMapToTokens { nodes ->
                 kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
             }
             possibleWhitespace()
-            nodeOfOneOfTypes(KtTokens.DOT, KtTokens.SAFE_ACCESS) andThen { nodes ->
+            nodeOfOneOfTypes(KtTokens.DOT, KtTokens.SAFE_ACCESS) thenMapToTokens { nodes ->
                 listOf(LeafNodeToken(nodes.first().text))
             }
         }
         possibleWhitespace()
-        oneOrMore { anyNode() } andThen { nodes ->
+        oneOrMore { anyNode() } thenMapToTokens { nodes ->
             kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
         }
         end()

@@ -22,7 +22,7 @@ internal class PropertyScanner(private val kotlinScanner: KotlinScanner): NodeSc
             declarationWithOptionalModifierList(kotlinScanner)
             zeroOrOne { propertyInitializer(kotlinScanner) }
             zeroOrMore {
-                nodeOfType(KtNodeTypes.PROPERTY_ACCESSOR) andThen { nodes ->
+                nodeOfType(KtNodeTypes.PROPERTY_ACCESSOR) thenMapToTokens { nodes ->
                     listOf(ForcedBreakToken(count = 1))
                         .plus(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT))
                 }
@@ -50,20 +50,20 @@ internal fun NodePatternBuilder.declarationWithOptionalModifierList(
     optionalKDoc(kotlinScanner)
     either {
         exactlyOne {
-            nodeOfType(KtNodeTypes.MODIFIER_LIST) andThen { nodes ->
+            nodeOfType(KtNodeTypes.MODIFIER_LIST) thenMapToTokens { nodes ->
                 List(markerCount) { MarkerToken }
                     .plus(modifierListScanner.scan(nodes.first(), ScannerState.STATEMENT))
             }
             possibleWhitespace()
-            anyNode() andThen { nodes ->
+            anyNode() thenMapToTokens { nodes ->
                 kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
             }
         }
-        zeroOrMoreFrugal { anyNode() } andThen { nodes ->
+        zeroOrMoreFrugal { anyNode() } thenMapToTokens { nodes ->
             kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
         }
     } or {
-        oneOrMoreFrugal { anyNode() } andThen { nodes ->
+        oneOrMoreFrugal { anyNode() } thenMapToTokens { nodes ->
             List(markerCount) { MarkerToken }.plus(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT))
         }
     }
@@ -76,7 +76,7 @@ internal fun NodePatternBuilder.optionalKDoc(kotlinScanner: KotlinScanner) {
     zeroOrOne {
         nodeOfType(KDocTokens.KDOC)
         possibleWhitespace()
-    } andThen { nodes ->
+    } thenMapToTokens { nodes ->
         if (nodes.isNotEmpty()) {
             kotlinScanner.scanNodes(nodes, ScannerState.KDOC).plus(ForcedBreakToken(count = 1))
         } else {
@@ -86,10 +86,10 @@ internal fun NodePatternBuilder.optionalKDoc(kotlinScanner: KotlinScanner) {
 }
 
 private fun NodePatternBuilder.propertyInitializer(kotlinScanner: KotlinScanner) {
-    possibleWhitespace() andThen { listOf(nonBreakingSpaceToken()) }
-    nodeOfType(KtTokens.EQ) andThen { listOf(LeafNodeToken("=")) }
-    possibleWhitespace() andThen { listOf(WhitespaceToken(" ")) }
-    zeroOrMoreFrugal { anyNode() } andThen { nodes ->
+    possibleWhitespace() thenMapToTokens { listOf(nonBreakingSpaceToken()) }
+    nodeOfType(KtTokens.EQ) thenMapToTokens { listOf(LeafNodeToken("=")) }
+    possibleWhitespace() thenMapToTokens { listOf(WhitespaceToken(" ")) }
+    zeroOrMoreFrugal { anyNode() } thenMapToTokens { nodes ->
         kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
     }
 }

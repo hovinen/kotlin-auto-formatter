@@ -18,14 +18,14 @@ import org.kotlin.formatter.scanning.nodepattern.nodePattern
 /** A [NodeScanner] for `when` expressions. */
 internal class WhenExpressionScanner(private val kotlinScanner: KotlinScanner): NodeScanner {
     private val nodePattern = nodePattern {
-        nodeOfType(KtTokens.WHEN_KEYWORD) andThen {
+        nodeOfType(KtTokens.WHEN_KEYWORD) thenMapToTokens {
             listOf(BeginToken(State.CODE), LeafNodeToken("when "))
         }
         possibleWhitespace()
         zeroOrOne {
             nodeOfType(KtTokens.LPAR)
             possibleWhitespace()
-            anyNode() andThen { nodes ->
+            anyNode() thenMapToTokens { nodes ->
                 listOf(LeafNodeToken("("))
                     .plus(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT))
                     .plus(ClosingSynchronizedBreakToken(whitespaceLength = 0))
@@ -35,18 +35,18 @@ internal class WhenExpressionScanner(private val kotlinScanner: KotlinScanner): 
             nodeOfType(KtTokens.RPAR)
         }
         possibleWhitespace()
-        nodeOfType(KtTokens.LBRACE) andThen {
+        nodeOfType(KtTokens.LBRACE) thenMapToTokens {
             listOf(LeafNodeToken("{"), EndToken)
         }
         possibleWhitespace()
         zeroOrMore {
-            nodeOfType(KtNodeTypes.WHEN_ENTRY) andThen { nodes ->
+            nodeOfType(KtNodeTypes.WHEN_ENTRY) thenMapToTokens { nodes ->
                 listOf(ForcedBreakToken(count = 1))
                     .plus(kotlinScanner.scanNodes(nodes, ScannerState.BLOCK))
             }
             possibleWhitespace()
         }
-        nodeOfType(KtTokens.RBRACE) andThen {
+        nodeOfType(KtTokens.RBRACE) thenMapToTokens {
             listOf(ClosingForcedBreakToken, LeafNodeToken("}"))
         }
         end()

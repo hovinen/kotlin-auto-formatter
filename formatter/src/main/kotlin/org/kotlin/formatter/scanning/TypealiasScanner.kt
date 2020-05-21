@@ -15,21 +15,21 @@ internal class TypealiasScanner(private val kotlinScanner: KotlinScanner) : Node
         optionalKDoc(kotlinScanner)
         possibleWhitespace()
         zeroOrOne {
-            nodeOfType(KtNodeTypes.MODIFIER_LIST) andThen { nodes ->
+            nodeOfType(KtNodeTypes.MODIFIER_LIST) thenMapToTokens { nodes ->
                 kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
                     .plus(WhitespaceToken(content = " "))
             }
             whitespace()
         }
-        nodeOfType(KtTokens.TYPE_ALIAS_KEYWORD) andThen { listOf(LeafNodeToken("typealias")) }
-        whitespace() andThen { listOf(WhitespaceToken(content = " "))}
-        nodeOfType(KtTokens.IDENTIFIER) andThen { nodes ->
+        nodeOfType(KtTokens.TYPE_ALIAS_KEYWORD) thenMapToTokens { listOf(LeafNodeToken("typealias")) }
+        whitespace() thenMapToTokens { listOf(WhitespaceToken(content = " "))}
+        nodeOfType(KtTokens.IDENTIFIER) thenMapToTokens { nodes ->
             listOf(LeafNodeToken(nodes[0].text))
         }
         possibleWhitespace()
-        nodeOfType(KtTokens.EQ) andThen { listOf(LeafNodeToken(" =")) }
-        possibleWhitespace() andThen { listOf(WhitespaceToken(content = " ")) }
-        nodeOfType(KtNodeTypes.TYPE_REFERENCE) andThen { nodes ->
+        nodeOfType(KtTokens.EQ) thenMapToTokens { listOf(LeafNodeToken(" =")) }
+        possibleWhitespace() thenMapToTokens { listOf(WhitespaceToken(content = " ")) }
+        nodeOfType(KtNodeTypes.TYPE_REFERENCE) thenMapToTokens { nodes ->
             kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
         }
         end()
