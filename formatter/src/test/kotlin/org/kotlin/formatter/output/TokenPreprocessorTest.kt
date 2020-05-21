@@ -269,7 +269,7 @@ internal class TokenPreprocessorTest {
     @ParameterizedTest
     @MethodSource("synchronizedBreakTokenCases")
     fun `converts synchronized break into forced break when KDoc token with newline the same block`(
-        synchronizedBreakToken: Token, expectedBreakToken: Token
+        synchronizedBreakToken: Token, unused: Token, expectedBreakToken: Token
     ) {
         val subject = TokenPreprocessor()
         val input = listOf(
@@ -294,7 +294,7 @@ internal class TokenPreprocessorTest {
     @ParameterizedTest
     @MethodSource("synchronizedBreakTokenCases")
     fun `does not convert synchronized break tokens in a subblock into forced break tokens`(
-        synchronizedBreakToken: Token, unused: Token
+        synchronizedBreakToken: Token, unused1: Token, unused2: Token
     ) {
         val subject = TokenPreprocessor()
         val input = listOf(
@@ -322,8 +322,33 @@ internal class TokenPreprocessorTest {
 
     @ParameterizedTest
     @MethodSource("synchronizedBreakTokenCases")
+    fun `converts synchronized break into forced break when forced break in the same block`(
+        synchronizedBreakToken: Token, forcedBreakToken: Token, expectedBreakToken: Token
+    ) {
+        val subject = TokenPreprocessor()
+        val input = listOf(
+            BeginToken(state = State.CODE),
+            synchronizedBreakToken,
+            forcedBreakToken,
+            EndToken
+        )
+
+        val result = subject.preprocess(input)
+
+        assertThat(result).isEqualTo(
+            listOf(
+                BeginToken(length = 0, state = State.CODE),
+                expectedBreakToken,
+                forcedBreakToken,
+                EndToken
+            )
+        )
+    }
+
+    @ParameterizedTest
+    @MethodSource("synchronizedBreakTokenCases")
     fun `removes SynchronizedBreakTokens which immediately follow ForcedBreakTokens`(
-        synchronizedBreakToken: Token, forcedBreakToken: Token
+        synchronizedBreakToken: Token, unused: Token, forcedBreakToken: Token
     ) {
         val subject = TokenPreprocessor()
         val input = listOf(forcedBreakToken, synchronizedBreakToken)
@@ -370,8 +395,10 @@ internal class TokenPreprocessorTest {
         @JvmStatic
         fun synchronizedBreakTokenCases(): List<Arguments> =
             listOf(
-                Arguments.of(SynchronizedBreakToken(whitespaceLength = 0), ForcedBreakToken(count = 1)),
-                Arguments.of(ClosingSynchronizedBreakToken(whitespaceLength = 0), ClosingForcedBreakToken)
+                Arguments.of(SynchronizedBreakToken(whitespaceLength = 0), ForcedBreakToken(count = 1), ForcedBreakToken(count = 1)),
+                Arguments.of(ClosingSynchronizedBreakToken(whitespaceLength = 0), ForcedBreakToken(count = 1), ClosingForcedBreakToken),
+                Arguments.of(SynchronizedBreakToken(whitespaceLength = 0), ClosingForcedBreakToken, ForcedBreakToken(count = 1)),
+                Arguments.of(ClosingSynchronizedBreakToken(whitespaceLength = 0), ClosingForcedBreakToken, ClosingForcedBreakToken)
             )
 
         @JvmStatic

@@ -158,7 +158,7 @@ private class BlockStackElement(
     tokens: MutableList<Token> = mutableListOf()
 ): StackElement(tokens) {
     internal fun replaceSynchronizedBreaks() {
-        if (tokens.any { it is KDocContentToken && it.content.contains('\n') }) {
+        if (shouldConvertSynchronizedBreaksToForcedBreaks()) {
             var level = 0
             tokens.replaceAll {
                 when {
@@ -177,6 +177,13 @@ private class BlockStackElement(
             }
         }
     }
+
+    private fun shouldConvertSynchronizedBreaksToForcedBreaks() =
+        tokens.any { it.forcesSynchronizedBreakConversionToForcedBreak() }
+
+    private fun Token.forcesSynchronizedBreakConversionToForcedBreak(): Boolean =
+        this is ForcedBreakToken || this is ClosingForcedBreakToken ||
+            (this is KDocContentToken && content.contains('\n'))
 }
 
 private class WhitespaceStackElement(internal val content: String): StackElement() {
