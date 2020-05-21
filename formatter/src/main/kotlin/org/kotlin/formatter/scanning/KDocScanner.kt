@@ -3,7 +3,6 @@ package org.kotlin.formatter.scanning
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.kdoc.lexer.KDocTokens
 import org.jetbrains.kotlin.kdoc.parser.KDocElementTypes
-import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.psi.psiUtil.children
 import org.kotlin.formatter.BeginToken
 import org.kotlin.formatter.ClosingSynchronizedBreakToken
@@ -11,7 +10,6 @@ import org.kotlin.formatter.EndToken
 import org.kotlin.formatter.KDocContentToken
 import org.kotlin.formatter.LeafNodeToken
 import org.kotlin.formatter.State
-import org.kotlin.formatter.SynchronizedBreakToken
 import org.kotlin.formatter.Token
 import org.kotlin.formatter.scanning.nodepattern.nodePattern
 
@@ -26,9 +24,9 @@ internal class KDocScanner(private val kotlinScanner: KotlinScanner) : NodeScann
             )
         }
         possibleWhitespace()
-        zeroOrMoreFrugal { nodeOfType(KDocElementTypes.KDOC_SECTION) } andThen { nodes ->
+        zeroOrMore { nodeOfType(KDocElementTypes.KDOC_SECTION) } andThen { nodes ->
             val fullContent = nodes.joinToString("") { scanIntoString(it.children().asIterable()) }
-            listOf(KDocContentToken(content = fullContent.trim()))
+            listOf(KDocContentToken(content = fullContent.trimOneWhitespace()))
         }
         possibleWhitespace()
         nodeOfType(KDocTokens.END) andThen {
@@ -40,6 +38,13 @@ internal class KDocScanner(private val kotlinScanner: KotlinScanner) : NodeScann
         }
         end()
     }
+
+    private fun String.trimOneWhitespace(): String =
+        if (startsWith(' ') && endsWith(' ')) {
+            substring(1, length - 1)
+        } else {
+            this
+        }
 
     private fun scanIntoString(nodes: Iterable<ASTNode>): String =
         sectionNodePattern.matchSequence(nodes).joinToString("") { (it as KDocContentToken).content }
@@ -54,16 +59,16 @@ internal class KDocScanner(private val kotlinScanner: KotlinScanner) : NodeScann
                 )
             }
             possibleWhitespace() andThen { nodes ->
-                listOf(KDocContentToken(content = "\n".repeat(nodes.map { it.text.count { it == '\n' } }.sum())))
+                listOf(KDocContentToken(content = "\n".repeat(nodes.map { it.text.countNewlines() }.sum())))
             }
         }
-        zeroOrMore {
+        zeroOrOne {
             oneOrMoreFrugal { nodeNotOfType(KDocTokens.LEADING_ASTERISK) } andThen { nodes ->
                 listOf(KDocContentToken(content = nodes.joinToString("") { it.text }))
             }
             zeroOrOne {
                 whitespaceWithNewline() andThen { nodes ->
-                    listOf(KDocContentToken(content = "\n".repeat(nodes.first().text.count { it == '\n' })))
+                    listOf(KDocContentToken(content = "\n".repeat(nodes.first().text.countNewlines())))
                 }
             }
         }
@@ -74,12 +79,14 @@ internal class KDocScanner(private val kotlinScanner: KotlinScanner) : NodeScann
             }
             zeroOrOne {
                 whitespaceWithNewline() andThen { nodes ->
-                    listOf(KDocContentToken(content = "\n".repeat(nodes.first().text.count { it == '\n' })))
+                    listOf(KDocContentToken(content = "\n".repeat(nodes.first().text.countNewlines())))
                 }
             }
         }
         end()
     }
+
+    private fun String.countNewlines(): Int = count { it == '\n' }
 
     private fun String.trimFirstWhitespace(): String =
         if (startsWith(' ')) {
@@ -90,13 +97,4 @@ internal class KDocScanner(private val kotlinScanner: KotlinScanner) : NodeScann
 
     override fun scan(node: ASTNode, scannerState: ScannerState): List<Token> =
         nodePattern.matchSequence(node.children().asIterable())
-}
-
-private fun List<ASTNode>.withoutInitialWhitespaceNode(): List<ASTNode> {
-    val firstElement = firstOrNull()
-    if (firstElement?.elementType == KDocTokens.TEXT && firstElement?.text == " ") {
-        return subList(1, size)
-    } else {
-        return this
-    }
 }

@@ -659,6 +659,24 @@ internal class PrinterTest {
     }
 
     @Test
+    fun `prints KDoc with leading whitespace in multiline format`() {
+        val subject = subject(maxLineLength = 40)
+
+        val result = subject.print(
+            listOf(
+                BeginToken(length = 40, state = State.CODE),
+                LeafNodeToken("/**"),
+                ClosingForcedBreakToken,
+                KDocContentToken(" * An item\n * Another item"),
+                ClosingForcedBreakToken,
+                LeafNodeToken(" */")
+            )
+        )
+
+        assertThat(result).isEqualTo("/**\n *  * An item\n *  * Another item\n */")
+    }
+
+    @Test
     fun `prints KDoc with blank lines with leading asterisk without trailing whitespace`() {
         val subject = subject(maxLineLength = 40)
 
