@@ -13,6 +13,7 @@ import org.kotlin.formatter.State
 import org.kotlin.formatter.SynchronizedBreakToken
 import org.kotlin.formatter.Token
 import org.kotlin.formatter.WhitespaceToken
+import java.lang.Integer.min
 import java.util.Stack
 
 /**
@@ -41,9 +42,16 @@ class TokenPreprocessor {
      * [BeginToken] if there is no forced break in the current block. The output contains no
      * instances of [MarkerToken] or [BlockFromMarkerToken].
      *
-     * Also replaces [SynchronizedBreakToken] and [ClosingSynchronizedBreakToken] instances by
-     * equivalent [ForcedBreakToken] respectively [ClosingForcedBreakToken] whenever there is
-     * already a [KDocContentToken] with a newline character in the same block.
+     * Replaces [SynchronizedBreakToken] and [ClosingSynchronizedBreakToken] instances by equivalent
+     * [ForcedBreakToken] respectively [ClosingForcedBreakToken] whenever there is already a
+     * [KDocContentToken] with a newline character in the same block.
+     *
+     * Any [SynchronizedBreakToken] or [ClosingSynchronizedBreakToken] which immediately follows
+     * a [ForcedBreakToken] or [ClosingForcedBreakToken] is dropped.
+     *
+     * Any [WhitespaceToken] containing newlines and immediately preceding a block of
+     * [comment type][State.isComment] is converted into a [ForcedBreakToken] with the same number
+     * of up to two newlines.
      *
      * Any existing values of [WhitespaceToken.length] and [BeginToken.length] in [input] are
      * ignored by this process.
@@ -73,6 +81,12 @@ class TokenPreprocessor {
                         resultStack.push(BlockStackElement(State.CODE))
                     }
                     appendTokensInElement(poppedElement, State.CODE)
+                }
+                is SynchronizedBreakToken, is ClosingSynchronizedBreakToken -> {
+                    val lastToken = resultStack.peek().tokens.lastOrNull()
+                    if (!(lastToken is ForcedBreakToken || lastToken is ClosingForcedBreakToken)) {
+                        resultStack.peek().tokens.add(token)
+                    }
                 }
                 else -> resultStack.peek().tokens.add(token)
             }
@@ -110,12 +124,20 @@ class TokenPreprocessor {
     }
 
     private fun appendTokensInWhitespaceElement(element: WhitespaceStackElement) {
-        val textLength = element.tokens.firstOrNull()?.textLength ?: 0
-        resultStack.peek().tokens.add(
-            WhitespaceToken(length = textLength + element.contentLength, content = element.content)
-        )
+        val firstToken = element.tokens.firstOrNull()
+        if (firstToken is BeginToken && firstToken.state.isComment && element.content.contains('\n')) {
+            resultStack.peek().tokens
+                .add(ForcedBreakToken(count = min(element.content.countNewlines(), 2)))
+        } else {
+            val textLength = firstToken?.textLength ?: 0
+            resultStack.peek().tokens.add(
+                WhitespaceToken(length = textLength + element.contentLength, content = element.content)
+            )
+        }
         resultStack.peek().tokens.addAll(element.tokens)
     }
+
+    private fun String.countNewlines(): Int = count { it == '\n' }
 }
 
 private sealed class StackElement(internal val tokens: MutableList<Token> = mutableListOf()) {

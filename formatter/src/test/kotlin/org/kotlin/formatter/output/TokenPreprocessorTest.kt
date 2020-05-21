@@ -320,6 +320,35 @@ internal class TokenPreprocessorTest {
         )
     }
 
+    @ParameterizedTest
+    @MethodSource("synchronizedBreakTokenCases")
+    fun `removes SynchronizedBreakTokens which immediately follow ForcedBreakTokens`(
+        synchronizedBreakToken: Token, forcedBreakToken: Token
+    ) {
+        val subject = TokenPreprocessor()
+        val input = listOf(forcedBreakToken, synchronizedBreakToken)
+
+        val result = subject.preprocess(input)
+
+        assertThat(result).isEqualTo(listOf(forcedBreakToken))
+    }
+
+    @ParameterizedTest
+    @MethodSource("whitespaceCommentConversionCases")
+    fun `converts whitespace with newlines preceding comment block into forced break`(
+        whitespaceToken: Token,
+        commentState: State,
+        expectedToken: Token
+    ) {
+        val subject = TokenPreprocessor()
+        val input = listOf(whitespaceToken, BeginToken(commentState), EndToken)
+
+        val result = subject.preprocess(input)
+
+        assertThat(result)
+            .isEqualTo(listOf(expectedToken, BeginToken(commentState), EndToken))
+    }
+
     companion object {
         @JvmStatic
         fun tokenLengthCases(): List<Arguments> =
@@ -342,9 +371,18 @@ internal class TokenPreprocessorTest {
         fun synchronizedBreakTokenCases(): List<Arguments> =
             listOf(
                 Arguments.of(SynchronizedBreakToken(whitespaceLength = 0), ForcedBreakToken(count = 1)),
-                Arguments.of(ClosingSynchronizedBreakToken(whitespaceLength = 0), ClosingForcedBreakToken),
-                Arguments.of(SynchronizedBreakToken(whitespaceLength = 0), ForcedBreakToken(count = 1)),
                 Arguments.of(ClosingSynchronizedBreakToken(whitespaceLength = 0), ClosingForcedBreakToken)
+            )
+
+        @JvmStatic
+        fun whitespaceCommentConversionCases(): List<Arguments> =
+            listOf(
+                Arguments.of(WhitespaceToken(" "), State.LINE_COMMENT, WhitespaceToken(" ", length = 1)),
+                Arguments.of(WhitespaceToken("\n"), State.LINE_COMMENT, ForcedBreakToken(count = 1)),
+                Arguments.of(WhitespaceToken("\n\n"), State.LINE_COMMENT, ForcedBreakToken(count = 2)),
+                Arguments.of(WhitespaceToken("\n\n\n"), State.LINE_COMMENT, ForcedBreakToken(count = 2)),
+                Arguments.of(WhitespaceToken("\n"), State.TODO_COMMENT, ForcedBreakToken(count = 1)),
+                Arguments.of(WhitespaceToken("\n"), State.LONG_COMMENT, ForcedBreakToken(count = 1))
             )
     }
 }

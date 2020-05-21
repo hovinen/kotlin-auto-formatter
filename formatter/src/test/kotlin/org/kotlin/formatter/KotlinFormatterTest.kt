@@ -1378,6 +1378,92 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `preserves formatting of one-line comments inside statements`() {
+        val subject = KotlinFormatter(maxLineLength = 60)
+
+        val result = subject.format("""
+            aVariable =
+
+                // Some comment text
+                // Some further text
+                anotherVariable + aThirdVariable
+        """.trimIndent())
+
+        assertThat(result).isEqualTo("""
+            aVariable =
+
+                // Some comment text
+                // Some further text
+                anotherVariable + aThirdVariable
+        """.trimIndent())
+    }
+
+    @Test
+    fun `preserves formatting of multi-line comments inside statements`() {
+        val subject = KotlinFormatter(maxLineLength = 60)
+
+        val result = subject.format("""
+            aVariable =
+
+                /* Some comment text which is too long to fit on line
+                 * Some further text */
+                anotherVariable + aThirdVariable
+        """.trimIndent())
+
+        assertThat(result).isEqualTo("""
+            aVariable =
+
+                /* Some comment text which is too long to fit on line
+                 * Some further text */
+                anotherVariable + aThirdVariable
+        """.trimIndent())
+    }
+
+    @Test
+    fun `preserves formatting of one-line comments inside function calls`() {
+        val subject = KotlinFormatter(maxLineLength = 60)
+
+        val result = subject.format("""
+            aFunctionCall(
+                aParameter,
+
+                // Some comment text
+                // Some further text
+                anotherParameter
+            )
+        """.trimIndent())
+
+        assertThat(result).isEqualTo("""
+            aFunctionCall(
+                aParameter,
+
+                // Some comment text
+                // Some further text
+                anotherParameter
+            )
+        """.trimIndent())
+    }
+
+    @Test
+    fun `preserves formatting of one-line comments inside blocks`() {
+        val subject = KotlinFormatter(maxLineLength = 60)
+
+        val result = subject.format("""
+            val aProperty
+
+            // Some comment text
+            // Some further text
+        """.trimIndent())
+
+        assertThat(result).isEqualTo("""
+            val aProperty
+
+            // Some comment text
+            // Some further text
+        """.trimIndent())
+    }
+
+    @Test
     fun `does not strip trailing whitespace in multiline string literals`() {
         val subject = KotlinFormatter()
 

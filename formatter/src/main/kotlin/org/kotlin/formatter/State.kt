@@ -69,7 +69,9 @@ enum class State {
      *
      * Existing line breaks are respected.
      */
-    LINE_COMMENT,
+    LINE_COMMENT {
+        override val isComment = true
+    },
 
     /**
      * A single line comment which introduces a TODO.
@@ -93,7 +95,9 @@ enum class State {
      *
      * Existing line breaks are respected.
      */
-    TODO_COMMENT,
+    TODO_COMMENT {
+        override val isComment = true
+    },
 
     /**
      * A multi-line comment, i.e., one demarcated with `/*` and `*/`.
@@ -131,7 +135,9 @@ enum class State {
      *
      * depending on which variant fits in the column limit.
      */
-    LONG_COMMENT,
+    LONG_COMMENT {
+        override val isComment = true
+    },
 
     /**
      * A tag within KDoc.
@@ -168,5 +174,8 @@ enum class State {
      * [Google Kotlin style guide](https://developer.android.com/kotlin/style-guide), by which
      * `package` and `import` statments are explicitly excluded from the column limit.
      */
-    PACKAGE_IMPORT
+    PACKAGE_IMPORT;
+
+    /** Whether this state corresponds to a comment. */
+    open val isComment = false
 }
