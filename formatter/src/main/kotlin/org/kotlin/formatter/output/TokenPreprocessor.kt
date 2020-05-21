@@ -43,8 +43,11 @@ class TokenPreprocessor {
      * instances of [MarkerToken] or [BlockFromMarkerToken].
      *
      * Replaces [SynchronizedBreakToken] and [ClosingSynchronizedBreakToken] instances by equivalent
-     * [ForcedBreakToken] respectively [ClosingForcedBreakToken] whenever there is already a
-     * [KDocContentToken] with a newline character in the same block.
+     * [ForcedBreakToken] respectively [ClosingForcedBreakToken] whenever either of the following
+     * holds:
+     *
+     *  * There is a [ForcedBreakToken], [ClosingForcedBreakToken] in the same block.
+     *  * There is already a [KDocContentToken] with a newline character in the same block.
      *
      * Any [SynchronizedBreakToken] or [ClosingSynchronizedBreakToken] which immediately follows
      * a [ForcedBreakToken] or [ClosingForcedBreakToken] is dropped.
