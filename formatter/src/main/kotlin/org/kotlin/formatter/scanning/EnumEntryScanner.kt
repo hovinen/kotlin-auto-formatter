@@ -17,5 +17,5 @@ internal class EnumEntryScanner(private val kotlinScanner: KotlinScanner) : Node
     }
 
     override fun scan(node: ASTNode, scannerState: ScannerState): List<Token> =
-        inBeginEndBlock(nodePattern.matchSequence(node.children().asIterable()), State.CODE)
+        nodePattern.matchSequence(node.children().asIterable())
 }

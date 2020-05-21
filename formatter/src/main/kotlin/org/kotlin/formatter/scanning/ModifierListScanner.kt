@@ -4,29 +4,34 @@ import org.jetbrains.kotlin.KtNodeTypes
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.psi.psiUtil.children
 import org.kotlin.formatter.ClosingForcedBreakToken
+import org.kotlin.formatter.ForcedBreakToken
+import org.kotlin.formatter.MarkerToken
 import org.kotlin.formatter.Token
+import org.kotlin.formatter.WhitespaceToken
 import org.kotlin.formatter.scanning.nodepattern.nodePattern
 
-/** A [NodeScanner] for the list of annotations and modifiers on a type or function declaration. */
-internal class ModifierListScanner(private val kotlinScanner: KotlinScanner) : NodeScanner {
+/**
+ * A [NodeScanner] for the list of annotations and modifiers on a type or function declaration.
+ * 
+ * @property markerCount how many [MarkerToken] should be inserted after each annotation
+ */
+internal class ModifierListScanner(
+    private val kotlinScanner: KotlinScanner,
+    private val markerCount: Int = 1
+) : NodeScanner {
     private val nodePattern = nodePattern {
         oneOrMore {
             either {
                 nodeOfType(KtNodeTypes.ANNOTATION_ENTRY) andThen { nodes ->
-                    listOf(
-                        *kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT).toTypedArray(),
-
-                        // We use a ClosingForcedBreakToken rather than a ForcedBreakToken here
-                        // because the modifier list is inside a block representing the full
-                        // property, class, or function declaration, and a ForcedBreakToken would
-                        // then cause the next lines to indent with the next standard indent.
-                        ClosingForcedBreakToken
-                    )
+                    kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
+                        .plus(ForcedBreakToken(count = 1))
+                        .plus(List(markerCount) { MarkerToken })
                 }
                 possibleWhitespace()
             } or {
                 anyNode() andThen { nodes ->
                     kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
+                        .plus(WhitespaceToken(" "))
                 }
             }
         }

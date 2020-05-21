@@ -9,6 +9,7 @@ import org.kotlin.formatter.EndToken
 import org.kotlin.formatter.LeafNodeToken
 import org.kotlin.formatter.State
 import org.kotlin.formatter.Token
+import org.kotlin.formatter.inBeginEndBlock
 import org.kotlin.formatter.scanning.nodepattern.nodePattern
 
 /** A [NodeScanner] for `for` loop expressions. */
@@ -20,14 +21,11 @@ internal class ForExpressionScanner(private val kotlinScanner: KotlinScanner): N
         nodeOfType(KtTokens.LPAR)
         oneOrMore { anyNode() } andThen { nodes ->
             val tokens = kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
-            listOf(
-                LeafNodeToken("("),
-                BeginToken(State.CODE),
-                *tokens.toTypedArray(),
-                ClosingSynchronizedBreakToken(whitespaceLength = 0),
-                EndToken,
-                LeafNodeToken(")")
-            )
+            listOf(LeafNodeToken("("), BeginToken(State.CODE))
+                .plus(tokens)
+                .plus(ClosingSynchronizedBreakToken(whitespaceLength = 0))
+                .plus(EndToken)
+                .plus(LeafNodeToken(")"))
         }
         nodeOfType(KtTokens.RPAR)
         zeroOrMore { anyNode() } andThen { nodes ->

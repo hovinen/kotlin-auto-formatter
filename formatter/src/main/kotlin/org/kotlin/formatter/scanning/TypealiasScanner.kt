@@ -16,10 +16,8 @@ internal class TypealiasScanner(private val kotlinScanner: KotlinScanner) : Node
         possibleWhitespace()
         zeroOrOne {
             nodeOfType(KtNodeTypes.MODIFIER_LIST) andThen { nodes ->
-                listOf(
-                    *kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT).toTypedArray(),
-                    WhitespaceToken(content = " ")
-                )
+                kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
+                    .plus(WhitespaceToken(content = " "))
             }
             whitespace()
         }

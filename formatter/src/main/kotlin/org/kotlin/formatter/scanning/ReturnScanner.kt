@@ -6,6 +6,8 @@ import org.jetbrains.kotlin.psi.psiUtil.children
 import org.kotlin.formatter.LeafNodeToken
 import org.kotlin.formatter.State
 import org.kotlin.formatter.Token
+import org.kotlin.formatter.inBeginEndBlock
+import org.kotlin.formatter.nonBreakingSpaceToken
 import org.kotlin.formatter.scanning.nodepattern.NodePatternBuilder
 import org.kotlin.formatter.scanning.nodepattern.nodePattern
 
@@ -16,10 +18,8 @@ internal class ReturnScanner(private val kotlinScanner: KotlinScanner) : NodeSca
         possibleWhitespace()
         zeroOrMore { anyNode() } andThen { nodes ->
             if (nodes.isNotEmpty()) {
-                listOf(
-                    LeafNodeToken(" "),
-                    *kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT).toTypedArray()
-                )
+                listOf(nonBreakingSpaceToken())
+                    .plus(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT))
             } else {
                 listOf()
             }

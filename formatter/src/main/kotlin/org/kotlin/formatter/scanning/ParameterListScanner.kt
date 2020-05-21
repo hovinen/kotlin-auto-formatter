@@ -9,6 +9,7 @@ import org.kotlin.formatter.LeafNodeToken
 import org.kotlin.formatter.State
 import org.kotlin.formatter.SynchronizedBreakToken
 import org.kotlin.formatter.Token
+import org.kotlin.formatter.inBeginEndBlock
 
 /**
  * A [NodeScanner] for a list of parameters in a function or class declaration, or the arguments of
@@ -34,15 +35,13 @@ internal class ParameterListScanner(private val kotlinScanner: KotlinScanner): N
                 val breakToken =
                     SynchronizedBreakToken(whitespaceLength = if (isFirstEntry) 0 else 1)
                 isFirstEntry = false
-                listOf(breakToken, *childTokens.toTypedArray())
+                listOf(breakToken).plus(childTokens)
             }
             KtTokens.WHITE_SPACE -> listOf()
             KtTokens.RPAR -> if (isFirstEntry) {
                 listOf(LeafNodeToken(")"))
             } else {
-                listOf(
-                    ClosingSynchronizedBreakToken(whitespaceLength = 0), LeafNodeToken(")")
-                )
+                listOf(ClosingSynchronizedBreakToken(whitespaceLength = 0), LeafNodeToken(")"))
             }
             else -> kotlinScanner.scanInState(node, ScannerState.STATEMENT)
         }

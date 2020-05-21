@@ -4,6 +4,7 @@ import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.psi.psiUtil.children
 import org.kotlin.formatter.State
 import org.kotlin.formatter.Token
+import org.kotlin.formatter.inBeginEndBlock
 
 /**
  * A [NodeScanner] for any [ASTNode] whose output consists of the scanned children wrapped in a

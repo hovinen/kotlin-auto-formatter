@@ -5,6 +5,7 @@ import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.psi.psiUtil.children
 import org.kotlin.formatter.State
 import org.kotlin.formatter.Token
+import org.kotlin.formatter.inBeginEndBlock
 import org.kotlin.formatter.nonBreakingSpaceToken
 import org.kotlin.formatter.scanning.nodepattern.nodePattern
 
@@ -17,10 +18,8 @@ internal class CallExpressionScanner(private val kotlinScanner: KotlinScanner) :
         zeroOrOne {
             possibleWhitespace()
             nodeOfType(KtNodeTypes.LAMBDA_ARGUMENT) andThen { nodes ->
-                listOf(
-                    nonBreakingSpaceToken(),
-                    *kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT).toTypedArray()
-                )
+                listOf(nonBreakingSpaceToken())
+                    .plus(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT))
             }
         }
         end()

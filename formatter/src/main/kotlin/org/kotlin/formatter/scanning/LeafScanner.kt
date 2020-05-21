@@ -17,18 +17,14 @@ internal class LeafScanner {
     fun scanLeaf(node: LeafPsiElement): List<Token> =
         when (node.elementType) {
             KtTokens.EOL_COMMENT -> {
-                listOf(
-                    BeginToken(stateBasedOnCommentContent(node.text)),
-                    *tokenizeString(node.text).toTypedArray(),
-                    EndToken
-                )
+                listOf(BeginToken(stateBasedOnCommentContent(node.text)))
+                    .plus(tokenizeString(node.text))
+                    .plus(EndToken)
             }
             KtTokens.BLOCK_COMMENT -> {
-                listOf(
-                    BeginToken(State.LONG_COMMENT),
-                    *tokenizeNodeContentInBlockComment(node).toTypedArray(),
-                    EndToken
-                )
+                listOf(BeginToken(State.LONG_COMMENT))
+                    .plus(tokenizeNodeContentInBlockComment(node))
+                    .plus(EndToken)
             }
             KDocTokens.END -> listOf(LeafNodeToken(node.text))
             KtTokens.REGULAR_STRING_PART -> tokenizeString(node.text)

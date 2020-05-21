@@ -68,6 +68,12 @@ data class KDocContentToken(internal val content: String): Token() {
 data class WhitespaceToken(internal val content: String, internal val length: Int = 0) : Token()
 
 /**
+ * Returns a [Token] which inserts a point where a line break may be introduced but produces no
+ * output if no line break occurs.
+ */
+fun emptyBreakPoint() = WhitespaceToken("")
+
+/**
  * A directive to add one or more line breaks, indenting the following line by the standard indent
  * from the indentation of the containing block.
  *
@@ -128,8 +134,27 @@ data class BeginToken(internal val state: State, internal val length: Int = 0) :
 object EndToken : Token()
 
 /**
- * A directive to insert a new block starting just after the last [ForcedBreakToken] or
- * [ClosingForcedBreakToken] in the current block, or at the beginning of the current block if there
- * is no such token in the current block, and ending at the current position.
+ * Returns a sequence of [Token] which wraps [innerTokens] inside a [BeginToken], [EndToken] pair
+ * with the given [State].
  */
-object BlockFromLastForcedBreakToken : Token()
+fun inBeginEndBlock(innerTokens: List<Token>, state: State): List<Token> =
+    listOf(BeginToken(state)).plus(innerTokens).plus(EndToken)
+
+/**
+ * A directive marking the point at which a block terminated by a [BlockFromMarkerToken] should
+ * begin.
+ *
+ * This token is stripped by the token preprocessor before the list of tokens is passed to the
+ * printer.
+ */
+object MarkerToken : Token()
+
+/**
+ * A directive to insert a new block starting just after the last [MarkerToken] in the current
+ * block, or at the beginning of the current block if there is no such token in the current block,
+ * and ending at the current position.
+ *
+ * This token is stripped by the token preprocessor before the list of tokens is passed to the
+ * printer.
+ */
+object BlockFromMarkerToken : Token()

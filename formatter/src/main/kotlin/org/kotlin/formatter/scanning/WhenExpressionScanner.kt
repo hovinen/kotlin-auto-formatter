@@ -12,6 +12,7 @@ import org.kotlin.formatter.ForcedBreakToken
 import org.kotlin.formatter.LeafNodeToken
 import org.kotlin.formatter.State
 import org.kotlin.formatter.Token
+import org.kotlin.formatter.inBeginEndBlock
 import org.kotlin.formatter.scanning.nodepattern.nodePattern
 
 /** A [NodeScanner] for `when` expressions. */
@@ -25,38 +26,28 @@ internal class WhenExpressionScanner(private val kotlinScanner: KotlinScanner): 
             nodeOfType(KtTokens.LPAR)
             possibleWhitespace()
             anyNode() andThen { nodes ->
-                listOf(
-                    LeafNodeToken("("),
-                    *kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT).toTypedArray(),
-                    ClosingSynchronizedBreakToken(whitespaceLength = 0),
-                    LeafNodeToken(") ")
-                )
+                listOf(LeafNodeToken("("))
+                    .plus(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT))
+                    .plus(ClosingSynchronizedBreakToken(whitespaceLength = 0))
+                    .plus(LeafNodeToken(") "))
             }
             possibleWhitespace()
             nodeOfType(KtTokens.RPAR)
         }
         possibleWhitespace()
         nodeOfType(KtTokens.LBRACE) andThen {
-            listOf(
-                LeafNodeToken("{"),
-                EndToken
-            )
+            listOf(LeafNodeToken("{"), EndToken)
         }
         possibleWhitespace()
         zeroOrMore {
             nodeOfType(KtNodeTypes.WHEN_ENTRY) andThen { nodes ->
-                listOf(
-                    ForcedBreakToken(count = 1),
-                    *kotlinScanner.scanNodes(nodes, ScannerState.BLOCK).toTypedArray()
-                )
+                listOf(ForcedBreakToken(count = 1))
+                    .plus(kotlinScanner.scanNodes(nodes, ScannerState.BLOCK))
             }
             possibleWhitespace()
         }
         nodeOfType(KtTokens.RBRACE) andThen {
-            listOf(
-                ClosingForcedBreakToken,
-                LeafNodeToken("}")
-            )
+            listOf(ClosingForcedBreakToken, LeafNodeToken("}"))
         }
         end()
     }

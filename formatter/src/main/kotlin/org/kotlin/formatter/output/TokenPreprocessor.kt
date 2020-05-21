@@ -1,13 +1,14 @@
 package org.kotlin.formatter.output
 
 import org.kotlin.formatter.BeginToken
-import org.kotlin.formatter.BlockFromLastForcedBreakToken
+import org.kotlin.formatter.BlockFromMarkerToken
 import org.kotlin.formatter.ClosingForcedBreakToken
 import org.kotlin.formatter.ClosingSynchronizedBreakToken
 import org.kotlin.formatter.EndToken
 import org.kotlin.formatter.ForcedBreakToken
 import org.kotlin.formatter.KDocContentToken
 import org.kotlin.formatter.LeafNodeToken
+import org.kotlin.formatter.MarkerToken
 import org.kotlin.formatter.State
 import org.kotlin.formatter.SynchronizedBreakToken
 import org.kotlin.formatter.Token
@@ -35,11 +36,10 @@ class TokenPreprocessor {
      * Returns a list of [Token] with the lengths of all [WhitespaceToken] and [BeginToken]
      * assigned.
      *
-     * Replaces all instances of [BlockFromLastForcedBreakToken] with a [BeginToken], [EndToken]
-     * pair stretching from the previous forced break (either [ForcedBreakToken] or
-     * [ClosingForcedBreakToken]) in the current block, or from the previous [BeginToken] if there
-     * is no forced break in the current block. Thus the output contains no instances of
-     * [BlockFromLastForcedBreakToken].
+     * Replaces all instances of [BlockFromMarkerToken] with a [BeginToken], [EndToken] pair
+     * stretching from the previous [MarkerToken] in the current block, or from the previous
+     * [BeginToken] if there is no forced break in the current block. The output contains no
+     * instances of [MarkerToken] or [BlockFromMarkerToken].
      *
      * Also replaces [SynchronizedBreakToken] and [ClosingSynchronizedBreakToken] instances by
      * equivalent [ForcedBreakToken] respectively [ClosingForcedBreakToken] whenever there is
@@ -62,18 +62,17 @@ class TokenPreprocessor {
                 }
                 is EndToken -> {
                     val blockElement = popBlock().apply { replaceSynchronizedBreaks() }
-                    val topElement = resultStack.peek()
-                    topElement.tokens.add(BeginToken(length = blockElement.textLength, state = blockElement.state))
-                    topElement.tokens.addAll(blockElement.tokens)
-                    topElement.tokens.add(EndToken)
+                    appendTokensInElement(blockElement, blockElement.state)
                 }
-                is BlockFromLastForcedBreakToken -> {
-                    val topElement = popBlock()
-                    val index = topElement.tokens.indexOfLast { it is ForcedBreakToken || it is ClosingForcedBreakToken }
-                    val length = BlockStackElement(topElement.state, topElement.tokens.subList(index + 1, topElement.tokens.size)).textLength
-                    topElement.tokens.add(index + 1, BeginToken(length = length, state = topElement.state))
-                    topElement.tokens.add(EndToken)
-                    resultStack.push(topElement)
+                is MarkerToken -> {
+                    resultStack.push(MarkerElement())
+                }
+                is BlockFromMarkerToken -> {
+                    val poppedElement = popBlockToMarker()
+                    if (poppedElement is BlockStackElement) {
+                        resultStack.push(BlockStackElement(State.CODE))
+                    }
+                    appendTokensInElement(poppedElement, State.CODE)
                 }
                 else -> resultStack.peek().tokens.add(token)
             }
@@ -85,14 +84,38 @@ class TokenPreprocessor {
         when (val topElement = resultStack.pop()) {
             is BlockStackElement -> topElement
             is WhitespaceStackElement -> {
-                val textLength = topElement.tokens.firstOrNull()?.textLength ?: 0
-                resultStack.peek().tokens.add(
-                    WhitespaceToken(length = textLength + topElement.contentLength, content = topElement.content)
-                )
+                appendTokensInWhitespaceElement(topElement)
+                popBlock()
+            }
+            is MarkerElement -> {
                 resultStack.peek().tokens.addAll(topElement.tokens)
                 popBlock()
             }
         }
+
+    private fun popBlockToMarker(): StackElement =
+        when (val topElement = resultStack.pop()) {
+            is BlockStackElement, is MarkerElement -> topElement
+            is WhitespaceStackElement -> {
+                appendTokensInWhitespaceElement(topElement)
+                popBlockToMarker()
+            }
+        }
+
+    private fun appendTokensInElement(stackElement: StackElement, state: State) {
+        val topElement = resultStack.peek()
+        topElement.tokens.add(BeginToken(length = stackElement.textLength, state = state))
+        topElement.tokens.addAll(stackElement.tokens)
+        topElement.tokens.add(EndToken)
+    }
+
+    private fun appendTokensInWhitespaceElement(element: WhitespaceStackElement) {
+        val textLength = element.tokens.firstOrNull()?.textLength ?: 0
+        resultStack.peek().tokens.add(
+            WhitespaceToken(length = textLength + element.contentLength, content = element.content)
+        )
+        resultStack.peek().tokens.addAll(element.tokens)
+    }
 }
 
 private sealed class StackElement(internal val tokens: MutableList<Token> = mutableListOf()) {
@@ -137,6 +160,8 @@ private class BlockStackElement(
 private class WhitespaceStackElement(internal val content: String): StackElement() {
     internal val contentLength: Int = if (content.isEmpty()) 0 else 1
 }
+
+private class MarkerElement: StackElement()
 
 private val Token.textLength: Int
     get() =

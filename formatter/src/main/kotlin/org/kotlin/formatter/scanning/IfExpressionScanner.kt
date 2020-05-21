@@ -10,6 +10,7 @@ import org.kotlin.formatter.LeafNodeToken
 import org.kotlin.formatter.State
 import org.kotlin.formatter.Token
 import org.kotlin.formatter.WhitespaceToken
+import org.kotlin.formatter.inBeginEndBlock
 import org.kotlin.formatter.scanning.nodepattern.nodePattern
 
 /** A [NodeScanner] for `if` expressions. */
@@ -20,21 +21,16 @@ internal class IfExpressionScanner(private val kotlinScanner: KotlinScanner) : N
             possibleWhitespace()
             nodeOfType(KtTokens.LPAR)
             nodeOfType(KtNodeTypes.CONDITION) andThen { nodes ->
-                listOf(
-                    LeafNodeToken("if ("),
-                    BeginToken(State.CODE),
-                    *kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT).toTypedArray(),
-                    EndToken
-                )
+                listOf(LeafNodeToken("if ("), BeginToken(State.CODE))
+                    .plus(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT))
+                    .plus(EndToken)
             }
             possibleWhitespace()
             nodeOfType(KtTokens.RPAR)
             possibleWhitespace()
             nodeOfType(KtNodeTypes.THEN) andThen { nodes ->
-                listOf(
-                    LeafNodeToken(") "),
-                    *kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT).toTypedArray()
-                )
+                listOf(LeafNodeToken(") "))
+                    .plus(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT))
             }
         }
         zeroOrOne {
@@ -42,11 +38,8 @@ internal class IfExpressionScanner(private val kotlinScanner: KotlinScanner) : N
             nodeOfType(KtTokens.ELSE_KEYWORD)
             possibleWhitespace()
             nodeOfType(KtNodeTypes.ELSE) andThen { nodes ->
-                listOf(
-                    WhitespaceToken(" "),
-                    LeafNodeToken("else "),
-                    *kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT).toTypedArray()
-                )
+                listOf(WhitespaceToken(" "), LeafNodeToken("else "))
+                    .plus(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT))
             }
         }
         end()

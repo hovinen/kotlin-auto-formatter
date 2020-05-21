@@ -6,6 +6,7 @@ import org.jetbrains.kotlin.psi.psiUtil.children
 import org.kotlin.formatter.State
 import org.kotlin.formatter.Token
 import org.kotlin.formatter.WhitespaceToken
+import org.kotlin.formatter.inBeginEndBlock
 import org.kotlin.formatter.nonBreakingSpaceToken
 import org.kotlin.formatter.scanning.nodepattern.nodePattern
 
@@ -13,10 +14,8 @@ import org.kotlin.formatter.scanning.nodepattern.nodePattern
 internal class BinaryExpressionScanner(private val kotlinScanner: KotlinScanner): NodeScanner {
     private val expressionPattern = nodePattern {
         anyNode() andThen { firstNode ->
-            listOf(
-                *kotlinScanner.scanNodes(firstNode, ScannerState.STATEMENT).toTypedArray(),
-                nonBreakingSpaceToken()
-            )
+            kotlinScanner.scanNodes(firstNode, ScannerState.STATEMENT)
+                .plus(nonBreakingSpaceToken())
         }
         possibleWhitespace()
         nodeOfType(KtNodeTypes.OPERATION_REFERENCE) andThen { operator ->
@@ -24,10 +23,8 @@ internal class BinaryExpressionScanner(private val kotlinScanner: KotlinScanner)
         }
         possibleWhitespace()
         anyNode() andThen { nodes ->
-            listOf(
-                WhitespaceToken(" "),
-                *kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT).toTypedArray()
-            )
+            listOf(WhitespaceToken(" "))
+                .plus(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT))
         }
         end()
     }

@@ -10,12 +10,9 @@ import org.kotlin.formatter.Token
 
 /** A [NodeScanner] for the condition of `if` and `while` expressions. */
 internal class ConditionScanner(private val kotlinScanner: KotlinScanner): NodeScanner {
-    override fun scan(node: ASTNode, scannerState: ScannerState): List<Token> {
-        return listOf(
-            BeginToken(state = State.CODE),
-            *kotlinScanner.scanNodes(node.children().asIterable(), ScannerState.STATEMENT).toTypedArray(),
-            ClosingSynchronizedBreakToken(whitespaceLength = 0),
-            EndToken
-        )
-    }
+    override fun scan(node: ASTNode, scannerState: ScannerState): List<Token> =
+        listOf(BeginToken(state = State.CODE))
+            .plus(kotlinScanner.scanNodes(node.children().asIterable(), ScannerState.STATEMENT))
+            .plus(ClosingSynchronizedBreakToken(whitespaceLength = 0))
+            .plus(EndToken)
 }

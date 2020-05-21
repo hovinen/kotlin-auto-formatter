@@ -49,6 +49,38 @@ class NodePatternTest {
     }
 
     @Test
+    fun `accepts nodes not of a given type`() {
+        val accumulatedNodes = mutableListOf<ASTNode>()
+        val subject = nodePattern {
+            nodeNotOfType(KtTokens.CLASS_KEYWORD) andThen {
+                accumulatedNodes.addAll(it)
+                listOf()
+            }
+            end()
+        }
+        val nodes = listOf(LeafPsiElement(KtTokens.FUN_KEYWORD, "fun"))
+
+        subject.matchSequence(nodes)
+
+        assertThat(accumulatedNodes).isEqualTo(nodes)
+    }
+
+    @Test
+    fun `rejects nodes of a type not being accepted`() {
+        val accumulatedNodes = mutableListOf<ASTNode>()
+        val subject = nodePattern {
+            nodeNotOfType(KtTokens.CLASS_KEYWORD) andThen {
+                accumulatedNodes.addAll(it)
+                listOf()
+            }
+            end()
+        }
+        val nodes = listOf(LeafPsiElement(KtTokens.CLASS_KEYWORD, "class"))
+
+        assertThrows<Exception> { subject.matchSequence(nodes) }
+    }
+
+    @Test
     fun `throws when sequence is not accepted`() {
         val accumulatedNodes = mutableListOf<ASTNode>()
         val subject = nodePattern {

@@ -265,6 +265,21 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `breaks between annotations and class declaration`() {
+        val result = KotlinFormatter().format("""
+            @AnAnnotation
+            class MyClass {
+            }
+        """.trimIndent())
+
+        assertThat(result).isEqualTo("""
+            @AnAnnotation
+            class MyClass {
+            }
+        """.trimIndent())
+    }
+
+    @Test
     fun `breaks between different annotations`() {
         val result = KotlinFormatter(maxLineLength = 50).format("""
             @AnAnnotation
@@ -319,7 +334,23 @@ class KotlinFormatterTest {
     }
 
     @Test
-    fun `indents property initializer for function when inside a class`() {
+    fun `indents property initializer for public function when inside a class`() {
+        val result = KotlinFormatter(maxLineLength = 50).format("""
+            class MyClass {
+                fun aFunction(): String = "A long string which should wrap"
+            }
+        """.trimIndent())
+
+        assertThat(result).isEqualTo("""
+            class MyClass {
+                fun aFunction(): String =
+                    "A long string which should wrap"
+            }
+        """.trimIndent())
+    }
+
+    @Test
+    fun `indents property initializer for private function when inside a class`() {
         val result = KotlinFormatter(maxLineLength = 50).format("""
             class MyClass {
                 private fun aFunction(): String = "A long string which should wrap"
@@ -329,6 +360,24 @@ class KotlinFormatterTest {
         assertThat(result).isEqualTo("""
             class MyClass {
                 private fun aFunction(): String =
+                    "A long string which should wrap"
+            }
+        """.trimIndent())
+    }
+
+    @Test
+    fun `indents property initializer for annotated function when inside a class`() {
+        val result = KotlinFormatter(maxLineLength = 50).format("""
+            class MyClass {
+                @AnAnnotation
+                fun aFunction(): String = "A long string which should wrap"
+            }
+        """.trimIndent())
+
+        assertThat(result).isEqualTo("""
+            class MyClass {
+                @AnAnnotation
+                fun aFunction(): String =
                     "A long string which should wrap"
             }
         """.trimIndent())
@@ -1115,6 +1164,25 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `maintains same level of indent for enum as its KDoc`() {
+        val subject = KotlinFormatter()
+
+        val result = subject.format("""
+            /** Some KDoc. */
+            enum class AnEnum {
+                A_VALUE
+            }
+        """.trimIndent())
+
+        assertThat(result).isEqualTo("""
+            /** Some KDoc. */
+            enum class AnEnum {
+                A_VALUE
+            }
+        """.trimIndent())
+    }
+
+    @Test
     fun `places an initial asterix on blank KDoc lines`() {
         val subject = KotlinFormatter(maxLineLength = 40)
 
@@ -1193,6 +1261,45 @@ class KotlinFormatterTest {
 
         assertThat(result).isEqualTo("""
             /** Some KDoc. */
+        """.trimIndent())
+    }
+
+    @Test
+    fun `handles continuation lines of tags in KDoc`() {
+        val subject = KotlinFormatter(maxLineLength = 40)
+
+        val result = subject.format("""
+            /**
+             * @property aProperty A property
+             *     with some KDoc
+             */
+        """.trimIndent())
+
+        assertThat(result).isEqualTo("""
+            /**
+             * @property aProperty A property
+             *     with some KDoc
+             */
+        """.trimIndent())
+    }
+
+
+    @Test
+    fun `maintains indentation of KDoc tags`() {
+        val subject = KotlinFormatter(maxLineLength = 40)
+
+        val result = subject.format("""
+            /**
+             * @property aProperty Some KDoc
+             * @property anotherProperty Some other KDoc
+             */
+        """.trimIndent())
+
+        assertThat(result).isEqualTo("""
+            /**
+             * @property aProperty Some KDoc
+             * @property anotherProperty Some other KDoc
+             */
         """.trimIndent())
     }
 

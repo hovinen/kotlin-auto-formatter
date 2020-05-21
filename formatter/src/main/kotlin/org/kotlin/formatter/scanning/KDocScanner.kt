@@ -46,8 +46,20 @@ internal class KDocScanner(private val kotlinScanner: KotlinScanner) : NodeScann
 
     private val sectionNodePattern = nodePattern {
         zeroOrMore {
+            nodeOfType(KDocElementTypes.KDOC_TAG) andThen { nodes ->
+                listOf(
+                    KDocContentToken(
+                        content = scanIntoString(nodes.first().children().asIterable())
+                    )
+                )
+            }
+            possibleWhitespace() andThen { nodes ->
+                listOf(KDocContentToken(content = "\n".repeat(nodes.map { it.text.count { it == '\n' } }.sum())))
+            }
+        }
+        zeroOrMore {
             oneOrMoreFrugal { nodeNotOfType(KDocTokens.LEADING_ASTERISK) } andThen { nodes ->
-                listOf(KDocContentToken(content = nodes.joinToString("") { it.text }.trimFirstWhitespace()))
+                listOf(KDocContentToken(content = nodes.joinToString("") { it.text }))
             }
             zeroOrOne {
                 whitespaceWithNewline() andThen { nodes ->
@@ -66,11 +78,6 @@ internal class KDocScanner(private val kotlinScanner: KotlinScanner) : NodeScann
                 }
             }
         }
-        zeroOrMore {
-            nodeOfType(KDocElementTypes.KDOC_TAG) andThen { nodes ->
-                listOf(KDocContentToken(content = scanIntoString(nodes.first().children().asIterable())))
-            }
-        }
         end()
     }
 
@@ -83,4 +90,13 @@ internal class KDocScanner(private val kotlinScanner: KotlinScanner) : NodeScann
 
     override fun scan(node: ASTNode, scannerState: ScannerState): List<Token> =
         nodePattern.matchSequence(node.children().asIterable())
+}
+
+private fun List<ASTNode>.withoutInitialWhitespaceNode(): List<ASTNode> {
+    val firstElement = firstOrNull()
+    if (firstElement?.elementType == KDocTokens.TEXT && firstElement?.text == " ") {
+        return subList(1, size)
+    } else {
+        return this
+    }
 }

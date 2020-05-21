@@ -6,18 +6,18 @@ import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.LeafPsiElement
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.kotlin.formatter.BeginToken
-import org.kotlin.formatter.BlockFromLastForcedBreakToken
+import org.kotlin.formatter.BlockFromMarkerToken
 import org.kotlin.formatter.ClosingForcedBreakToken
 import org.kotlin.formatter.ClosingSynchronizedBreakToken
 import org.kotlin.formatter.EndToken
 import org.kotlin.formatter.ForcedBreakToken
 import org.kotlin.formatter.KDocContentToken
 import org.kotlin.formatter.LeafNodeToken
+import org.kotlin.formatter.MarkerToken
 import org.kotlin.formatter.State
 import org.kotlin.formatter.SynchronizedBreakToken
 import org.kotlin.formatter.WhitespaceToken
 import org.kotlin.formatter.loading.KotlinFileLoader
-import org.kotlin.formatter.nonBreakingSpaceToken
 
 internal class KotlinScannerTest {
     private val kotlinLoader = KotlinFileLoader()
@@ -717,7 +717,7 @@ internal class KotlinScannerTest {
     }
 
     @Test
-    fun `outputs a ClosingForcedBreakToken between KDoc and function declaration`() {
+    fun `outputs a ForcedBreakToken between KDoc and function declaration`() {
         val subject = subject()
         val node = kotlinLoader.parseKotlin("""
             /** Some KDoc */
@@ -730,7 +730,7 @@ internal class KotlinScannerTest {
         assertThat(result)
             .containsSubsequence(
                 LeafNodeToken(" */"),
-                ClosingForcedBreakToken,
+                ForcedBreakToken(count = 1),
                 LeafNodeToken("fun")
             )
     }
@@ -766,12 +766,13 @@ internal class KotlinScannerTest {
 
         assertThat(result)
             .containsSubsequence(
+                MarkerToken,
                 LeafNodeToken("class"),
                 LeafNodeToken("MyClass"),
                 LeafNodeToken("AnInterface"),
                 WhitespaceToken(" "),
                 LeafNodeToken("{"),
-                BlockFromLastForcedBreakToken
+                BlockFromMarkerToken
             )
     }
 
@@ -787,11 +788,12 @@ internal class KotlinScannerTest {
 
         assertThat(result)
             .containsSubsequence(
+                MarkerToken,
                 LeafNodeToken("interface"),
                 LeafNodeToken("AnInterface"),
                 WhitespaceToken(" "),
                 LeafNodeToken("{"),
-                BlockFromLastForcedBreakToken
+                BlockFromMarkerToken
             )
     }
 
@@ -1348,9 +1350,10 @@ internal class KotlinScannerTest {
             listOf(
                 LeafNodeToken(" */"),
                 ForcedBreakToken(count = 1),
+                MarkerToken,
                 LeafNodeToken("class"),
                 LeafNodeToken("MyClass"),
-                BlockFromLastForcedBreakToken
+                BlockFromMarkerToken
             )
         )
     }

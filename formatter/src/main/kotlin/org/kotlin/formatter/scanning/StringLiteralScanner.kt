@@ -5,7 +5,8 @@ import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.psi.psiUtil.children
 import org.kotlin.formatter.State
 import org.kotlin.formatter.Token
-import org.kotlin.formatter.WhitespaceToken
+import org.kotlin.formatter.emptyBreakPoint
+import org.kotlin.formatter.inBeginEndBlock
 
 /** A [NodeScanner] for string templates. */
 internal class StringLiteralScanner(private val kotlinScanner: KotlinScanner): NodeScanner {
