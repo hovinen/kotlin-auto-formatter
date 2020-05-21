@@ -77,7 +77,7 @@ class NodePatternTest {
         }
         val nodes = listOf(LeafPsiElement(KtTokens.CLASS_KEYWORD, "class"))
 
-        assertThrows<Exception> { subject.matchSequence(nodes) }
+        assertThrows<NodeSequenceNotMatchedException> { subject.matchSequence(nodes) }
     }
 
     @Test
@@ -92,7 +92,7 @@ class NodePatternTest {
         }
         val nodes = listOf(LeafPsiElement(KtTokens.FUN_KEYWORD, "fun"))
 
-        assertThrows<Exception> {
+        assertThrows<NodeSequenceNotMatchedException> {
             subject.matchSequence(nodes)
         }
     }
@@ -608,7 +608,7 @@ class NodePatternTest {
             end()
         }
 
-        assertThrows<Exception> { subject.matchSequence(listOf()) }
+        assertThrows<NodeSequenceNotMatchedException> { subject.matchSequence(listOf()) }
     }
 
     @Test

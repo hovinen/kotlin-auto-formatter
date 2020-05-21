@@ -4,6 +4,7 @@ import org.kotlin.formatter.loading.KotlinFileLoader
 import org.kotlin.formatter.output.Printer
 import org.kotlin.formatter.output.TokenPreprocessor
 import org.kotlin.formatter.scanning.KotlinScanner
+import org.kotlin.formatter.scanning.nodepattern.NodeSequenceNotMatchedException
 import java.nio.file.Files
 import java.nio.file.Path
 
@@ -43,7 +44,34 @@ class KotlinFormatter(
      * replacing the content of that file with the formatted output.
      */
     fun formatFile(path: Path) {
-        Files.writeString(path, format(Files.readString(path, Charsets.UTF_8)), Charsets.UTF_8)
+        val input = Files.readString(path, Charsets.UTF_8)
+        try {
+            Files.writeString(path, format(input), Charsets.UTF_8)
+        } catch (thrown: NodeSequenceNotMatchedException) {
+            println(
+                "Could not process $path " +
+                    "(line ${lineNumber(input, thrown.nodes.firstOrNull()?.startOffset)}): " +
+                    thrown.message
+            )
+        }
+    }
+
+    private fun lineNumber(input: String, offset: Int?): Int {
+        if (offset != null) {
+            var currentOffset = offset
+            var line = 0
+            input.split('\n').forEach {
+                if (currentOffset < it.length) {
+                    return line
+                } else {
+                    currentOffset -= it.length
+                    line++
+                }
+            }
+            return line
+        } else {
+            return 0
+        }
     }
 }
 

@@ -42,7 +42,7 @@ class NodePattern internal constructor(private val initialState: State) {
         paths = epsilonStep(paths, states)
         paths = step(paths, TerminalNode)
         return paths.firstOrNull { it is FinalPathStep }?.runActions()?.tokens
-            ?: throw Exception("Could not match node sequence ${nodes.toList()}")
+            ?: throw NodeSequenceNotMatchedException(nodes)
     }
 
     private fun setNodeOnPaths(paths: List<PathStep>, node: ASTNode): List<PathStep> =
