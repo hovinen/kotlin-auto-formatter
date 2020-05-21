@@ -906,7 +906,7 @@ class KotlinFormatterTest {
 
     @Test
     fun `format breaks the short form of the summary fragment`() {
-        val result = KotlinFormatter(maxLineLength = 60).format("""
+        val result = KotlinFormatter(maxLineLength = 69).format("""
             /** An extra long summary fragment which should wrap to a new line. */
         """.trimIndent())
 
@@ -1183,7 +1183,7 @@ class KotlinFormatterTest {
     }
 
     @Test
-    fun `places an initial asterix on blank KDoc lines`() {
+    fun `places an initial asterisk on blank KDoc lines`() {
         val subject = KotlinFormatter(maxLineLength = 40)
 
         val result = subject.format("""

@@ -146,6 +146,7 @@ private sealed class StackElement(internal val tokens: MutableList<Token> = muta
             when (it) {
                 is WhitespaceToken -> if (it.content.isEmpty()) 0 else 1
                 is SynchronizedBreakToken -> it.whitespaceLength
+                is ClosingSynchronizedBreakToken -> it.whitespaceLength
                 is LeafNodeToken -> it.textLength
                 is KDocContentToken -> it.textLength
                 else -> 0
