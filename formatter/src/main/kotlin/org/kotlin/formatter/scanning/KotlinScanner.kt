@@ -3,12 +3,10 @@ package org.kotlin.formatter.scanning
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.LeafPsiElement
 import org.jetbrains.kotlin.lexer.KtTokens
-import org.kotlin.formatter.BeginToken
-import org.kotlin.formatter.EndToken
 import org.kotlin.formatter.ForcedBreakToken
-import org.kotlin.formatter.State
 import org.kotlin.formatter.Token
 import org.kotlin.formatter.WhitespaceToken
+import org.kotlin.formatter.scanning.nodepattern.NodePatternBuilder
 import org.kotlin.formatter.scanning.nodepattern.nodePattern
 
 /**
@@ -58,23 +56,7 @@ class KotlinScanner {
     private fun nodePattern(scannerState: ScannerState, singleNodeScanner: (ASTNode, ScannerState) -> List<Token>) = nodePattern {
         zeroOrMore {
             either {
-                possibleWhitespace() thenMapToTokens { nodes ->
-                    if (nodes.isNotEmpty()) {
-                        toForcedBreak(nodes.first())
-                    } else {
-                        listOf()
-                    }
-                }
-                nodeOfOneOfTypes(KtTokens.EOL_COMMENT, KtTokens.BLOCK_COMMENT) thenMapToTokens { nodes ->
-                    LeafScanner().scanCommentNode(nodes.first())
-                }
-                possibleWhitespace() thenMapToTokens { nodes ->
-                    if (nodes.isNotEmpty()) {
-                        toForcedBreak(nodes.first())
-                    } else {
-                        listOf()
-                    }
-                }
+                commentWithPossibleWhitspace()
             } or {
                 anyNode() thenMapToTokens { nodes ->
                     singleNodeScanner(nodes.first(), scannerState)
@@ -107,9 +89,41 @@ class KotlinScanner {
         node: LeafPsiElement,
         scannerState: ScannerState
     ) = node.textContains('\n') && setOf(ScannerState.BLOCK, ScannerState.PACKAGE_IMPORT).contains(scannerState)
-
-    private fun toForcedBreak(node: ASTNode) =
-        listOf(ForcedBreakToken(count = if (hasDoubleNewline(node)) 2 else 1))
-
-    private fun hasDoubleNewline(node: ASTNode): Boolean = node.text.count { it == '\n' } > 1
 }
+
+/**
+ * Adds to the receiver [NodePatternBuilder] a sequence matching whitespace, a comment surrounded by
+ * whitespace, or the empty sequence.
+ */
+fun NodePatternBuilder.possibleWhitespaceWithComment() {
+    either {
+        commentWithPossibleWhitspace()
+    } or {
+        possibleWhitespace()
+    }
+}
+
+private fun NodePatternBuilder.commentWithPossibleWhitspace() {
+    possibleWhitespace() thenMapToTokens { nodes ->
+        if (nodes.isNotEmpty()) {
+            toForcedBreak(nodes.first())
+        } else {
+            listOf()
+        }
+    }
+    nodeOfOneOfTypes(KtTokens.EOL_COMMENT, KtTokens.BLOCK_COMMENT) thenMapToTokens { nodes ->
+        LeafScanner().scanCommentNode(nodes.first())
+    }
+    possibleWhitespace() thenMapToTokens { nodes ->
+        if (nodes.isNotEmpty()) {
+            toForcedBreak(nodes.first())
+        } else {
+            listOf()
+        }
+    }
+}
+
+private fun toForcedBreak(node: ASTNode) =
+    listOf(ForcedBreakToken(count = if (hasDoubleNewline(node)) 2 else 1))
+
+private fun hasDoubleNewline(node: ASTNode): Boolean = node.text.count { it == '\n' } > 1

@@ -48,6 +48,7 @@ internal fun NodePatternBuilder.declarationWithOptionalModifierList(
     markerCount: Int = 1
 ) {
     optionalKDoc(kotlinScanner)
+    possibleWhitespaceWithComment()
     either {
         exactlyOne {
             nodeOfType(KtNodeTypes.MODIFIER_LIST) thenMapToTokens { nodes ->

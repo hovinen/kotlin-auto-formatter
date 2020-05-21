@@ -13,6 +13,7 @@ import org.kotlin.formatter.scanning.nodepattern.nodePattern
 internal class ClassScanner(private val kotlinScanner: KotlinScanner): NodeScanner {
     private val nodePattern = nodePattern {
         optionalKDoc(kotlinScanner)
+        possibleWhitespaceWithComment()
         zeroOrOne {
             nodeOfType(KtNodeTypes.MODIFIER_LIST)
         } thenMapToTokens { nodes ->

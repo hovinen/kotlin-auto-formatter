@@ -1357,6 +1357,57 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `maintains comment between KDoc and class declaration`() {
+        val subject = KotlinFormatter(maxLineLength = 60)
+
+        val result = subject.format("""
+            /** Some KDoc. */
+            // A comment
+            class AClass
+        """.trimIndent())
+
+        assertThat(result).isEqualTo("""
+            /** Some KDoc. */
+            // A comment
+            class AClass
+        """.trimIndent())
+    }
+
+    @Test
+    fun `maintains comment between KDoc and property declaration`() {
+        val subject = KotlinFormatter(maxLineLength = 60)
+
+        val result = subject.format("""
+            /** Some KDoc. */
+            // A comment
+            val aProperty
+        """.trimIndent())
+
+        assertThat(result).isEqualTo("""
+            /** Some KDoc. */
+            // A comment
+            val aProperty
+        """.trimIndent())
+    }
+
+    @Test
+    fun `maintains comment between KDoc and function declaration`() {
+        val subject = KotlinFormatter(maxLineLength = 60)
+
+        val result = subject.format("""
+            /** Some KDoc. */
+            // A comment
+            fun aFunction()
+        """.trimIndent())
+
+        assertThat(result).isEqualTo("""
+            /** Some KDoc. */
+            // A comment
+            fun aFunction()
+        """.trimIndent())
+    }
+
+    @Test
     fun `maintains spacing before KDoc tag`() {
         val subject = KotlinFormatter(maxLineLength = 60)
 
