@@ -3,7 +3,7 @@ plugins {
 }
 
 group = "org.kotlin.formatter"
-version = "1.0-SNAPSHOT"
+version = "0.1-SNAPSHOT"
 
 application {
     mainClassName = "org.kotlin.formatter.KotlinFormatterKt"
