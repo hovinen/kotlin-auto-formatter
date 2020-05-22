@@ -110,7 +110,7 @@ internal fun nodeScannerForElementType(
         KtFileElementType.INSTANCE, is KtScriptElementType, KtNodeTypes.LITERAL_STRING_TEMPLATE_ENTRY -> {
             SimpleScanner(kotlinScanner, ScannerState.BLOCK)
         }
-        KtNodeTypes.WHEN_ENTRY, KtNodeTypes.ANNOTATION_ENTRY, KtNodeTypes.PARENTHESIZED -> {
+        KtNodeTypes.WHEN_ENTRY, KtNodeTypes.ANNOTATION_ENTRY, KtNodeTypes.PARENTHESIZED, KtNodeTypes.PRIMARY_CONSTRUCTOR, KtNodeTypes.SUPER_TYPE_CALL_ENTRY -> {
             SimpleBlockScanner(kotlinScanner, ScannerState.STATEMENT, State.CODE)
         }
         KtNodeTypes.SHORT_STRING_TEMPLATE_ENTRY -> {

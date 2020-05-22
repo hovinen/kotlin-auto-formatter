@@ -127,6 +127,31 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `format does not break on super constructor parameter list based on full length`() {
+        val result = KotlinFormatter(maxLineLength = 50).format("""
+            class ALongClass(aParameter: String) : ASuperclass(aParameter, anotherParameter)
+        """.trimIndent())
+
+        assertThat(result).isEqualTo("""
+            class ALongClass(aParameter: String) :
+                ASuperclass(aParameter, anotherParameter)
+        """.trimIndent())
+    }
+
+    @Test
+    fun `format breaks on multiple super class spec correctly`() {
+        val result = KotlinFormatter(maxLineLength = 50).format("""
+            class ALongClass(aParameter: String) : ASuperclass(aParameter, anotherParameter), AnInterface, AnotherInterface
+        """.trimIndent())
+
+        assertThat(result).isEqualTo("""
+            class ALongClass(aParameter: String) :
+                ASuperclass(aParameter, anotherParameter),
+                AnInterface, AnotherInterface
+        """.trimIndent())
+    }
+
+    @Test
     fun `format does not indent a class after a class after a package declaration`() {
         val result = KotlinFormatter(maxLineLength = 50).format("""
             package apackage
