@@ -542,6 +542,23 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `prefers to break outside grouping operators`() {
+        val result = KotlinFormatter(maxLineLength = 50).format("""
+            fun myFunction() {
+                aVariable = aValue + anotherValue + (yetAnotherValue + andYetAnotherValue)
+            }
+        """.trimIndent())
+
+        assertThat(result).isEqualTo("""
+            fun myFunction() {
+                aVariable =
+                    aValue + anotherValue +
+                        (yetAnotherValue + andYetAnotherValue)
+            }
+        """.trimIndent())
+    }
+
+    @Test
     fun `format breaks expressions at operators inside if statements`() {
         val result = KotlinFormatter(maxLineLength = 50).format("""
             fun myFunction() {
