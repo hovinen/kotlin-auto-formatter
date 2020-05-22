@@ -655,10 +655,9 @@ class KotlinFormatterTest {
         """.trimIndent())
 
         assertThat(result).isEqualTo("""
-            val aFunction =
-                { aParameter, anotherParameter ->
-                    anotherFunction()
-                }
+            val aFunction = { aParameter, anotherParameter ->
+                anotherFunction()
+            }
         """.trimIndent())
     }
 

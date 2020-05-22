@@ -92,7 +92,7 @@ internal fun nodeScannerForElementType(
         KtFileElementType.INSTANCE, is KtScriptElementType, KtNodeTypes.LITERAL_STRING_TEMPLATE_ENTRY -> {
             SimpleScanner(kotlinScanner, ScannerState.BLOCK)
         }
-        KtNodeTypes.PRIMARY_CONSTRUCTOR, KtNodeTypes.BODY, KtNodeTypes.THEN -> {
+        KtNodeTypes.PRIMARY_CONSTRUCTOR, KtNodeTypes.BODY, KtNodeTypes.THEN, KtNodeTypes.LAMBDA_EXPRESSION -> {
             SimpleScanner(kotlinScanner, ScannerState.STATEMENT)
         }
         KtNodeTypes.VALUE_PARAMETER, KtNodeTypes.VALUE_ARGUMENT -> {
