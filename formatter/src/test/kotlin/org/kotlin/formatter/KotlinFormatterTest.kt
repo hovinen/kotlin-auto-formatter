@@ -127,7 +127,7 @@ class KotlinFormatterTest {
     }
 
     @Test
-    fun `format does not break on super constructor parameter list based on full length`() {
+    fun `does not break on super constructor parameter list based on full length`() {
         val result = KotlinFormatter(maxLineLength = 50).format("""
             class ALongClass(aParameter: String) : ASuperclass(aParameter, anotherParameter)
         """.trimIndent())
@@ -139,7 +139,7 @@ class KotlinFormatterTest {
     }
 
     @Test
-    fun `format breaks on multiple super class spec correctly`() {
+    fun `breaks on multiple super class spec correctly`() {
         val result = KotlinFormatter(maxLineLength = 50).format("""
             class ALongClass(aParameter: String) : ASuperclass(aParameter, anotherParameter), AnInterface, AnotherInterface
         """.trimIndent())
@@ -148,6 +148,21 @@ class KotlinFormatterTest {
             class ALongClass(aParameter: String) :
                 ASuperclass(aParameter, anotherParameter),
                 AnInterface, AnotherInterface
+        """.trimIndent())
+    }
+
+    @Test
+    fun `does not break immediately before opening brace of class body`() {
+        val result = KotlinFormatter(maxLineLength = 33).format("""
+            class AClass(aParameter: String) {
+            }
+        """.trimIndent())
+
+        assertThat(result).isEqualTo("""
+            class AClass(
+                aParameter: String
+            ) {
+            }
         """.trimIndent())
     }
 

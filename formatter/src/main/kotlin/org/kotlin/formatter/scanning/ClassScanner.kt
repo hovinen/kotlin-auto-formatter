@@ -7,6 +7,7 @@ import org.jetbrains.kotlin.psi.psiUtil.children
 import org.kotlin.formatter.BlockFromMarkerToken
 import org.kotlin.formatter.MarkerToken
 import org.kotlin.formatter.Token
+import org.kotlin.formatter.nonBreakingSpaceToken
 import org.kotlin.formatter.scanning.nodepattern.nodePattern
 
 /** A [NodeScanner] for class and interface definitions. */
@@ -26,9 +27,12 @@ internal class ClassScanner(private val kotlinScanner: KotlinScanner): NodeScann
         } thenMapToTokens { nodes ->
             kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
         }
-        zeroOrOne { nodeOfType(KtNodeTypes.CLASS_BODY) } thenMapToTokens { nodes ->
+        possibleWhitespace()
+        zeroOrOne {
+            nodeOfType(KtNodeTypes.CLASS_BODY)
+        } thenMapToTokens { nodes ->
             if (nodes.isNotEmpty()) {
-                kotlinScanner.scanNodes(nodes, ScannerState.BLOCK)
+                listOf(nonBreakingSpaceToken()).plus(kotlinScanner.scanNodes(nodes, ScannerState.BLOCK))
             } else {
                 listOf(BlockFromMarkerToken)
             }
