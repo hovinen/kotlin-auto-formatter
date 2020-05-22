@@ -89,12 +89,6 @@ internal fun nodeScannerForElementType(
         KtNodeTypes.IMPORT_ALIAS -> {
             SimpleBlockScanner(kotlinScanner, ScannerState.PACKAGE_IMPORT, State.PACKAGE_IMPORT)
         }
-        KtFileElementType.INSTANCE, is KtScriptElementType, KtNodeTypes.LITERAL_STRING_TEMPLATE_ENTRY -> {
-            SimpleScanner(kotlinScanner, ScannerState.BLOCK)
-        }
-        KtNodeTypes.PRIMARY_CONSTRUCTOR, KtNodeTypes.BODY, KtNodeTypes.THEN, KtNodeTypes.LAMBDA_EXPRESSION -> {
-            SimpleScanner(kotlinScanner, ScannerState.STATEMENT)
-        }
         KtNodeTypes.VALUE_PARAMETER, KtNodeTypes.VALUE_ARGUMENT -> {
             SimpleBlockScanner(kotlinScanner, ScannerState.STATEMENT, State.CODE)
         }
@@ -107,7 +101,22 @@ internal fun nodeScannerForElementType(
         KtNodeTypes.THROW -> {
             ThrowScanner(kotlinScanner)
         }
-        else -> {
+        KtNodeTypes.CATCH -> {
+            CatchScanner(kotlinScanner)
+        }
+        KtNodeTypes.PROPERTY_ACCESSOR -> {
             SimpleBlockScanner(kotlinScanner, ScannerState.STATEMENT, State.CODE)
+        }
+        KtFileElementType.INSTANCE, is KtScriptElementType, KtNodeTypes.LITERAL_STRING_TEMPLATE_ENTRY -> {
+            SimpleScanner(kotlinScanner, ScannerState.BLOCK)
+        }
+        KtNodeTypes.WHEN_ENTRY, KtNodeTypes.ANNOTATION_ENTRY -> {
+            SimpleBlockScanner(kotlinScanner, ScannerState.STATEMENT, State.CODE)
+        }
+        KtNodeTypes.SHORT_STRING_TEMPLATE_ENTRY -> {
+            SimpleBlockScanner(kotlinScanner, ScannerState.STATEMENT, State.STRING_LITERAL)
+        }
+        else -> {
+            SimpleScanner(kotlinScanner, ScannerState.STATEMENT)
         }
     }

@@ -248,6 +248,23 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `correctly treats annotations with arguments`() {
+        val result = KotlinFormatter(maxLineLength = 50).format("""
+            class MyClass {
+                @AnAnnotation("An argument")
+                fun myFunction()
+            }
+        """.trimIndent())
+
+        assertThat(result).isEqualTo("""
+            class MyClass {
+                @AnAnnotation("An argument")
+                fun myFunction()
+            }
+        """.trimIndent())
+    }
+
+    @Test
     fun `breaks between annotations and multiline declarations`() {
         val result = KotlinFormatter(maxLineLength = 50).format("""
             @AnAnnotation
@@ -873,6 +890,29 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `indents inside when entry`() {
+        val result = KotlinFormatter(maxLineLength = 50).format("""
+            fun myFunction() {
+                when (anExpression) {
+                    else ->
+                        throw AnException("A long exception message")
+                }
+            }
+        """.trimIndent())
+
+        assertThat(result).isEqualTo("""
+            fun myFunction() {
+                when (anExpression) {
+                    else ->
+                        throw AnException(
+                            "A long exception message"
+                        )
+                }
+            }
+        """.trimIndent())
+    }
+
+    @Test
     fun `does not insert whitespace into an empty block`() {
         val result = KotlinFormatter().format("""
             val object = MyInterface {}
@@ -899,6 +939,29 @@ class KotlinFormatterTest {
                     anotherParameter,
                     aThirdParameter
                 )
+            }
+        """.trimIndent())
+    }
+
+    @Test
+    fun `indents a try-catch expression correctly`() {
+        val result = KotlinFormatter(maxLineLength = 40).format("""
+            fun aFunction() { 
+                try {
+                    aFunction()
+                } catch (e: Exception) {
+                    anotherFunction()
+                }
+            }
+        """.trimIndent())
+
+        assertThat(result).isEqualTo("""
+            fun aFunction() {
+                try {
+                    aFunction()
+                } catch (e: Exception) {
+                    anotherFunction()
+                }
             }
         """.trimIndent())
     }
