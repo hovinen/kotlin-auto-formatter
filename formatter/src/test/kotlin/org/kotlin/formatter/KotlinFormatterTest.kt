@@ -420,6 +420,20 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `breaks if condition even if condition would fit on the line`() {
+        val result = KotlinFormatter(maxLineLength = 35).format("""
+            if (aCondition || anotherCondition) {
+            }
+        """.trimIndent())
+
+        assertThat(result).isEqualTo("""
+            if (aCondition || anotherCondition
+            ) {
+            }
+        """.trimIndent())
+    }
+
+    @Test
     fun `format breaks at logical operator in a while statement`() {
         val result = KotlinFormatter(maxLineLength = 50).format("""
             fun myFunction() {

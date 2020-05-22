@@ -156,6 +156,50 @@ internal class TokenPreprocessorTest {
     }
 
     @Test
+    fun `moves an EndToken to after a following LeafNodeToken`() {
+        val subject = TokenPreprocessor()
+        val input = listOf(
+            BeginToken(length = 0, state = State.CODE),
+            EndToken,
+            LeafNodeToken("token")
+        )
+
+        val result = subject.preprocess(input)
+
+        assertThat(result).isEqualTo(
+            listOf(
+                BeginToken(length = 5, state = State.CODE),
+                LeafNodeToken("token"),
+                EndToken
+            )
+        )
+    }
+
+    @Test
+    fun `moves an inner EndToken to after a following LeafNodeToken`() {
+        val subject = TokenPreprocessor()
+        val input = listOf(
+            BeginToken(length = 0, state = State.CODE),
+            BeginToken(length = 0, state = State.CODE),
+            EndToken,
+            EndToken,
+            LeafNodeToken("token")
+        )
+
+        val result = subject.preprocess(input)
+
+        assertThat(result).isEqualTo(
+            listOf(
+                BeginToken(length = 5, state = State.CODE),
+                BeginToken(length = 5, state = State.CODE),
+                LeafNodeToken("token"),
+                EndToken,
+                EndToken
+            )
+        )
+    }
+
+    @Test
     fun `outputs BeginToken using the state of the input token`() {
         val subject = TokenPreprocessor()
         val input = listOf(

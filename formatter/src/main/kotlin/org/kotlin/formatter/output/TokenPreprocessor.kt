@@ -37,6 +37,9 @@ class TokenPreprocessor {
      * Returns a list of [Token] with the lengths of all [WhitespaceToken] and [BeginToken]
      * assigned.
      *
+     * Moves [EndToken] instances to appear after any non-breaking tokens which follow them,
+     * adjusting the block lengths accordingly.
+     *
      * Replaces all instances of [BlockFromMarkerToken] with a [BeginToken], [EndToken] pair
      * stretching from the previous [MarkerToken] in the current block, or from the previous
      * [BeginToken] if there is no forced break in the current block. The output contains no
@@ -60,8 +63,16 @@ class TokenPreprocessor {
      * ignored by this process.
      */
     fun preprocess(input: List<Token>): List<Token> {
+        var foundEndTokens = 0
         resultStack.push(BlockStackElement(State.CODE))
         for (token in input) {
+            if (token !is LeafNodeToken && token !is EndToken) {
+                while (foundEndTokens > 0) {
+                    handleEndToken()
+                    foundEndTokens--
+                }
+            }
+
             when (token) {
                 is WhitespaceToken -> {
                     if (token.content.isNotEmpty() || !(resultStack.peek() is WhitespaceStackElement)) {
@@ -72,8 +83,7 @@ class TokenPreprocessor {
                     resultStack.push(BlockStackElement(token.state))
                 }
                 is EndToken -> {
-                    val blockElement = popBlock().apply { replaceSynchronizedBreaks() }
-                    appendTokensInElement(blockElement, blockElement.state)
+                    ++foundEndTokens
                 }
                 is MarkerToken -> {
                     resultStack.push(MarkerElement())
@@ -94,7 +104,15 @@ class TokenPreprocessor {
                 else -> resultStack.peek().tokens.add(token)
             }
         }
+        while (foundEndTokens-- > 0) {
+            handleEndToken()
+        }
         return popBlock().tokens
+    }
+
+    private fun handleEndToken() {
+        val blockElement = popBlock().apply { replaceSynchronizedBreaks() }
+        appendTokensInElement(blockElement, blockElement.state)
     }
 
     private fun popBlock(): BlockStackElement =
