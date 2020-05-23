@@ -178,8 +178,9 @@ class NodePatternBuilder {
      * An input sequence with whitespace at the end may be matched either via `anyNode()` in the
      * `zeroOrMoreGreedy` block or by `possibleWhitesapce()`. The "frugal" in `zeroOrMoreGreedy`
      * prefers the latter behaviour, so that the whitespace nodes are attached to
-     * `possibleWhitespace` and not `zeroOrMoreFrugal`. In particular, any [actions](andThen)
-     * attached to `zeroOrMoreFrugal` do not see the following whitespace nodes.
+     * `possibleWhitespace` and not `zeroOrMoreFrugal`. In particular, any
+     * [actions][thenMapToTokens] attached to `zeroOrMoreFrugal` do not see the following whitespace
+     * nodes.
      */
     fun zeroOrMoreFrugal(init: NodePatternBuilder.() -> Unit): NodePatternBuilder {
         val subgraphElement = buildSubgraph(init)
@@ -328,14 +329,14 @@ class NodePatternBuilder {
  * }
  * ```
  *
- * To transform the [ASTNode] into [Token], apply the method [andThen] after a block which specifies
- * the nodes to be transformed:
+ * To transform the [ASTNode] into [Token], apply the method [NodePatternBuilder.thenMapToTokens]
+ * after a block which specifies the nodes to be transformed:
  *
  * ```
  * nodePattern {
  *     possibleWhitespace()
  *     oneOrMore {
- *         nodeOfType(KtTokens.IDENTIFIER) andThen { nodes ->
+ *         nodeOfType(KtTokens.IDENTIFIER) thenMapToTokens { nodes ->
  *             listOf(
  *                 LeafNodeToken(nodes[0].text),
  *                 LeafNodeToken(","),
@@ -357,10 +358,10 @@ class NodePatternBuilder {
  * nodePattern {
  *     possibleWhitespace()
  *     oneOrMore {
- *         nodeOfType(KtTokens.IDENTIFIER) andThen { nodes -> listOf(...) }
+ *         nodeOfType(KtTokens.IDENTIFIER) thenMapToTokens { nodes -> listOf(...) }
  *         nodeOfType(KtTokens.COMMA)
  *         possibleWhitespace()
- *     } andThen { allNodes -> ...work with nodes... } // WRONG: identifiers were already consumed
+ *     } thenMapToTokens { allNodes -> ...work with nodes... } // WRONG: identifiers were already consumed
  *     end()
  * }
  * ```
