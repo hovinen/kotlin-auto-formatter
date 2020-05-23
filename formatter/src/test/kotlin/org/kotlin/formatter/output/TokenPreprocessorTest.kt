@@ -24,9 +24,7 @@ internal class TokenPreprocessorTest {
     @Test
     fun `outputs a LeafNodeToken directly`() {
         val subject = TokenPreprocessor()
-        val input = listOf(
-            LeafNodeToken("any token")
-        )
+        val input = listOf(LeafNodeToken("any token"))
 
         val result = subject.preprocess(input)
 
@@ -35,32 +33,30 @@ internal class TokenPreprocessorTest {
 
     @ParameterizedTest
     @MethodSource("whitespaceTokenLengthCases")
-    fun `outputs a WhitespaceToken with the length of the following token`(token: Token, lengthExpected: Int) {
+    fun `outputs a WhitespaceToken with the length of the following token`(
+        token: Token,
+        lengthExpected: Int
+    ) {
         val subject = TokenPreprocessor()
-        val input = listOf(
-            WhitespaceToken(content = " "),
-            token
-        )
+        val input = listOf(WhitespaceToken(content = " "), token)
 
         val result = subject.preprocess(input)
 
         assertThat(result).isEqualTo(
-            listOf(
-                WhitespaceToken(length = lengthExpected, content = " "),
-                token
-            )
+            listOf(WhitespaceToken(length = lengthExpected, content = " "), token)
         )
     }
 
     @Test
     fun `outputs a WhitespaceToken with the length of the following block`() {
         val subject = TokenPreprocessor()
-        val input = listOf(
-            WhitespaceToken(content = " "),
-            BeginToken(state = State.CODE),
-            LeafNodeToken("any token"),
-            EndToken
-        )
+        val input =
+            listOf(
+                WhitespaceToken(content = " "),
+                BeginToken(state = State.CODE),
+                LeafNodeToken("any token"),
+                EndToken
+            )
 
         val result = subject.preprocess(input)
 
@@ -70,49 +66,42 @@ internal class TokenPreprocessorTest {
     @Test
     fun `consolidates WhitespaceToken with emptyBreakPoint`() {
         val subject = TokenPreprocessor()
-        val input = listOf(
-            WhitespaceToken(length = 0, content = " "),
-            emptyBreakPoint(),
-            LeafNodeToken("any token")
-        )
+        val input =
+            listOf(
+                WhitespaceToken(length = 0, content = " "),
+                emptyBreakPoint(),
+                LeafNodeToken("any token")
+            )
 
         val result = subject.preprocess(input)
 
         assertThat(result).isEqualTo(
-            listOf(
-                WhitespaceToken(length = 10, content = " "),
-                LeafNodeToken("any token")
-            )
+            listOf(WhitespaceToken(length = 10, content = " "), LeafNodeToken("any token"))
         )
     }
 
     @Test
     fun `preserves emptyBreakPoint when not preceded by a WhitespaceToken`() {
         val subject = TokenPreprocessor()
-        val input = listOf(
-            emptyBreakPoint(),
-            LeafNodeToken("any token")
-        )
+        val input = listOf(emptyBreakPoint(), LeafNodeToken("any token"))
 
         val result = subject.preprocess(input)
 
         assertThat(result).isEqualTo(
-            listOf(
-                WhitespaceToken(length = 9, content = ""),
-                LeafNodeToken("any token")
-            )
+            listOf(WhitespaceToken(length = 9, content = ""), LeafNodeToken("any token"))
         )
     }
 
     @Test
     fun `preserves emptyBreakPoint when not immediately preceded by a WhitespaceToken`() {
         val subject = TokenPreprocessor()
-        val input = listOf(
-            WhitespaceToken(content = " "),
-            LeafNodeToken("any token"),
-            emptyBreakPoint(),
-            LeafNodeToken("any token")
-        )
+        val input =
+            listOf(
+                WhitespaceToken(content = " "),
+                LeafNodeToken("any token"),
+                emptyBreakPoint(),
+                LeafNodeToken("any token")
+            )
 
         val result = subject.preprocess(input)
 
@@ -129,12 +118,13 @@ internal class TokenPreprocessorTest {
     @Test
     fun `does not include the length of following tokens in the length of a WhitespaceToken`() {
         val subject = TokenPreprocessor()
-        val input = listOf(
-            WhitespaceToken( content = " "),
-            LeafNodeToken("any token"),
-            WhitespaceToken(content = " "),
-            LeafNodeToken("another token")
-        )
+        val input =
+            listOf(
+                WhitespaceToken(content = " "),
+                LeafNodeToken("any token"),
+                WhitespaceToken(content = " "),
+                LeafNodeToken("another token")
+            )
 
         val result = subject.preprocess(input)
 
@@ -145,11 +135,7 @@ internal class TokenPreprocessorTest {
     @MethodSource("tokenLengthCases")
     fun `outputs a BeginToken, EndToken pair with length`(token: Token, lengthExpected: Int) {
         val subject = TokenPreprocessor()
-        val input = listOf(
-            BeginToken(state = State.CODE),
-            token,
-            EndToken
-        )
+        val input = listOf(BeginToken(state = State.CODE), token, EndToken)
 
         val result = subject.preprocess(input)
 
@@ -159,12 +145,13 @@ internal class TokenPreprocessorTest {
     @Test
     fun `outputs a BeginToken, EndToken pair with length of two tokens`() {
         val subject = TokenPreprocessor()
-        val input = listOf(
-            BeginToken(state = State.CODE),
-            LeafNodeToken("token 1"),
-            LeafNodeToken("token 2"),
-            EndToken
-        )
+        val input =
+            listOf(
+                BeginToken(state = State.CODE),
+                LeafNodeToken("token 1"),
+                LeafNodeToken("token 2"),
+                EndToken
+            )
 
         val result = subject.preprocess(input)
 
@@ -181,33 +168,26 @@ internal class TokenPreprocessorTest {
     @Test
     fun `moves an EndToken to after a following LeafNodeToken`() {
         val subject = TokenPreprocessor()
-        val input = listOf(
-            BeginToken(state = State.CODE),
-            EndToken,
-            LeafNodeToken("token")
-        )
+        val input = listOf(BeginToken(state = State.CODE), EndToken, LeafNodeToken("token"))
 
         val result = subject.preprocess(input)
 
         assertThat(result).isEqualTo(
-            listOf(
-                BeginToken(length = 5, state = State.CODE),
-                LeafNodeToken("token"),
-                EndToken
-            )
+            listOf(BeginToken(length = 5, state = State.CODE), LeafNodeToken("token"), EndToken)
         )
     }
 
     @Test
     fun `moves an inner EndToken to after a following LeafNodeToken`() {
         val subject = TokenPreprocessor()
-        val input = listOf(
-            BeginToken(state = State.CODE),
-            BeginToken(state = State.CODE),
-            EndToken,
-            EndToken,
-            LeafNodeToken("token")
-        )
+        val input =
+            listOf(
+                BeginToken(state = State.CODE),
+                BeginToken(state = State.CODE),
+                EndToken,
+                EndToken,
+                LeafNodeToken("token")
+            )
 
         val result = subject.preprocess(input)
 
@@ -225,11 +205,8 @@ internal class TokenPreprocessorTest {
     @Test
     fun `outputs BeginToken using the state of the input token`() {
         val subject = TokenPreprocessor()
-        val input = listOf(
-            BeginToken(state = State.STRING_LITERAL),
-            LeafNodeToken("any token"),
-            EndToken
-        )
+        val input =
+            listOf(BeginToken(state = State.STRING_LITERAL), LeafNodeToken("any token"), EndToken)
 
         val result = subject.preprocess(input)
 
@@ -239,86 +216,58 @@ internal class TokenPreprocessorTest {
     @Test
     fun `outputs BeginToken, EndToken pair from start of block for BlockFromMarkerToken`() {
         val subject = TokenPreprocessor()
-        val input = listOf(
-            LeafNodeToken("any token"),
-            BlockFromMarkerToken
-        )
+        val input = listOf(LeafNodeToken("any token"), BlockFromMarkerToken)
 
         val result = subject.preprocess(input)
 
         assertThat(result).isEqualTo(
-            listOf(
-                BeginToken(length = 9, state = State.CODE),
-                LeafNodeToken("any token"),
-                EndToken
-            )
+            listOf(BeginToken(length = 9, state = State.CODE), LeafNodeToken("any token"), EndToken)
         )
     }
 
     @Test
     fun `outputs BeginToken, EndToken pair from MarkerToken for BlockFromMarkerToken`() {
         val subject = TokenPreprocessor()
-        val input = listOf(
-            LeafNodeToken("any token"),
-            MarkerToken,
-            BlockFromMarkerToken
-        )
+        val input = listOf(LeafNodeToken("any token"), MarkerToken, BlockFromMarkerToken)
 
         val result = subject.preprocess(input)
 
         assertThat(result).isEqualTo(
-            listOf(
-                LeafNodeToken("any token"),
-                BeginToken(length = 0, state = State.CODE),
-                EndToken
-            )
+            listOf(LeafNodeToken("any token"), BeginToken(length = 0, state = State.CODE), EndToken)
         )
     }
 
     @Test
     fun `removes unmatched MarkerToken`() {
         val subject = TokenPreprocessor()
-        val input = listOf(
-            LeafNodeToken("any token"),
-            MarkerToken
-        )
+        val input = listOf(LeafNodeToken("any token"), MarkerToken)
 
         val result = subject.preprocess(input)
 
-        assertThat(result).isEqualTo(
-            listOf(
-                LeafNodeToken("any token")
-            )
-        )
+        assertThat(result).isEqualTo(listOf(LeafNodeToken("any token")))
     }
 
     @Test
     fun `maintains tokens following dropped MarkerToken`() {
         val subject = TokenPreprocessor()
-        val input = listOf(
-            MarkerToken,
-            LeafNodeToken("any token")
-        )
+        val input = listOf(MarkerToken, LeafNodeToken("any token"))
 
         val result = subject.preprocess(input)
 
-        assertThat(result).isEqualTo(
-            listOf(
-                LeafNodeToken("any token")
-            )
-        )
+        assertThat(result).isEqualTo(listOf(LeafNodeToken("any token")))
     }
 
     @Test
     fun `does not output BeginToken from MarkerToken in subblock`() {
         val subject = TokenPreprocessor()
-        val input = listOf(
-            LeafNodeToken("any token"),
-            BeginToken(state = State.CODE),
-            MarkerToken,
-            EndToken,
-            BlockFromMarkerToken
-        )
+        val input =
+            listOf(
+                LeafNodeToken("any token"),
+                BeginToken(state = State.CODE),
+                MarkerToken,
+                EndToken,
+                BlockFromMarkerToken
+            )
 
         val result = subject.preprocess(input)
 
@@ -336,15 +285,18 @@ internal class TokenPreprocessorTest {
     @ParameterizedTest
     @MethodSource("synchronizedBreakTokenCases")
     fun `converts synchronized break into forced break when KDoc token with newline the same block`(
-        synchronizedBreakToken: Token, unused: Token, expectedBreakToken: Token
+        synchronizedBreakToken: Token,
+        unused: Token,
+        expectedBreakToken: Token
     ) {
         val subject = TokenPreprocessor()
-        val input = listOf(
-            BeginToken(state = State.CODE),
-            synchronizedBreakToken,
-            KDocContentToken("\n"),
-            EndToken
-        )
+        val input =
+            listOf(
+                BeginToken(state = State.CODE),
+                synchronizedBreakToken,
+                KDocContentToken("\n"),
+                EndToken
+            )
 
         val result = subject.preprocess(input)
 
@@ -361,17 +313,20 @@ internal class TokenPreprocessorTest {
     @ParameterizedTest
     @MethodSource("synchronizedBreakTokenCases")
     fun `does not convert synchronized break tokens in a subblock into forced break tokens`(
-        synchronizedBreakToken: Token, unused1: Token, unused2: Token
+        synchronizedBreakToken: Token,
+        unused1: Token,
+        unused2: Token
     ) {
         val subject = TokenPreprocessor()
-        val input = listOf(
-            BeginToken(state = State.CODE),
-            BeginToken(state = State.CODE),
-            synchronizedBreakToken,
-            EndToken,
-            KDocContentToken("\n"),
-            EndToken
-        )
+        val input =
+            listOf(
+                BeginToken(state = State.CODE),
+                BeginToken(state = State.CODE),
+                synchronizedBreakToken,
+                EndToken,
+                KDocContentToken("\n"),
+                EndToken
+            )
 
         val result = subject.preprocess(input)
 
@@ -390,15 +345,18 @@ internal class TokenPreprocessorTest {
     @ParameterizedTest
     @MethodSource("synchronizedBreakTokenCases")
     fun `converts synchronized break into forced break when forced break in the same block`(
-        synchronizedBreakToken: Token, forcedBreakToken: Token, expectedBreakToken: Token
+        synchronizedBreakToken: Token,
+        forcedBreakToken: Token,
+        expectedBreakToken: Token
     ) {
         val subject = TokenPreprocessor()
-        val input = listOf(
-            BeginToken(state = State.CODE),
-            synchronizedBreakToken,
-            forcedBreakToken,
-            EndToken
-        )
+        val input =
+            listOf(
+                BeginToken(state = State.CODE),
+                synchronizedBreakToken,
+                forcedBreakToken,
+                EndToken
+            )
 
         val result = subject.preprocess(input)
 
@@ -415,7 +373,9 @@ internal class TokenPreprocessorTest {
     @ParameterizedTest
     @MethodSource("synchronizedBreakTokenCases")
     fun `removes SynchronizedBreakTokens which immediately follow ForcedBreakTokens`(
-        synchronizedBreakToken: Token, unused: Token, forcedBreakToken: Token
+        synchronizedBreakToken: Token,
+        unused: Token,
+        forcedBreakToken: Token
     ) {
         val subject = TokenPreprocessor()
         val input = listOf(forcedBreakToken, synchronizedBreakToken)
@@ -437,8 +397,7 @@ internal class TokenPreprocessorTest {
 
         val result = subject.preprocess(input)
 
-        assertThat(result)
-            .isEqualTo(listOf(expectedToken, BeginToken(commentState), EndToken))
+        assertThat(result).isEqualTo(listOf(expectedToken, BeginToken(commentState), EndToken))
     }
 
     companion object {
@@ -462,20 +421,56 @@ internal class TokenPreprocessorTest {
         @JvmStatic
         fun synchronizedBreakTokenCases(): List<Arguments> =
             listOf(
-                Arguments.of(SynchronizedBreakToken(whitespaceLength = 0), ForcedBreakToken(count = 1), ForcedBreakToken(count = 1)),
-                Arguments.of(ClosingSynchronizedBreakToken(whitespaceLength = 0), ForcedBreakToken(count = 1), ClosingForcedBreakToken),
-                Arguments.of(SynchronizedBreakToken(whitespaceLength = 0), ClosingForcedBreakToken, ForcedBreakToken(count = 1)),
-                Arguments.of(ClosingSynchronizedBreakToken(whitespaceLength = 0), ClosingForcedBreakToken, ClosingForcedBreakToken)
+                Arguments.of(
+                    SynchronizedBreakToken(whitespaceLength = 0),
+                    ForcedBreakToken(count = 1),
+                    ForcedBreakToken(count = 1)
+                ),
+                Arguments.of(
+                    ClosingSynchronizedBreakToken(whitespaceLength = 0),
+                    ForcedBreakToken(count = 1),
+                    ClosingForcedBreakToken
+                ),
+                Arguments.of(
+                    SynchronizedBreakToken(whitespaceLength = 0),
+                    ClosingForcedBreakToken,
+                    ForcedBreakToken(count = 1)
+                ),
+                Arguments.of(
+                    ClosingSynchronizedBreakToken(whitespaceLength = 0),
+                    ClosingForcedBreakToken,
+                    ClosingForcedBreakToken
+                )
             )
 
         @JvmStatic
         fun whitespaceCommentConversionCases(): List<Arguments> =
             listOf(
-                Arguments.of(WhitespaceToken(" "), State.LINE_COMMENT, WhitespaceToken(" ", length = 1)),
-                Arguments.of(WhitespaceToken("\n"), State.LINE_COMMENT, ForcedBreakToken(count = 1)),
-                Arguments.of(WhitespaceToken("\n\n"), State.LINE_COMMENT, ForcedBreakToken(count = 2)),
-                Arguments.of(WhitespaceToken("\n\n\n"), State.LINE_COMMENT, ForcedBreakToken(count = 2)),
-                Arguments.of(WhitespaceToken("\n"), State.TODO_COMMENT, ForcedBreakToken(count = 1)),
+                Arguments.of(
+                    WhitespaceToken(" "),
+                    State.LINE_COMMENT,
+                    WhitespaceToken(" ", length = 1)
+                ),
+                Arguments.of(
+                    WhitespaceToken("\n"),
+                    State.LINE_COMMENT,
+                    ForcedBreakToken(count = 1)
+                ),
+                Arguments.of(
+                    WhitespaceToken("\n\n"),
+                    State.LINE_COMMENT,
+                    ForcedBreakToken(count = 2)
+                ),
+                Arguments.of(
+                    WhitespaceToken("\n\n\n"),
+                    State.LINE_COMMENT,
+                    ForcedBreakToken(count = 2)
+                ),
+                Arguments.of(
+                    WhitespaceToken("\n"),
+                    State.TODO_COMMENT,
+                    ForcedBreakToken(count = 1)
+                ),
                 Arguments.of(WhitespaceToken("\n"), State.LONG_COMMENT, ForcedBreakToken(count = 1))
             )
     }

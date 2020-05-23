@@ -50,21 +50,22 @@ class KotlinScanner {
         nodes: Iterable<ASTNode>,
         scannerState: ScannerState,
         singleNodeScanner: (ASTNode, ScannerState) -> List<Token> = this::scanSingleNode
-    ): List<Token> =
-        nodePattern(scannerState, singleNodeScanner).matchSequence(nodes)
+    ): List<Token> = nodePattern(scannerState, singleNodeScanner).matchSequence(nodes)
 
-    private fun nodePattern(scannerState: ScannerState, singleNodeScanner: (ASTNode, ScannerState) -> List<Token>) = nodePattern {
-        zeroOrMore {
-            either {
-                commentWithPossibleWhitspace()
-            } or {
-                anyNode() thenMapToTokens { nodes ->
-                    singleNodeScanner(nodes.first(), scannerState)
+    private fun nodePattern(
+        scannerState: ScannerState,
+        singleNodeScanner: (ASTNode, ScannerState) -> List<Token>
+    ) =
+        nodePattern {
+            zeroOrMore {
+                either { commentWithPossibleWhitspace() } or {
+                    anyNode() thenMapToTokens { nodes ->
+                        singleNodeScanner(nodes.first(), scannerState)
+                    }
                 }
             }
+            end()
         }
-        end()
-    }
 
     private fun scanSingleNode(node: ASTNode, scannerState: ScannerState): List<Token> {
         return if (node is LeafPsiElement && node.elementType == KtTokens.WHITE_SPACE) {
@@ -74,21 +75,19 @@ class KotlinScanner {
         }
     }
 
-    private fun whitespaceElementToTokens(
-        node: LeafPsiElement,
-        scannerState: ScannerState
-    ) = if (node.isAtEndOfFile || hasNewlineInBlockState(node, scannerState)) {
+    private fun whitespaceElementToTokens(node: LeafPsiElement, scannerState: ScannerState) =
+        if (node.isAtEndOfFile || hasNewlineInBlockState(node, scannerState)) {
             toForcedBreak(node)
         } else {
             listOf(WhitespaceToken(node.text))
         }
 
-    private val ASTNode.isAtEndOfFile: Boolean get() = treeNext == null
-    
-    private fun hasNewlineInBlockState(
-        node: LeafPsiElement,
-        scannerState: ScannerState
-    ) = node.textContains('\n') && setOf(ScannerState.BLOCK, ScannerState.PACKAGE_IMPORT).contains(scannerState)
+    private val ASTNode.isAtEndOfFile: Boolean
+        get() = treeNext == null
+
+    private fun hasNewlineInBlockState(node: LeafPsiElement, scannerState: ScannerState) =
+        node.textContains('\n') &&
+            setOf(ScannerState.BLOCK, ScannerState.PACKAGE_IMPORT).contains(scannerState)
 }
 
 /**
@@ -96,11 +95,7 @@ class KotlinScanner {
  * whitespace, or the empty sequence.
  */
 fun NodePatternBuilder.possibleWhitespaceWithComment() {
-    either {
-        commentWithPossibleWhitspace()
-    } or {
-        possibleWhitespace()
-    }
+    either { commentWithPossibleWhitspace() } or { possibleWhitespace() }
 }
 
 private fun NodePatternBuilder.commentWithPossibleWhitspace() {

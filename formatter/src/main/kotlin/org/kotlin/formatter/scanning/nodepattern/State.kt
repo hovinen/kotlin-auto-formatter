@@ -31,16 +31,13 @@ internal class State(private val id: Int = idCounter++) {
         return this
     }
 
-    /**
-     * All [State] which result from a single out-transition from this state.
-     */
-    internal val nextStates get(): Set<State> = transitions.map { it.state }.toSet()
+    /** All [State] which result from a single out-transition from this state. */
+    internal val nextStates
+        get(): Set<State> = transitions.map { it.state }.toSet()
 
-    /**
-     * All [State] which result from a single ε-transition from this state.
-     */
-    internal val immediateNextStates get(): List<State> =
-        transitions.filterIsInstance<EpsilonTransition>().map { it.state }
+    /** All [State] which result from a single ε-transition from this state. */
+    internal val immediateNextStates
+        get(): List<State> = transitions.filterIsInstance<EpsilonTransition>().map { it.state }
 
     /**
      * All [State] which result from single transitions from this state which match the given
@@ -112,7 +109,8 @@ internal class State(private val id: Int = idCounter++) {
     /**
      * Whether this instance is terminal, which is the case if there are no out-transitions from it.
      */
-    internal val isTerminal: Boolean get() = transitions.isEmpty()
+    internal val isTerminal: Boolean
+        get() = transitions.isEmpty()
 
     override fun toString() = "State($id)"
 
@@ -177,22 +175,19 @@ internal data class Evaluation(
      * The list of [Token] accumulated since the last [tokenPushingAction], or since the start of
      * NFA evalution if there is no previous [tokenPushingAction].
      */
-    internal val tokens: List<Token> get() = tokenStack.peek()
+    internal val tokens: List<Token>
+        get() = tokenStack.peek()
 
     companion object {
-        /**
-         * An [EvaluationAction] to accumulate the current [ASTNode] to [nodes].
-         */
-        internal val accumulate: EvaluationAction =
-            { evaluation, astNode ->
-                Evaluation(evaluation.nodes.plusIfNonNull(astNode), evaluation.tokenStack)
-            }
+        /** An [EvaluationAction] to accumulate the current [ASTNode] to [nodes]. */
+        internal val accumulate: EvaluationAction = { evaluation, astNode ->
+            Evaluation(evaluation.nodes.plusIfNonNull(astNode), evaluation.tokenStack)
+        }
 
-        /**
-         * An [EvaluationAction] to throw away all [nodes].
-         */
-        internal val consume: EvaluationAction =
-            { evaluation, _ -> Evaluation(listOf(), evaluation.tokenStack) }
+        /** An [EvaluationAction] to throw away all [nodes]. */
+        internal val consume: EvaluationAction = { evaluation, _ ->
+            Evaluation(listOf(), evaluation.tokenStack)
+        }
 
         /**
          * An [EvaluationAction] to run the given [Action] on currently accumulated [nodes] and
@@ -202,20 +197,16 @@ internal data class Evaluation(
          * The [ASTNode] associated with the current NFA path step is not passed to the [Action],
          * but is ignored by this [EvaluationAction].
          */
-        internal fun consumingAction(action: Action): EvaluationAction =
-            { evaluation, _ ->
-                evaluation.tokenStack.push(evaluation.tokenStack.pop().plus(action(evaluation.nodes)))
-                Evaluation(listOf(), evaluation.tokenStack)
-            }
+        internal fun consumingAction(action: Action): EvaluationAction = { evaluation, _ ->
+            evaluation.tokenStack.push(evaluation.tokenStack.pop().plus(action(evaluation.nodes)))
+            Evaluation(listOf(), evaluation.tokenStack)
+        }
 
-        /**
-         * An [EvaluationAction] to push a new empty list to [tokenStack].
-         */
-        internal val tokenPushingAction: EvaluationAction =
-            { evaluation, _ ->
-                evaluation.tokenStack.push(listOf())
-                Evaluation(evaluation.nodes, evaluation.tokenStack)
-            }
+        /** An [EvaluationAction] to push a new empty list to [tokenStack]. */
+        internal val tokenPushingAction: EvaluationAction = { evaluation, _ ->
+            evaluation.tokenStack.push(listOf())
+            Evaluation(evaluation.nodes, evaluation.tokenStack)
+        }
 
         /**
          * An [EvaluationAction] to pop the top of [tokenStack], run the given [mapper] on that

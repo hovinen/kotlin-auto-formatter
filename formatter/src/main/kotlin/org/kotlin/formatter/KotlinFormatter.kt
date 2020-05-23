@@ -36,7 +36,9 @@ class KotlinFormatter(
                 standardIndent = standardIndentSize,
                 continuationIndent = continuationIndentSize
             )
-        return printer.print(tokenPreprocessor.preprocess(kotlinScanner.scan(kotlinLoader.parseKotlin(input))))
+        return printer.print(
+            tokenPreprocessor.preprocess(kotlinScanner.scan(kotlinLoader.parseKotlin(input)))
+        )
     }
 
     /**
@@ -60,14 +62,15 @@ class KotlinFormatter(
         if (offset != null) {
             var currentOffset = offset
             var line = 0
-            input.split('\n').forEach {
-                if (currentOffset < it.length) {
-                    return line
-                } else {
-                    currentOffset -= it.length
-                    line++
+            input.split('\n')
+                .forEach {
+                    if (currentOffset < it.length) {
+                        return line
+                    } else {
+                        currentOffset -= it.length
+                        line++
+                    }
                 }
-            }
             return line
         } else {
             return 0

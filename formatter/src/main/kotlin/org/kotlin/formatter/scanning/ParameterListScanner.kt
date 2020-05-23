@@ -24,7 +24,9 @@ internal class ParameterListScanner(private val kotlinScanner: KotlinScanner): N
     override fun scan(node: ASTNode, scannerState: ScannerState): List<Token> {
         isFirstEntry = true
         val children = node.children().toList()
-        return kotlinScanner.scanNodes(children, ScannerState.STATEMENT) { childNode, _ -> scanEntry(childNode) }
+        return kotlinScanner.scanNodes(children, ScannerState.STATEMENT) { childNode, _ ->
+            scanEntry(childNode)
+        }
     }
 
     private fun scanEntry(node: ASTNode): List<Token> {
@@ -32,7 +34,10 @@ internal class ParameterListScanner(private val kotlinScanner: KotlinScanner): N
             KtNodeTypes.VALUE_PARAMETER, KtNodeTypes.VALUE_ARGUMENT -> {
                 val childTokens =
                     inBeginEndBlock(
-                        kotlinScanner.scanNodes(node.children().asIterable(), ScannerState.STATEMENT),
+                        kotlinScanner.scanNodes(
+                            node.children().asIterable(),
+                            ScannerState.STATEMENT
+                        ),
                         State.CODE
                     )
                 val breakToken =
@@ -42,11 +47,16 @@ internal class ParameterListScanner(private val kotlinScanner: KotlinScanner): N
             }
             KtTokens.WHITE_SPACE -> listOf()
             KtTokens.LPAR -> listOf(LeafNodeToken("("), BeginToken(State.CODE))
-            KtTokens.RPAR -> if (isFirstEntry) {
-                listOf(EndToken, LeafNodeToken(")"))
-            } else {
-                listOf(ClosingSynchronizedBreakToken(whitespaceLength = 0), EndToken, LeafNodeToken(")"))
-            }
+            KtTokens.RPAR ->
+                if (isFirstEntry) {
+                    listOf(EndToken, LeafNodeToken(")"))
+                } else {
+                    listOf(
+                        ClosingSynchronizedBreakToken(whitespaceLength = 0),
+                        EndToken,
+                        LeafNodeToken(")")
+                    )
+                }
             else -> kotlinScanner.scanInState(node, ScannerState.STATEMENT)
         }
     }

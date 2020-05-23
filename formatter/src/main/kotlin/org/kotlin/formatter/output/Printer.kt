@@ -47,7 +47,8 @@ class Printer(
         private val token: BeginToken,
         val isInitial: Boolean = false
     ) {
-        fun topBlockFitsOnLine(maxLineLength: Int) = blockStartColumn + token.length <= maxLineLength
+        fun topBlockFitsOnLine(maxLineLength: Int) =
+            blockStartColumn + token.length <= maxLineLength
 
         val state = token.state
     }
@@ -56,8 +57,10 @@ class Printer(
     private var spaceRemaining: Int = maxLineLength
     private var currentLineIndent: Int = 0
     private var result = StringBuilder()
-    private val inStringLiteral: Boolean get() = STRING_LITERAL_STATES.contains(blockStack.peek().state)
-    private val inComment: Boolean get() = COMMENT_STATES.contains(blockStack.peek().state)
+    private val inStringLiteral: Boolean
+        get() = STRING_LITERAL_STATES.contains(blockStack.peek().state)
+    private val inComment: Boolean
+        get() = COMMENT_STATES.contains(blockStack.peek().state)
     private var atStartOfLine = true
 
     /**
@@ -106,8 +109,7 @@ class Printer(
                 is WhitespaceToken -> {
                     lastToken = token
                 }
-                is ForcedBreakToken,
-                is ClosingForcedBreakToken -> {
+                is ForcedBreakToken, is ClosingForcedBreakToken -> {
                     cleanedUpTokens.add(token)
                     lastToken = null
                 }
@@ -259,7 +261,8 @@ class Printer(
         spaceRemaining -= text.length
     }
 
-    private val breakingAllowed: Boolean get() = blockStack.peek().state != State.PACKAGE_IMPORT
+    private val breakingAllowed: Boolean
+        get() = blockStack.peek().state != State.PACKAGE_IMPORT
 
     private fun whitespacePlusFollowingTokenFitOnLine(token: WhitespaceToken) =
         when (blockStack.peek().state) {
@@ -307,9 +310,10 @@ class Printer(
             State.PACKAGE_IMPORT -> {
                 result.append("\n")
             }
-            else -> throw IllegalStateException(
-                "Unrecognized state for line breaking ${blockStack.peek().state}"
-            )
+            else ->
+                throw IllegalStateException(
+                    "Unrecognized state for line breaking ${blockStack.peek().state}"
+                )
         }
     }
 
@@ -327,7 +331,9 @@ class Printer(
 
     companion object {
         private const val STRING_BREAK_TERMINATOR = "\" +"
-        private val STRING_LITERAL_STATES = setOf(State.STRING_LITERAL, State.MULTILINE_STRING_LITERAL)
-        private val COMMENT_STATES = setOf(State.LONG_COMMENT, State.KDOC_TAG, State.LINE_COMMENT, State.TODO_COMMENT)
+        private val STRING_LITERAL_STATES =
+            setOf(State.STRING_LITERAL, State.MULTILINE_STRING_LITERAL)
+        private val COMMENT_STATES =
+            setOf(State.LONG_COMMENT, State.KDOC_TAG, State.LINE_COMMENT, State.TODO_COMMENT)
     }
 }

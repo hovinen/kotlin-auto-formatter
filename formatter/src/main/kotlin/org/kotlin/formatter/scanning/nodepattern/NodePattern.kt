@@ -41,8 +41,8 @@ class NodePattern internal constructor(private val initialState: State) {
         val states = paths.filterIsInstance<PathStepOnState>().map { it.state }.toMutableSet()
         paths = epsilonStep(paths, states)
         paths = step(paths, TerminalNode)
-        return paths.firstOrNull { it is FinalPathStep }?.runActions()?.tokens
-            ?: throw NodeSequenceNotMatchedException(nodes)
+        return paths.firstOrNull { it is FinalPathStep }?.runActions()?.tokens ?:
+            throw NodeSequenceNotMatchedException(nodes)
     }
 
     private fun setNodeOnPaths(paths: List<PathStep>, node: ASTNode): List<PathStep> =
@@ -51,31 +51,31 @@ class NodePattern internal constructor(private val initialState: State) {
     private fun epsilonStep(paths: List<PathStep>, states: MutableSet<State>): List<PathStep> =
         paths.flatMap { if (it is PathStepOnState) epsilonStepForPath(it, states) else listOf(it) }
 
-    private fun epsilonStepForPath(
-        startingPath: PathStepOnState,
-        visitedStates: MutableSet<State>
-    ): List<PathStep> {
-        val newStates = startingPath.state.immediateNextStates.minus(visitedStates)
-        return if (newStates.isNotEmpty()) {
-            visitedStates.addAll(newStates)
-            newStates.flatMap { state ->
-                epsilonStepForPath(ContinuingPathStep(state, startingPath), visitedStates)
+    private fun epsilonStepForPath(startingPath: PathStepOnState, visitedStates: MutableSet<State>):
+        List<PathStep> {
+            val newStates = startingPath.state.immediateNextStates.minus(visitedStates)
+            return if (newStates.isNotEmpty()) {
+                visitedStates.addAll(newStates)
+                newStates.flatMap { state ->
+                    epsilonStepForPath(ContinuingPathStep(state, startingPath), visitedStates)
+                }
+            } else {
+                listOf(startingPath)
             }
-        } else {
-            listOf(startingPath)
         }
-    }
 
     private fun step(paths: List<PathStep>, node: ASTNode): List<PathStep> =
         paths.flatMap { path ->
             if (path is PathStepOnState) {
-                path.state.matchingNextStates(node).map { state ->
-                    if (state.isTerminal) {
-                        FinalPathStep(state, path)
-                    } else {
-                        ContinuingPathStep(state, path)
+                path.state
+                    .matchingNextStates(node)
+                    .map { state ->
+                        if (state.isTerminal) {
+                            FinalPathStep(state, path)
+                        } else {
+                            ContinuingPathStep(state, path)
+                        }
                     }
-                }
             } else {
                 listOf()
             }
@@ -96,9 +96,7 @@ private sealed class PathStep {
      */
     abstract fun runActions(): Evaluation
 
-    /**
-     * Creates a new [PathStep] based on this instance with the given [ASTNode] attached.
-     */
+    /** Creates a new [PathStep] based on this instance with the given [ASTNode] attached. */
     abstract fun withNode(node: ASTNode): PathStep
 }
 
@@ -111,10 +109,8 @@ private sealed class PathStep {
  *     determined yet or because only ε-transitions have been made. On any given path, a given
  *     [ASTNode] may only appear on one [PathStep].
  */
-private abstract class PathStepOnState(
-    internal val state: State,
-    internal val node: ASTNode?
-) : PathStep()
+private abstract class PathStepOnState(internal val state: State, internal val node: ASTNode?) :
+    PathStep()
 
 /**
  * A [PathStep] located in the initial state of the NFA.
@@ -149,13 +145,12 @@ private class ContinuingPathStep(
  * @property state the accepting state associated with this step
  * @property previous the previous [PathStep] of this path
  */
-private class FinalPathStep(internal val state: State, internal val previous: PathStep) : PathStep() {
-    override fun runActions(): Evaluation = previous.runActions()
+private class FinalPathStep(internal val state: State, internal val previous: PathStep) :
+    PathStep() {
+        override fun runActions(): Evaluation = previous.runActions()
 
-    override fun withNode(node: ASTNode): PathStep = this
-}
+        override fun withNode(node: ASTNode): PathStep = this
+    }
 
-/**
- * An [ASTNode] representing the end of input.
- */
+/** An [ASTNode] representing the end of input. */
 internal object TerminalNode: LeafPsiElement(KtTokens.EOF, "")

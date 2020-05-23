@@ -149,13 +149,15 @@ class TokenPreprocessor {
 
     private fun appendTokensInWhitespaceElement(element: WhitespaceStackElement) {
         val firstToken = element.tokens.firstOrNull()
-        if (firstToken is BeginToken && firstToken.state.isComment && element.content.contains('\n')) {
-            resultStack.peek().tokens
+        if (firstToken is BeginToken && firstToken.state.isComment && element.content.contains('\n')
+        ) {
+            resultStack.peek()
+                .tokens
                 .add(ForcedBreakToken(count = min(element.content.countNewlines(), 2)))
         } else {
-            resultStack.peek().tokens.add(
-                WhitespaceToken(length = element.totalLength, content = element.content)
-            )
+            resultStack.peek()
+                .tokens
+                .add(WhitespaceToken(length = element.totalLength, content = element.content))
         }
         resultStack.peek().tokens.addAll(element.tokens)
     }
@@ -164,17 +166,20 @@ class TokenPreprocessor {
 }
 
 private sealed class StackElement(internal val tokens: MutableList<Token> = mutableListOf()) {
-    internal val textLength: Int get() =
-        tokens.map {
-            when (it) {
-                is WhitespaceToken -> if (it.content.isEmpty()) 0 else 1
-                is SynchronizedBreakToken -> it.whitespaceLength
-                is ClosingSynchronizedBreakToken -> it.whitespaceLength
-                is LeafNodeToken -> it.textLength
-                is KDocContentToken -> it.textLength
-                else -> 0
-            }
-        }.sum()
+    internal val textLength: Int
+        get() =
+            tokens
+                .map {
+                    when (it) {
+                        is WhitespaceToken -> if (it.content.isEmpty()) 0 else 1
+                        is SynchronizedBreakToken -> it.whitespaceLength
+                        is ClosingSynchronizedBreakToken -> it.whitespaceLength
+                        is LeafNodeToken -> it.textLength
+                        is KDocContentToken -> it.textLength
+                        else -> 0
+                    }
+                }
+                .sum()
 }
 
 private class BlockStackElement(
@@ -213,16 +218,18 @@ private class BlockStackElement(
 private class WhitespaceStackElement(internal val content: String): StackElement() {
     private val contentLength: Int = if (content.isEmpty()) 0 else 1
 
-    internal val totalLength: Int get() = contentLength + initialTextLength
+    internal val totalLength: Int
+        get() = contentLength + initialTextLength
 
-    private val initialTextLength: Int get() = tokens.firstOrNull()?.textLength ?: 0
+    private val initialTextLength: Int
+        get() = tokens.firstOrNull()?.textLength ?: 0
 }
 
 private class MarkerElement: StackElement()
 
 private val Token.textLength: Int
     get() =
-        when(this) {
+        when (this) {
             is LeafNodeToken -> textLength
             is KDocContentToken -> textLength
             is BeginToken -> length

@@ -15,35 +15,38 @@ import org.kotlin.formatter.scanning.nodepattern.nodePattern
 
 /** A [NodeScanner] for `if` expressions. */
 internal class IfExpressionScanner(private val kotlinScanner: KotlinScanner) : NodeScanner {
-    private val nodePattern = nodePattern {
-        exactlyOne {
-            nodeOfType(KtTokens.IF_KEYWORD)
-            possibleWhitespace()
-            nodeOfType(KtTokens.LPAR)
-            nodeOfType(KtNodeTypes.CONDITION) thenMapToTokens { nodes ->
-                listOf(LeafNodeToken("if ("), BeginToken(State.CODE))
-                    .plus(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT))
-                    .plus(EndToken)
+    private val nodePattern =
+        nodePattern {
+            exactlyOne {
+                nodeOfType(KtTokens.IF_KEYWORD)
+                possibleWhitespace()
+                nodeOfType(KtTokens.LPAR)
+                nodeOfType(KtNodeTypes.CONDITION) thenMapToTokens { nodes ->
+                    listOf(LeafNodeToken("if ("), BeginToken(State.CODE))
+                        .plus(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT))
+                        .plus(EndToken)
+                }
+                possibleWhitespace()
+                nodeOfType(KtTokens.RPAR)
+                possibleWhitespace()
+                nodeOfType(KtNodeTypes.THEN) thenMapToTokens { nodes ->
+                    listOf(LeafNodeToken(") ")).plus(
+                        kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
+                    )
+                }
             }
-            possibleWhitespace()
-            nodeOfType(KtTokens.RPAR)
-            possibleWhitespace()
-            nodeOfType(KtNodeTypes.THEN) thenMapToTokens { nodes ->
-                listOf(LeafNodeToken(") "))
-                    .plus(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT))
+            zeroOrOne {
+                possibleWhitespace()
+                nodeOfType(KtTokens.ELSE_KEYWORD)
+                possibleWhitespace()
+                nodeOfType(KtNodeTypes.ELSE) thenMapToTokens { nodes ->
+                    listOf(WhitespaceToken(" "), LeafNodeToken("else ")).plus(
+                        kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
+                    )
+                }
             }
+            end()
         }
-        zeroOrOne {
-            possibleWhitespace()
-            nodeOfType(KtTokens.ELSE_KEYWORD)
-            possibleWhitespace()
-            nodeOfType(KtNodeTypes.ELSE) thenMapToTokens { nodes ->
-                listOf(WhitespaceToken(" "), LeafNodeToken("else "))
-                    .plus(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT))
-            }
-        }
-        end()
-    }
 
     override fun scan(node: ASTNode, scannerState: ScannerState): List<Token> =
         inBeginEndBlock(nodePattern.matchSequence(node.children().asIterable()), State.CODE)

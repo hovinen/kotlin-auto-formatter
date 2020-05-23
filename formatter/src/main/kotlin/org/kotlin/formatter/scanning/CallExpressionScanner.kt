@@ -11,19 +11,21 @@ import org.kotlin.formatter.scanning.nodepattern.nodePattern
 
 /** A [NodeScanner] for function call expressions. */
 internal class CallExpressionScanner(private val kotlinScanner: KotlinScanner) : NodeScanner {
-    private val nodePattern = nodePattern {
-        oneOrMoreFrugal { anyNode() } thenMapToTokens { nodes ->
-            kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
-        }
-        zeroOrOne {
-            possibleWhitespace()
-            nodeOfType(KtNodeTypes.LAMBDA_ARGUMENT) thenMapToTokens { nodes ->
-                listOf(nonBreakingSpaceToken())
-                    .plus(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT))
+    private val nodePattern =
+        nodePattern {
+            oneOrMoreFrugal { anyNode() } thenMapToTokens { nodes ->
+                kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
             }
+            zeroOrOne {
+                possibleWhitespace()
+                nodeOfType(KtNodeTypes.LAMBDA_ARGUMENT) thenMapToTokens { nodes ->
+                    listOf(nonBreakingSpaceToken()).plus(
+                        kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
+                    )
+                }
+            }
+            end()
         }
-        end()
-    }
 
     override fun scan(node: ASTNode, scannerState: ScannerState): List<Token> =
         inBeginEndBlock(nodePattern.matchSequence(node.children().asIterable()), State.CODE)

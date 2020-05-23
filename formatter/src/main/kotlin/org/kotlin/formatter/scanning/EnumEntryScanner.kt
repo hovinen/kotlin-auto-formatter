@@ -7,13 +7,14 @@ import org.kotlin.formatter.scanning.nodepattern.nodePattern
 
 /** A [NodeScanner] for individual entries of an `enum`. */
 internal class EnumEntryScanner(private val kotlinScanner: KotlinScanner) : NodeScanner {
-    private val nodePattern = nodePattern {
-        optionalKDoc(kotlinScanner)
-        oneOrMore { anyNode() } thenMapToTokens { nodes ->
-            kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
+    private val nodePattern =
+        nodePattern {
+            optionalKDoc(kotlinScanner)
+            oneOrMore { anyNode() } thenMapToTokens { nodes ->
+                kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
+            }
+            end()
         }
-        end()
-    }
 
     override fun scan(node: ASTNode, scannerState: ScannerState): List<Token> =
         nodePattern.matchSequence(node.children().asIterable())

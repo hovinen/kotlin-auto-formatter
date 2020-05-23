@@ -15,20 +15,26 @@ import org.kotlin.formatter.scanning.nodepattern.nodePattern
 /** A [NodeScanner] for function declarations. */
 internal class FunctionDeclarationScanner(private val kotlinScanner: KotlinScanner): NodeScanner {
     private val modifierListScanner = ModifierListScanner(kotlinScanner, markerCount = 2)
-    private val nodePattern = nodePattern {
-        either {
-            declarationWithOptionalModifierList(kotlinScanner)
-            possibleWhitespace()
-            nodeOfType(KtNodeTypes.BLOCK) thenMapToTokens { nodes ->
-                listOf(nonBreakingSpaceToken())
-                    .plus(kotlinScanner.scanNodes(nodes, ScannerState.BLOCK))
+    private val nodePattern =
+        nodePattern {
+            either {
+                declarationWithOptionalModifierList(kotlinScanner)
+                possibleWhitespace()
+                nodeOfType(KtNodeTypes.BLOCK) thenMapToTokens { nodes ->
+                    listOf(nonBreakingSpaceToken()).plus(
+                        kotlinScanner.scanNodes(nodes, ScannerState.BLOCK)
+                    )
+                }
+            } or {
+                declarationWithOptionalModifierList(
+                    kotlinScanner,
+                    modifierListScanner,
+                    markerCount = 2
+                )
+                optionalFunctionInitializer(kotlinScanner)
             }
-        } or {
-            declarationWithOptionalModifierList(kotlinScanner, modifierListScanner, markerCount = 2)
-            optionalFunctionInitializer(kotlinScanner)
+            end()
         }
-        end()
-    }
 
     override fun scan(node: ASTNode, scannerState: ScannerState): List<Token> =
         nodePattern.matchSequence(node.children().asIterable())

@@ -11,15 +11,17 @@ import org.kotlin.formatter.scanning.nodepattern.nodePattern
 
 /** A [NodeScanner] for `throw` expressions. */
 internal class ThrowScanner(private val kotlinScanner: KotlinScanner) : NodeScanner {
-    private val nodePattern = nodePattern {
-        nodeOfType(KtTokens.THROW_KEYWORD)
-        whitespace()
-        oneOrMore { anyNode() } thenMapToTokens { nodes ->
-            listOf(LeafNodeToken("throw "))
-                .plus(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT))
+    private val nodePattern =
+        nodePattern {
+            nodeOfType(KtTokens.THROW_KEYWORD)
+            whitespace()
+            oneOrMore { anyNode() } thenMapToTokens { nodes ->
+                listOf(LeafNodeToken("throw ")).plus(
+                    kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
+                )
+            }
+            end()
         }
-        end()
-    }
 
     override fun scan(node: ASTNode, scannerState: ScannerState): List<Token> =
         inBeginEndBlock(nodePattern.matchSequence(node.children().asIterable()), State.CODE)

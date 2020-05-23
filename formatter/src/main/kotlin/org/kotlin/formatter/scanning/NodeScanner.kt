@@ -9,9 +9,7 @@ import org.jetbrains.kotlin.psi.stubs.elements.KtScriptElementType
 import org.kotlin.formatter.State
 import org.kotlin.formatter.Token
 
-/**
- * An abstract scanner for a particular type of [ASTNode].
- */
+/** An abstract scanner for a particular type of [ASTNode]. */
 internal interface NodeScanner {
     /**
      * Scans an [ASTNode] of a particular type in the state [ScannerState], returning the resulting
@@ -26,10 +24,8 @@ internal interface NodeScanner {
  * The parameter [kotlinScanner] is a top-level scanner for all Kotlin constructions for use when
  * scanning [ASTNode] recursively.
  */
-internal fun nodeScannerForElementType(
-    kotlinScanner: KotlinScanner,
-    elementType: IElementType
-): NodeScanner =
+internal fun nodeScannerForElementType(kotlinScanner: KotlinScanner, elementType: IElementType):
+    NodeScanner =
     when (elementType) {
         KtNodeTypes.BLOCK, KtNodeTypes.CLASS_BODY -> {
             BlockScanner(kotlinScanner)
@@ -85,12 +81,10 @@ internal fun nodeScannerForElementType(
         KtNodeTypes.PROPERTY -> {
             PropertyScanner(kotlinScanner)
         }
-        KtNodeTypes.PACKAGE_DIRECTIVE,
-        KtNodeTypes.IMPORT_LIST,
-        KtNodeTypes.IMPORT_DIRECTIVE,
-        KtNodeTypes.IMPORT_ALIAS -> {
-            SimpleBlockScanner(kotlinScanner, ScannerState.PACKAGE_IMPORT, State.PACKAGE_IMPORT)
-        }
+        KtNodeTypes.PACKAGE_DIRECTIVE, KtNodeTypes.IMPORT_LIST, KtNodeTypes.IMPORT_DIRECTIVE,
+            KtNodeTypes.IMPORT_ALIAS -> {
+                SimpleBlockScanner(kotlinScanner, ScannerState.PACKAGE_IMPORT, State.PACKAGE_IMPORT)
+            }
         KtNodeTypes.VALUE_PARAMETER, KtNodeTypes.VALUE_ARGUMENT -> {
             SimpleBlockScanner(kotlinScanner, ScannerState.STATEMENT, State.CODE)
         }
@@ -109,12 +103,14 @@ internal fun nodeScannerForElementType(
         KtNodeTypes.PROPERTY_ACCESSOR -> {
             SimpleBlockScanner(kotlinScanner, ScannerState.STATEMENT, State.CODE)
         }
-        KtFileElementType.INSTANCE, is KtScriptElementType, KtNodeTypes.LITERAL_STRING_TEMPLATE_ENTRY -> {
-            SimpleScanner(kotlinScanner, ScannerState.BLOCK)
-        }
-        KtNodeTypes.WHEN_ENTRY, KtNodeTypes.ANNOTATION_ENTRY, KtNodeTypes.PREFIX_EXPRESSION, KtNodeTypes.PARENTHESIZED, KtNodeTypes.SUPER_TYPE_CALL_ENTRY -> {
-            SimpleBlockScanner(kotlinScanner, ScannerState.STATEMENT, State.CODE)
-        }
+        KtFileElementType.INSTANCE, is KtScriptElementType,
+            KtNodeTypes.LITERAL_STRING_TEMPLATE_ENTRY -> {
+                SimpleScanner(kotlinScanner, ScannerState.BLOCK)
+            }
+        KtNodeTypes.WHEN_ENTRY, KtNodeTypes.ANNOTATION_ENTRY, KtNodeTypes.PREFIX_EXPRESSION,
+            KtNodeTypes.PARENTHESIZED, KtNodeTypes.SUPER_TYPE_CALL_ENTRY -> {
+                SimpleBlockScanner(kotlinScanner, ScannerState.STATEMENT, State.CODE)
+            }
         KtNodeTypes.SHORT_STRING_TEMPLATE_ENTRY -> {
             SimpleBlockScanner(kotlinScanner, ScannerState.STATEMENT, State.STRING_LITERAL)
         }

@@ -15,8 +15,10 @@ internal class StringLiteralScanner(private val kotlinScanner: KotlinScanner): N
         var lastChild: ASTNode? = null
         for (child in node.children()) {
             val childTokens = kotlinScanner.scanInState(child, ScannerState.BLOCK)
-            if (child.elementType != KtTokens.OPEN_QUOTE && child.elementType != KtTokens.CLOSING_QUOTE
-                && lastChild?.elementType != KtTokens.OPEN_QUOTE) {
+            if (child.elementType != KtTokens.OPEN_QUOTE &&
+                child.elementType != KtTokens.CLOSING_QUOTE &&
+                lastChild?.elementType != KtTokens.OPEN_QUOTE
+            ) {
                 tokens.add(emptyBreakPoint())
             }
             tokens.addAll(childTokens)

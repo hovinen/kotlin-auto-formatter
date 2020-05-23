@@ -12,19 +12,21 @@ import org.kotlin.formatter.scanning.nodepattern.nodePattern
 
 /** A [NodeScanner] for `return` expressions. */
 internal class ReturnScanner(private val kotlinScanner: KotlinScanner) : NodeScanner {
-    private val nodePattern = nodePattern {
-        nodeOfType(KtTokens.RETURN_KEYWORD) thenMapToTokens { listOf(LeafNodeToken("return")) }
-        possibleWhitespace()
-        zeroOrMore { anyNode() } thenMapToTokens { nodes ->
-            if (nodes.isNotEmpty()) {
-                listOf(nonBreakingSpaceToken())
-                    .plus(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT))
-            } else {
-                listOf()
+    private val nodePattern =
+        nodePattern {
+            nodeOfType(KtTokens.RETURN_KEYWORD) thenMapToTokens { listOf(LeafNodeToken("return")) }
+            possibleWhitespace()
+            zeroOrMore { anyNode() } thenMapToTokens { nodes ->
+                if (nodes.isNotEmpty()) {
+                    listOf(nonBreakingSpaceToken()).plus(
+                        kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
+                    )
+                } else {
+                    listOf()
+                }
             }
+            end()
         }
-        end()
-    }
 
     override fun scan(node: ASTNode, scannerState: ScannerState): List<Token> =
         inBeginEndBlock(nodePattern.matchSequence(node.children().asIterable()), State.CODE)

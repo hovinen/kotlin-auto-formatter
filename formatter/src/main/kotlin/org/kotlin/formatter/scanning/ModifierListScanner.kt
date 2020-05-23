@@ -11,31 +11,32 @@ import org.kotlin.formatter.scanning.nodepattern.nodePattern
 
 /**
  * A [NodeScanner] for the list of annotations and modifiers on a type or function declaration.
- * 
+ *
  * @property markerCount how many [MarkerToken] should be inserted after each annotation
  */
 internal class ModifierListScanner(
     private val kotlinScanner: KotlinScanner,
     private val markerCount: Int = 1
 ) : NodeScanner {
-    private val nodePattern = nodePattern {
-        oneOrMore {
-            either {
-                nodeOfType(KtNodeTypes.ANNOTATION_ENTRY) thenMapToTokens { nodes ->
-                    kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
-                        .plus(ForcedBreakToken(count = 1))
-                        .plus(List(markerCount) { MarkerToken })
-                }
-                possibleWhitespace()
-            } or {
-                anyNode() thenMapToTokens { nodes ->
-                    kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
-                        .plus(WhitespaceToken(" "))
+    private val nodePattern =
+        nodePattern {
+            oneOrMore {
+                either {
+                    nodeOfType(KtNodeTypes.ANNOTATION_ENTRY) thenMapToTokens { nodes ->
+                        kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
+                            .plus(ForcedBreakToken(count = 1))
+                            .plus(List(markerCount) { MarkerToken })
+                    }
+                    possibleWhitespace()
+                } or {
+                    anyNode() thenMapToTokens { nodes ->
+                        kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
+                            .plus(WhitespaceToken(" "))
+                    }
                 }
             }
+            end()
         }
-        end()
-    }
 
     override fun scan(node: ASTNode, scannerState: ScannerState): List<Token> =
         nodePattern.matchSequence(node.children().asIterable())

@@ -22,45 +22,30 @@ import java.util.Stack
 class NodePatternBuilder {
     private val elementStack = Stack<Element>()
 
-    /**
-     * Matches any [ASTNode].
-     */
+    /** Matches any [ASTNode]. */
     fun anyNode(): NodePatternBuilder = nodeMatching { true }
 
-    /**
-     * Matches a [ASTNode] whose [ASTNode.getElementType] is the given [type].
-     */
+    /** Matches a [ASTNode] whose [ASTNode.getElementType] is the given [type]. */
     fun nodeOfType(type: IElementType): NodePatternBuilder = nodeMatching { it.elementType == type }
 
-    /**
-     * Matches a [ASTNode] whose [ASTNode.getElementType] is not the given [type].
-     */
+    /** Matches a [ASTNode] whose [ASTNode.getElementType] is not the given [type]. */
     fun nodeNotOfType(type: IElementType): NodePatternBuilder =
         nodeMatching { it.elementType != type }
 
-    /**
-     * Matches a [ASTNode] whose [ASTNode.getElementType] is any of the given [type].
-     */
+    /** Matches a [ASTNode] whose [ASTNode.getElementType] is any of the given [type]. */
     fun nodeOfOneOfTypes(vararg types: IElementType): NodePatternBuilder {
         val typeSet = setOf(*types)
         return nodeMatching { typeSet.contains(it.elementType) }
     }
 
-    /**
-     * Matches any whitespace [ASTNode].
-     */
+    /** Matches any whitespace [ASTNode]. */
     fun whitespace(): NodePatternBuilder = nodeOfType(KtTokens.WHITE_SPACE)
 
-    /**
-     * Matches a whitespace [ASTNode] only if it contains a newline character `\n`.
-     */
-    fun whitespaceWithNewline(): NodePatternBuilder = nodeMatching {
-        it.elementType == KtTokens.WHITE_SPACE && it.textContains('\n')
-    }
+    /** Matches a whitespace [ASTNode] only if it contains a newline character `\n`. */
+    fun whitespaceWithNewline(): NodePatternBuilder =
+        nodeMatching { it.elementType == KtTokens.WHITE_SPACE && it.textContains('\n') }
 
-    /**
-     * Matches a possibly empty sequence of whitespace [ASTNode].
-     */
+    /** Matches a possibly empty sequence of whitespace [ASTNode]. */
     fun possibleWhitespace() = zeroOrMore { whitespace() }
 
     /**
@@ -70,16 +55,11 @@ class NodePatternBuilder {
      */
     fun end(): NodePatternBuilder = nodeMatching { it == TerminalNode }
 
-    /**
-     * Matches exactly those [ASTNode] for which [matcher] returns `true`.
-     */
+    /** Matches exactly those [ASTNode] for which [matcher] returns `true`. */
     fun nodeMatching(matcher: (ASTNode) -> Boolean): NodePatternBuilder {
         val finalState = terminalState()
         elementStack.push(
-            Element(
-                State().addTransition(MatchingTransition(matcher, finalState)),
-                finalState
-            )
+            Element(State().addTransition(MatchingTransition(matcher, finalState)), finalState)
         )
         return this
     }
@@ -90,9 +70,7 @@ class NodePatternBuilder {
      */
     fun either(init: NodePatternBuilder.() -> Unit) = EitherOrBuilder(init)
 
-    /**
-     * Represents an either-or expression.
-     */
+    /** Represents an either-or expression. */
     inner class EitherOrBuilder(private val eitherInit: NodePatternBuilder.() -> Unit) {
         /**
          * Specifies a second sequence of [ASTNode] which this either-or expression matches.
@@ -103,8 +81,7 @@ class NodePatternBuilder {
             val eitherElement = buildSubgraph(eitherInit)
             val orElement = buildSubgraph(orInit)
             val initialState =
-                State()
-                    .addTransition(EpsilonTransition(eitherElement.initialState))
+                State().addTransition(EpsilonTransition(eitherElement.initialState))
                     .addTransition(EpsilonTransition(orElement.initialState))
             val finalState = terminalState()
             eitherElement.finalState.addTransition(EpsilonTransition(finalState))
@@ -114,15 +91,12 @@ class NodePatternBuilder {
         }
     }
 
-    /**
-     * Matches the sequence specified by [init] optionally or its complete absence.
-     */
+    /** Matches the sequence specified by [init] optionally or its complete absence. */
     fun zeroOrOne(init: NodePatternBuilder.() -> Unit): NodePatternBuilder {
         val subgraphElement = buildSubgraph(init)
         val finalState = terminalState()
         val initialState =
-            State()
-                .addTransition(EpsilonTransition(subgraphElement.initialState))
+            State().addTransition(EpsilonTransition(subgraphElement.initialState))
                 .addTransition(EpsilonTransition(finalState))
         subgraphElement.finalState.addTransition(EpsilonTransition(finalState))
         elementStack.push(Element(initialState, finalState))
@@ -159,8 +133,7 @@ class NodePatternBuilder {
         val subgraphElement = buildSubgraph(init)
         val finalState = terminalState()
         val initialState =
-            State()
-                .addTransition(EpsilonTransition(subgraphElement.initialState))
+            State().addTransition(EpsilonTransition(subgraphElement.initialState))
                 .addTransition(EpsilonTransition(finalState))
         subgraphElement.finalState.addTransition(EpsilonTransition(initialState))
         elementStack.push(Element(initialState, finalState))
@@ -189,8 +162,7 @@ class NodePatternBuilder {
         val subgraphElement = buildSubgraph(init)
         val finalState = terminalState()
         val initialState =
-            State()
-                .addTransition(EpsilonTransition(finalState))
+            State().addTransition(EpsilonTransition(finalState))
                 .addTransition(EpsilonTransition(subgraphElement.initialState))
         subgraphElement.finalState.addTransition(EpsilonTransition(initialState))
         elementStack.push(Element(initialState, finalState))
@@ -280,16 +252,13 @@ class NodePatternBuilder {
      */
     infix fun thenMapTokens(tokenMapper: (List<Token>) -> List<Token>) {
         val topElement = elementStack.pop()
-        val initialState =
-            State().addTransition(EpsilonTransition(topElement.initialState))
+        val initialState = State().addTransition(EpsilonTransition(topElement.initialState))
         initialState.installPushTokens()
         topElement.finalState.installTokenMapper(tokenMapper)
         elementStack.push(Element(initialState, topElement.finalState))
     }
 
-    /**
-     * Constructs a [NodePattern] from this builder.
-     */
+    /** Constructs a [NodePattern] from this builder. */
     internal fun build(): NodePattern {
         reduce()
         return NodePattern(elementStack.pop().initialState)
@@ -374,9 +343,7 @@ class NodePatternBuilder {
 fun nodePattern(init: NodePatternBuilder.() -> Unit): NodePattern =
     NodePatternBuilder().apply(init).build()
 
-/**
- * A subgraph of an NFA corresponding to a subsequence of [ASTNode] to be matched.
- */
+/** A subgraph of an NFA corresponding to a subsequence of [ASTNode] to be matched. */
 private class Element internal constructor(
     internal val initialState: State,
     internal val finalState: State

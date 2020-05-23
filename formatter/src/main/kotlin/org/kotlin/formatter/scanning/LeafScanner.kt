@@ -26,14 +26,13 @@ internal class LeafScanner {
      * [Token].
      */
     internal fun scanCommentNode(node: ASTNode): List<Token> =
-        when(node.elementType) {
+        when (node.elementType) {
             KtTokens.EOL_COMMENT ->
                 listOf(BeginToken(stateBasedOnCommentContent(node.text)))
                     .plus(LeafScanner().tokenizeString(node.text))
                     .plus(EndToken)
             KtTokens.BLOCK_COMMENT ->
-                listOf(BeginToken(State.LONG_COMMENT))
-                    .plus(tokenizeNodeContentInBlockComment(node))
+                listOf(BeginToken(State.LONG_COMMENT)).plus(tokenizeNodeContentInBlockComment(node))
                     .plus(EndToken)
             else -> throw IllegalArgumentException("Invalid node for comment $node")
         }

@@ -12,33 +12,34 @@ import org.kotlin.formatter.scanning.nodepattern.nodePattern
 
 /** A [NodeScanner] for class and interface definitions. */
 internal class ClassScanner(private val kotlinScanner: KotlinScanner): NodeScanner {
-    private val nodePattern = nodePattern {
-        optionalKDoc(kotlinScanner)
-        possibleWhitespaceWithComment()
-        zeroOrOne {
-            nodeOfType(KtNodeTypes.MODIFIER_LIST)
-        } thenMapToTokens { nodes ->
-            listOf(MarkerToken).plus(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT))
-        }
-        possibleWhitespace()
-        exactlyOne {
-            nodeOfOneOfTypes(KtTokens.CLASS_KEYWORD, KtTokens.OBJECT_KEYWORD, KtTokens.INTERFACE_KEYWORD)
-            zeroOrMoreFrugal { anyNode() }
-        } thenMapToTokens { nodes ->
-            kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
-        }
-        possibleWhitespace()
-        zeroOrOne {
-            nodeOfType(KtNodeTypes.CLASS_BODY)
-        } thenMapToTokens { nodes ->
-            if (nodes.isNotEmpty()) {
-                listOf(nonBreakingSpaceToken()).plus(kotlinScanner.scanNodes(nodes, ScannerState.BLOCK))
-            } else {
-                listOf(BlockFromMarkerToken)
+    private val nodePattern =
+        nodePattern {
+            optionalKDoc(kotlinScanner)
+            possibleWhitespaceWithComment()
+            zeroOrOne { nodeOfType(KtNodeTypes.MODIFIER_LIST) } thenMapToTokens { nodes ->
+                listOf(MarkerToken).plus(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT))
             }
+            possibleWhitespace()
+            exactlyOne {
+                nodeOfOneOfTypes(
+                    KtTokens.CLASS_KEYWORD,
+                    KtTokens.OBJECT_KEYWORD,
+                    KtTokens.INTERFACE_KEYWORD
+                )
+                zeroOrMoreFrugal { anyNode() }
+            } thenMapToTokens { nodes -> kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT) }
+            possibleWhitespace()
+            zeroOrOne { nodeOfType(KtNodeTypes.CLASS_BODY) } thenMapToTokens { nodes ->
+                if (nodes.isNotEmpty()) {
+                    listOf(nonBreakingSpaceToken()).plus(
+                        kotlinScanner.scanNodes(nodes, ScannerState.BLOCK)
+                    )
+                } else {
+                    listOf(BlockFromMarkerToken)
+                }
+            }
+            end()
         }
-        end()
-    }
 
     override fun scan(node: ASTNode, scannerState: ScannerState): List<Token> =
         nodePattern.matchSequence(node.children().asIterable())

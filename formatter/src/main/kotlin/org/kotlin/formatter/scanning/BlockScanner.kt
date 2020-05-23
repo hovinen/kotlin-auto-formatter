@@ -14,29 +14,29 @@ import org.kotlin.formatter.scanning.nodepattern.nodePattern
 
 /** A [NodeScanner] for block statements and class content. */
 internal class BlockScanner(private val kotlinScanner: KotlinScanner): NodeScanner {
-    private val nodePattern = nodePattern {
-        either {
-            nodeOfType(KtTokens.LBRACE)
-            zeroOrMoreFrugal { anyNode() } thenMapToTokens { nodes ->
-                listOf(LeafNodeToken("{"), BlockFromMarkerToken, BeginToken(State.CODE))
-                    .plus(kotlinScanner.scanNodes(nodes, ScannerState.BLOCK))
+    private val nodePattern =
+        nodePattern {
+            either {
+                nodeOfType(KtTokens.LBRACE)
+                zeroOrMoreFrugal { anyNode() } thenMapToTokens { nodes ->
+                    listOf(LeafNodeToken("{"), BlockFromMarkerToken, BeginToken(State.CODE)).plus(
+                        kotlinScanner.scanNodes(nodes, ScannerState.BLOCK)
+                    )
+                }
+                zeroOrOne { whitespaceWithNewline() } thenMapToTokens { nodes ->
+                    if (nodes.isNotEmpty()) listOf(ClosingForcedBreakToken) else listOf()
+                }
+                nodeOfType(KtTokens.RBRACE) thenMapToTokens { listOf(EndToken, LeafNodeToken("}")) }
+            } or {
+                zeroOrMoreFrugal { anyNode() } thenMapToTokens { nodes ->
+                    kotlinScanner.scanNodes(nodes, ScannerState.BLOCK)
+                }
+                zeroOrOne { whitespaceWithNewline() } thenMapToTokens { nodes ->
+                    if (nodes.isNotEmpty()) listOf(ClosingForcedBreakToken) else listOf()
+                }
             }
-            zeroOrOne { whitespaceWithNewline() } thenMapToTokens { nodes ->
-                if (nodes.isNotEmpty()) listOf(ClosingForcedBreakToken) else listOf()
-            }
-            nodeOfType(KtTokens.RBRACE) thenMapToTokens {
-                listOf(EndToken, LeafNodeToken("}"))
-            }
-        } or {
-            zeroOrMoreFrugal { anyNode() } thenMapToTokens { nodes ->
-                kotlinScanner.scanNodes(nodes, ScannerState.BLOCK)
-            }
-            zeroOrOne { whitespaceWithNewline() } thenMapToTokens { nodes ->
-                if (nodes.isNotEmpty()) listOf(ClosingForcedBreakToken) else listOf()
-            }
+            end()
         }
-        end()
-    }
 
     override fun scan(node: ASTNode, scannerState: ScannerState): List<Token> =
         nodePattern.matchSequence(node.children().asIterable())

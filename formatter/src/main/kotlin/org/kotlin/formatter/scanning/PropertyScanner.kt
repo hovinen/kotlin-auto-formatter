@@ -17,19 +17,21 @@ import org.kotlin.formatter.scanning.nodepattern.nodePattern
 
 /** A [NodeScanner] for property declarations. */
 internal class PropertyScanner(private val kotlinScanner: KotlinScanner): NodeScanner {
-    private val nodePattern = nodePattern {
-        exactlyOne {
-            declarationWithOptionalModifierList(kotlinScanner)
-            zeroOrOne { propertyInitializer(kotlinScanner) }
-            zeroOrMore {
-                nodeOfType(KtNodeTypes.PROPERTY_ACCESSOR) thenMapToTokens { nodes ->
-                    listOf(ForcedBreakToken(count = 1))
-                        .plus(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT))
+    private val nodePattern =
+        nodePattern {
+            exactlyOne {
+                declarationWithOptionalModifierList(kotlinScanner)
+                zeroOrOne { propertyInitializer(kotlinScanner) }
+                zeroOrMore {
+                    nodeOfType(KtNodeTypes.PROPERTY_ACCESSOR) thenMapToTokens { nodes ->
+                        listOf(ForcedBreakToken(count = 1)).plus(
+                            kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
+                        )
+                    }
                 }
-            }
-        } thenMapTokens { it.plus(BlockFromMarkerToken) }
-        end()
-    }
+            } thenMapTokens { it.plus(BlockFromMarkerToken) }
+            end()
+        }
 
     override fun scan(node: ASTNode, scannerState: ScannerState): List<Token> =
         nodePattern.matchSequence(node.children().asIterable())
@@ -52,8 +54,9 @@ internal fun NodePatternBuilder.declarationWithOptionalModifierList(
     either {
         exactlyOne {
             nodeOfType(KtNodeTypes.MODIFIER_LIST) thenMapToTokens { nodes ->
-                List(markerCount) { MarkerToken }
-                    .plus(modifierListScanner.scan(nodes.first(), ScannerState.STATEMENT))
+                List(markerCount) { MarkerToken }.plus(
+                    modifierListScanner.scan(nodes.first(), ScannerState.STATEMENT)
+                )
             }
             possibleWhitespace()
             anyNode() thenMapToTokens { nodes ->
@@ -65,14 +68,14 @@ internal fun NodePatternBuilder.declarationWithOptionalModifierList(
         }
     } or {
         oneOrMoreFrugal { anyNode() } thenMapToTokens { nodes ->
-            List(markerCount) { MarkerToken }.plus(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT))
+            List(markerCount) { MarkerToken }.plus(
+                kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
+            )
         }
     }
 }
 
-/**
- * Adds to the receiver [NodePatternBuilder] a sequence matching optionally present KDoc.
- */
+/** Adds to the receiver [NodePatternBuilder] a sequence matching optionally present KDoc. */
 internal fun NodePatternBuilder.optionalKDoc(kotlinScanner: KotlinScanner) {
     zeroOrOne {
         nodeOfType(KDocTokens.KDOC)

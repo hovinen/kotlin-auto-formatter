@@ -15,29 +15,30 @@ import org.kotlin.formatter.scanning.nodepattern.nodePattern
 
 /** A [NodeScanner] for KDoc. */
 internal class KDocScanner(private val kotlinScanner: KotlinScanner) : NodeScanner {
-    private val nodePattern = nodePattern {
-        nodeOfType(KDocTokens.START) thenMapToTokens {
-            listOf(
-                BeginToken(State.CODE),
-                LeafNodeToken("/**"),
-                ClosingSynchronizedBreakToken(whitespaceLength = 1)
-            )
+    private val nodePattern =
+        nodePattern {
+            nodeOfType(KDocTokens.START) thenMapToTokens {
+                listOf(
+                    BeginToken(State.CODE),
+                    LeafNodeToken("/**"),
+                    ClosingSynchronizedBreakToken(whitespaceLength = 1)
+                )
+            }
+            possibleWhitespace()
+            zeroOrMore { nodeOfType(KDocElementTypes.KDOC_SECTION) } thenMapToTokens { nodes ->
+                val fullContent = nodes.joinToString("") { scanChildrenToString(it) }
+                listOf(KDocContentToken(content = fullContent.trimOneWhitespace()))
+            }
+            possibleWhitespace()
+            nodeOfType(KDocTokens.END) thenMapToTokens {
+                listOf(
+                    ClosingSynchronizedBreakToken(whitespaceLength = 0),
+                    LeafNodeToken(" */"),
+                    EndToken
+                )
+            }
+            end()
         }
-        possibleWhitespace()
-        zeroOrMore { nodeOfType(KDocElementTypes.KDOC_SECTION) } thenMapToTokens { nodes ->
-            val fullContent = nodes.joinToString("") { scanChildrenToString(it) }
-            listOf(KDocContentToken(content = fullContent.trimOneWhitespace()))
-        }
-        possibleWhitespace()
-        nodeOfType(KDocTokens.END) thenMapToTokens {
-            listOf(
-                ClosingSynchronizedBreakToken(whitespaceLength = 0),
-                LeafNodeToken(" */"),
-                EndToken
-            )
-        }
-        end()
-    }
 
     private fun scanChildrenToString(node: ASTNode): String =
         sectionNodePattern.matchSequence(node.children().asIterable())
@@ -50,30 +51,46 @@ internal class KDocScanner(private val kotlinScanner: KotlinScanner) : NodeScann
             this
         }
 
-    private val sectionNodePattern = nodePattern {
-        zeroOrOne {
-            oneOrMoreFrugal { nodeNotOfType(KDocTokens.LEADING_ASTERISK) } thenMapToTokens { nodes ->
-                listOf(KDocContentToken(content = nodes.joinToString("") { scanNodeToString(it) }))
-            }
+    private val sectionNodePattern =
+        nodePattern {
             zeroOrOne {
-                whitespaceWithNewline() thenMapToTokens { nodes ->
-                    listOf(KDocContentToken(content = "\n".repeat(nodes.first().countNewlines())))
+                oneOrMoreFrugal { nodeNotOfType(KDocTokens.LEADING_ASTERISK) } thenMapToTokens
+                    { nodes ->
+                        listOf(
+                            KDocContentToken(
+                                content = nodes.joinToString("") { scanNodeToString(it) }
+                            )
+                        )
+                    }
+                zeroOrOne {
+                    whitespaceWithNewline() thenMapToTokens { nodes ->
+                        listOf(
+                            KDocContentToken(content = "\n".repeat(nodes.first().countNewlines()))
+                        )
+                    }
                 }
             }
-        }
-        zeroOrMore {
-            nodeOfType(KDocTokens.LEADING_ASTERISK)
-            zeroOrMoreFrugal { anyNode() } thenMapToTokens { nodes ->
-                listOf(KDocContentToken(content = nodes.joinToString("") { scanNodeToString(it) }.trimFirstWhitespace()))
-            }
-            zeroOrOne {
-                whitespaceWithNewline() thenMapToTokens { nodes ->
-                    listOf(KDocContentToken(content = "\n".repeat(nodes.first().countNewlines())))
+            zeroOrMore {
+                nodeOfType(KDocTokens.LEADING_ASTERISK)
+                zeroOrMoreFrugal { anyNode() } thenMapToTokens { nodes ->
+                    listOf(
+                        KDocContentToken(
+                            content =
+                                nodes.joinToString("") { scanNodeToString(it) }
+                                    .trimFirstWhitespace()
+                        )
+                    )
+                }
+                zeroOrOne {
+                    whitespaceWithNewline() thenMapToTokens { nodes ->
+                        listOf(
+                            KDocContentToken(content = "\n".repeat(nodes.first().countNewlines()))
+                        )
+                    }
                 }
             }
+            end()
         }
-        end()
-    }
 
     private fun scanNodeToString(node: ASTNode): String =
         if (node.elementType == KDocElementTypes.KDOC_TAG) {

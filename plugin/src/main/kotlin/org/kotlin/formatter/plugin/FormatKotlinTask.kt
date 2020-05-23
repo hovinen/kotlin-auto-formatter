@@ -14,8 +14,6 @@ internal open class FormatKotlinTask : SourceTask() {
     @TaskAction
     fun format() {
         val kotlinFormatter = KotlinFormatter()
-        source.forEach {
-            kotlinFormatter.formatFile(it.toPath())
-        }
+        source.forEach { kotlinFormatter.formatFile(it.toPath()) }
     }
 }

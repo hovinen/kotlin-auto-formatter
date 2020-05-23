@@ -27,7 +27,10 @@ class KotlinFileLoader {
         compilerConfiguration.put(CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY, MessageCollector.NONE)
         val environment =
             KotlinCoreEnvironment.createForProduction(
-                Disposable {}, compilerConfiguration, EnvironmentConfigFiles.JVM_CONFIG_FILES)
+                Disposable {},
+                compilerConfiguration,
+                EnvironmentConfigFiles.JVM_CONFIG_FILES
+            )
         installPomModel(environment)
         psiFileFactory = PsiFileFactory.getInstance(environment.project)
     }
@@ -51,7 +54,9 @@ class KotlinFileLoader {
                         val constructor =
                             ReflectionFactory.getReflectionFactory()
                                 .newConstructorForSerialization(
-                                    aspect, Any::class.java.getDeclaredConstructor())
+                                    aspect,
+                                    Any::class.java.getDeclaredConstructor()
+                                )
                         return constructor.newInstance() as T
                     } else {
                         return null

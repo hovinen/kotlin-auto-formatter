@@ -24,15 +24,15 @@ fun nonBreakingSpaceToken(content: String = " "): Token = LeafNodeToken(text = c
 
 /**
  * A directive to output the given [content] as the content of a long comment such as KDoc.
- * 
+ *
  * All line breaks in the content are indented and prefixed with the long comment marker ` * `. If
  * the token is immediately preceded by a [ForcedBreakToken], a long comment marker is also output
  * before the content so that the first line is consistent with the remaining content.
- * 
+ *
  * The value of [content] is expected to be stripped of leading asterisks as well as the begin and
  * end markers. In other words, it should be suitable for passing through a separate markdown auto-
  * formatter.
- * 
+ *
  * The content is otherwise output unchanged with no additional line breaking.
  */
 // TODO: Support passing the content through a separate formatter from the Printer.

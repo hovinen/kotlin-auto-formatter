@@ -66,13 +66,7 @@ internal class PrinterTest {
     fun `preserves whitespace when line break does not occur`(token: Token) {
         val subject = subject()
 
-        val result =
-            subject.print(
-                listOf(
-                    WhitespaceToken(length = 1, content = " "),
-                    token
-                )
-            )
+        val result = subject.print(listOf(WhitespaceToken(length = 1, content = " "), token))
 
         assertThat(result).contains("  ")
     }
@@ -112,16 +106,17 @@ internal class PrinterTest {
     fun `outputs additional indentation inside a block`() {
         val subject = subject(maxLineLength = 80, continuationIndent = 4)
 
-        val result = subject.print(
-            listOf(
-                LeafNodeToken("Before whitespace"),
-                WhitespaceToken(length = 81, content = " "),
-                BeginToken(length = 0, state = State.CODE),
-                LeafNodeToken("variable"),
-                WhitespaceToken(length = 81, content = " "),
-                LeafNodeToken("variable")
+        val result =
+            subject.print(
+                listOf(
+                    LeafNodeToken("Before whitespace"),
+                    WhitespaceToken(length = 81, content = " "),
+                    BeginToken(length = 0, state = State.CODE),
+                    LeafNodeToken("variable"),
+                    WhitespaceToken(length = 81, content = " "),
+                    LeafNodeToken("variable")
+                )
             )
-        )
 
         assertThat(result).isEqualTo("Before whitespace\n    variable\n        variable")
     }
@@ -130,17 +125,18 @@ internal class PrinterTest {
     fun `returns to original indentation after block ends`() {
         val subject = subject(maxLineLength = 80, continuationIndent = 4)
 
-        val result = subject.print(
-            listOf(
-                LeafNodeToken("Before whitespace"),
-                WhitespaceToken(length = 81, content = " "),
-                BeginToken(length = 0, state = State.CODE),
-                LeafNodeToken("variable"),
-                EndToken,
-                WhitespaceToken(length = 81, content = " "),
-                LeafNodeToken("variable")
+        val result =
+            subject.print(
+                listOf(
+                    LeafNodeToken("Before whitespace"),
+                    WhitespaceToken(length = 81, content = " "),
+                    BeginToken(length = 0, state = State.CODE),
+                    LeafNodeToken("variable"),
+                    EndToken,
+                    WhitespaceToken(length = 81, content = " "),
+                    LeafNodeToken("variable")
+                )
             )
-        )
 
         assertThat(result).isEqualTo("Before whitespace\n    variable\n    variable")
     }
@@ -149,13 +145,14 @@ internal class PrinterTest {
     fun `inserts a break if remaining space is too low`() {
         val subject = subject(maxLineLength = 80, continuationIndent = 4)
 
-        val result = subject.print(
-            listOf(
-                LeafNodeToken("variable"),
-                WhitespaceToken(length = 73, content = " "),
-                LeafNodeToken("variable")
+        val result =
+            subject.print(
+                listOf(
+                    LeafNodeToken("variable"),
+                    WhitespaceToken(length = 73, content = " "),
+                    LeafNodeToken("variable")
+                )
             )
-        )
 
         assertThat(result).isEqualTo("variable\n    variable")
     }
@@ -164,14 +161,15 @@ internal class PrinterTest {
     fun `considers printed whitespace also when determining remaining space on the line`() {
         val subject = subject(maxLineLength = 80, continuationIndent = 4)
 
-        val result = subject.print(
-            listOf(
-                WhitespaceToken(length = 1, content = " "),
-                LeafNodeToken("variable"),
-                WhitespaceToken(length = 72, content = " "),
-                LeafNodeToken("variable")
+        val result =
+            subject.print(
+                listOf(
+                    WhitespaceToken(length = 1, content = " "),
+                    LeafNodeToken("variable"),
+                    WhitespaceToken(length = 72, content = " "),
+                    LeafNodeToken("variable")
+                )
             )
-        )
 
         assertThat(result).isEqualTo(" variable\n    variable")
     }
@@ -180,15 +178,16 @@ internal class PrinterTest {
     fun `considers existing indentation also when determining remaining space on the line`() {
         val subject = subject(maxLineLength = 80, continuationIndent = 4)
 
-        val result = subject.print(
-            listOf(
-                LeafNodeToken("Before whitespace"),
-                WhitespaceToken(length = 81, content = " "),
-                LeafNodeToken("variable"),
-                WhitespaceToken(length = 69, content = " "),
-                LeafNodeToken("variable")
+        val result =
+            subject.print(
+                listOf(
+                    LeafNodeToken("Before whitespace"),
+                    WhitespaceToken(length = 81, content = " "),
+                    LeafNodeToken("variable"),
+                    WhitespaceToken(length = 69, content = " "),
+                    LeafNodeToken("variable")
+                )
             )
-        )
 
         assertThat(result).isEqualTo("Before whitespace\n    variable\n    variable")
     }
@@ -197,14 +196,15 @@ internal class PrinterTest {
     fun `uses current indentation and not position of beginning of block for cont indent`() {
         val subject = subject(maxLineLength = 80, continuationIndent = 4)
 
-        val result = subject.print(
-            listOf(
-                LeafNodeToken("outside block"),
-                BeginToken(length = 0, state = State.CODE),
-                WhitespaceToken(length = 81, content = " "),
-                LeafNodeToken("in block")
+        val result =
+            subject.print(
+                listOf(
+                    LeafNodeToken("outside block"),
+                    BeginToken(length = 0, state = State.CODE),
+                    WhitespaceToken(length = 81, content = " "),
+                    LeafNodeToken("in block")
+                )
             )
-        )
 
         assertThat(result).isEqualTo("outside block\n    in block")
     }
@@ -213,11 +213,7 @@ internal class PrinterTest {
     fun `does not indent on forced break if outside a block`() {
         val subject = subject(standardIndent = 2)
 
-        val result = subject.print(
-            listOf(
-                ForcedBreakToken(count = 1)
-            )
-        )
+        val result = subject.print(listOf(ForcedBreakToken(count = 1)))
 
         assertThat(result).isEqualTo("\n")
     }
@@ -226,12 +222,10 @@ internal class PrinterTest {
     fun `indents with standard indent on forced break if inside a block`() {
         val subject = subject(standardIndent = 2)
 
-        val result = subject.print(
-            listOf(
-                BeginToken(length = 0, state = State.CODE),
-                ForcedBreakToken(count = 1)
+        val result =
+            subject.print(
+                listOf(BeginToken(length = 0, state = State.CODE), ForcedBreakToken(count = 1))
             )
-        )
 
         assertThat(result).isEqualTo("\n  ")
     }
@@ -240,12 +234,10 @@ internal class PrinterTest {
     fun `does not indent first line on forced break with count 2`() {
         val subject = subject(standardIndent = 2)
 
-        val result = subject.print(
-            listOf(
-                BeginToken(length = 0, state = State.CODE),
-                ForcedBreakToken(count = 2)
+        val result =
+            subject.print(
+                listOf(BeginToken(length = 0, state = State.CODE), ForcedBreakToken(count = 2))
             )
-        )
 
         assertThat(result).isEqualTo("\n\n  ")
     }
@@ -254,15 +246,16 @@ internal class PrinterTest {
     fun `considers current indent when applying forced break`() {
         val subject = subject(standardIndent = 2)
 
-        val result = subject.print(
-            listOf(
-                BeginToken(length = 0, state = State.CODE),
-                ForcedBreakToken(count = 1),
-                BeginToken(length = 0, state = State.CODE),
-                ForcedBreakToken(count = 1),
-                LeafNodeToken("variable")
+        val result =
+            subject.print(
+                listOf(
+                    BeginToken(length = 0, state = State.CODE),
+                    ForcedBreakToken(count = 1),
+                    BeginToken(length = 0, state = State.CODE),
+                    ForcedBreakToken(count = 1),
+                    LeafNodeToken("variable")
+                )
             )
-        )
 
         assertThat(result).isEqualTo("\n  \n    variable")
     }
@@ -271,27 +264,26 @@ internal class PrinterTest {
     fun `inserts a break with no indent on ClosingForcedBreakToken`() {
         val subject = subject()
 
-        val result = subject.print(
-            listOf(
-                BeginToken(length = 0, state = State.CODE),
-                ClosingForcedBreakToken
+        val result =
+            subject.print(
+                listOf(BeginToken(length = 0, state = State.CODE), ClosingForcedBreakToken)
             )
-        )
 
         assertThat(result).isEqualTo("\n")
     }
-    
+
     @Test
     fun `breaks at synchronized break if parent block does not fit on line`() {
         val subject = subject(maxLineLength = 80, continuationIndent = 4)
 
-        val result = subject.print(
-            listOf(
-                BeginToken(length = 81, state = State.CODE),
-                SynchronizedBreakToken(whitespaceLength = 0),
-                LeafNodeToken("variable")
+        val result =
+            subject.print(
+                listOf(
+                    BeginToken(length = 81, state = State.CODE),
+                    SynchronizedBreakToken(whitespaceLength = 0),
+                    LeafNodeToken("variable")
+                )
             )
-        )
 
         assertThat(result).isEqualTo("\n    variable")
     }
@@ -300,14 +292,15 @@ internal class PrinterTest {
     fun `considers current position in line when deciding to break at synchronized break`() {
         val subject = subject(maxLineLength = 80, continuationIndent = 4)
 
-        val result = subject.print(
-            listOf(
-                LeafNodeToken("outside block"),
-                BeginToken(length = 68, state = State.CODE),
-                SynchronizedBreakToken(whitespaceLength = 0),
-                LeafNodeToken("inside block")
+        val result =
+            subject.print(
+                listOf(
+                    LeafNodeToken("outside block"),
+                    BeginToken(length = 68, state = State.CODE),
+                    SynchronizedBreakToken(whitespaceLength = 0),
+                    LeafNodeToken("inside block")
+                )
             )
-        )
 
         assertThat(result).isEqualTo("outside block\n    inside block")
     }
@@ -316,13 +309,14 @@ internal class PrinterTest {
     fun `outputs simple whitespace at synchronized break if parent block fits on line`() {
         val subject = subject(maxLineLength = 80, continuationIndent = 4)
 
-        val result = subject.print(
-            listOf(
-                BeginToken(length = 80, state = State.CODE),
-                SynchronizedBreakToken(whitespaceLength = 2),
-                LeafNodeToken("variable")
+        val result =
+            subject.print(
+                listOf(
+                    BeginToken(length = 80, state = State.CODE),
+                    SynchronizedBreakToken(whitespaceLength = 2),
+                    LeafNodeToken("variable")
+                )
             )
-        )
 
         assertThat(result).isEqualTo("  variable")
     }
@@ -331,31 +325,33 @@ internal class PrinterTest {
     fun `considers current indent when determining whether to break at synchronized break`() {
         val subject = subject(maxLineLength = 80, continuationIndent = 4)
 
-        val result = subject.print(
-            listOf(
-                LeafNodeToken("outside block"),
-                BeginToken(length = 0, state = State.CODE),
-                WhitespaceToken(length = 81, content = ""),
-                BeginToken(length = 77, state = State.CODE),
-                SynchronizedBreakToken(whitespaceLength = 0),
-                LeafNodeToken("inside block")
+        val result =
+            subject.print(
+                listOf(
+                    LeafNodeToken("outside block"),
+                    BeginToken(length = 0, state = State.CODE),
+                    WhitespaceToken(length = 81, content = ""),
+                    BeginToken(length = 77, state = State.CODE),
+                    SynchronizedBreakToken(whitespaceLength = 0),
+                    LeafNodeToken("inside block")
+                )
             )
-        )
 
         assertThat(result).isEqualTo("outside block\n    \n        inside block")
     }
-    
+
     @Test
     fun `breaks at closing synchronized break if parent does not fit on line`() {
         val subject = subject(maxLineLength = 80)
 
-        val result = subject.print(
-            listOf(
-                BeginToken(length = 81, state = State.CODE),
-                ClosingSynchronizedBreakToken(whitespaceLength = 0),
-                LeafNodeToken("variable")
+        val result =
+            subject.print(
+                listOf(
+                    BeginToken(length = 81, state = State.CODE),
+                    ClosingSynchronizedBreakToken(whitespaceLength = 0),
+                    LeafNodeToken("variable")
+                )
             )
-        )
 
         assertThat(result).isEqualTo("\nvariable")
     }
@@ -364,33 +360,32 @@ internal class PrinterTest {
     fun `does not break at closing synchronized break if parent fits on line`() {
         val subject = subject(maxLineLength = 80)
 
-        val result = subject.print(
-            listOf(
-                BeginToken(length = 80, state = State.CODE),
-                ClosingSynchronizedBreakToken(whitespaceLength = 2),
-                LeafNodeToken("variable")
+        val result =
+            subject.print(
+                listOf(
+                    BeginToken(length = 80, state = State.CODE),
+                    ClosingSynchronizedBreakToken(whitespaceLength = 2),
+                    LeafNodeToken("variable")
+                )
             )
-        )
 
         assertThat(result).isEqualTo("  variable")
     }
 
     @ParameterizedTest
     @MethodSource("commentCases")
-    fun `breaks comment by adding comment marker`(
-        commentState: State,
-        commentPrefix: String
-    ) {
+    fun `breaks comment by adding comment marker`(commentState: State, commentPrefix: String) {
         val subject = subject(maxLineLength = 80)
 
-        val result = subject.print(
-            listOf(
-                LeafNodeToken("Before whitespace"),
-                BeginToken(length = 0, state = commentState),
-                WhitespaceToken(length = 81, content = " "),
-                LeafNodeToken("Comment")
+        val result =
+            subject.print(
+                listOf(
+                    LeafNodeToken("Before whitespace"),
+                    BeginToken(length = 0, state = commentState),
+                    WhitespaceToken(length = 81, content = " "),
+                    LeafNodeToken("Comment")
+                )
             )
-        )
 
         assertThat(result).isEqualTo("Before whitespace\n${commentPrefix}Comment")
     }
@@ -403,13 +398,14 @@ internal class PrinterTest {
     ) {
         val subject = subject(maxLineLength = 80)
 
-        val result = subject.print(
-            listOf(
-                BeginToken(length = 0, state = commentState),
-                ForcedBreakToken(count = 2),
-                LeafNodeToken(" Comment")
+        val result =
+            subject.print(
+                listOf(
+                    BeginToken(length = 0, state = commentState),
+                    ForcedBreakToken(count = 2),
+                    LeafNodeToken(" Comment")
+                )
             )
-        )
 
         assertThat(result).isEqualTo("\n${commentPrefix.trimEnd()}\n${commentPrefix}Comment")
     }
@@ -418,13 +414,14 @@ internal class PrinterTest {
     fun `does not insert comment marker on ClosingSynchronizedBreakToken in long comment`() {
         val subject = subject(maxLineLength = 80)
 
-        val result = subject.print(
-            listOf(
-                BeginToken(length = 81, state = State.LONG_COMMENT),
-                ClosingSynchronizedBreakToken(whitespaceLength = 0),
-                LeafNodeToken("Comment")
+        val result =
+            subject.print(
+                listOf(
+                    BeginToken(length = 81, state = State.LONG_COMMENT),
+                    ClosingSynchronizedBreakToken(whitespaceLength = 0),
+                    LeafNodeToken("Comment")
+                )
             )
-        )
 
         assertThat(result).isEqualTo("\n Comment")
     }
@@ -437,16 +434,17 @@ internal class PrinterTest {
     ) {
         val subject = subject(maxLineLength = 80)
 
-        val result = subject.print(
-            listOf(
-                LeafNodeToken("outside block"),
-                BeginToken(length = 0, state = State.CODE),
-                WhitespaceToken(length = 81, content = ""),
-                BeginToken(length = 0, state = commentState),
-                WhitespaceToken(length = 81, content = " "),
-                LeafNodeToken("Comment")
+        val result =
+            subject.print(
+                listOf(
+                    LeafNodeToken("outside block"),
+                    BeginToken(length = 0, state = State.CODE),
+                    WhitespaceToken(length = 81, content = ""),
+                    BeginToken(length = 0, state = commentState),
+                    WhitespaceToken(length = 81, content = " "),
+                    LeafNodeToken("Comment")
+                )
             )
-        )
 
         assertThat(result).isEqualTo("outside block\n        \n        ${commentPrefix}Comment")
     }
@@ -455,14 +453,15 @@ internal class PrinterTest {
     fun `breaks in comment state at the correct point`() {
         val subject = subject(maxLineLength = 80)
 
-        val result = subject.print(
-            listOf(
-                BeginToken(state = State.LONG_COMMENT),
-                LeafNodeToken("Before whitespace"),
-                WhitespaceToken(content = " ", length = 64),
-                LeafNodeToken("After whitespace")
+        val result =
+            subject.print(
+                listOf(
+                    BeginToken(state = State.LONG_COMMENT),
+                    LeafNodeToken("Before whitespace"),
+                    WhitespaceToken(content = " ", length = 64),
+                    LeafNodeToken("After whitespace")
+                )
             )
-        )
 
         assertThat(result).isEqualTo("Before whitespace\n * After whitespace")
     }
@@ -475,38 +474,39 @@ internal class PrinterTest {
     ) {
         val subject = subject(maxLineLength = 80)
 
-        val result = subject.print(
-            listOf(
-                LeafNodeToken("outside block"),
-                BeginToken(length = 0, state = State.CODE),
-                WhitespaceToken(length = 81, content = ""),
-                BeginToken(length = 0, state = commentState),
-                WhitespaceToken(length = 81, content = " "),
-                LeafNodeToken("Comment"),
-                WhitespaceToken(length = 65, content = " "),
-                LeafNodeToken("Comment")
+        val result =
+            subject.print(
+                listOf(
+                    LeafNodeToken("outside block"),
+                    BeginToken(length = 0, state = State.CODE),
+                    WhitespaceToken(length = 81, content = ""),
+                    BeginToken(length = 0, state = commentState),
+                    WhitespaceToken(length = 81, content = " "),
+                    LeafNodeToken("Comment"),
+                    WhitespaceToken(length = 65, content = " "),
+                    LeafNodeToken("Comment")
+                )
             )
-        )
 
-        assertThat(result)
-            .isEqualTo(
-                "outside block\n        \n        ${commentPrefix}Comment\n        " +
+        assertThat(result).isEqualTo(
+            "outside block\n        \n        ${commentPrefix}Comment\n        " +
                 "${commentPrefix}Comment"
-            )
+        )
     }
 
     @Test
     fun `breaks a string literal with concatenation operator and preserving original whitespace`() {
         val subject = subject(maxLineLength = 80, continuationIndent = 4)
 
-        val result = subject.print(
-            listOf(
-                BeginToken(length = 0, state = State.STRING_LITERAL),
-                LeafNodeToken("Content"),
-                WhitespaceToken(length = 74, content = "  "),
-                LeafNodeToken("Content")
+        val result =
+            subject.print(
+                listOf(
+                    BeginToken(length = 0, state = State.STRING_LITERAL),
+                    LeafNodeToken("Content"),
+                    WhitespaceToken(length = 74, content = "  "),
+                    LeafNodeToken("Content")
+                )
             )
-        )
 
         assertThat(result).isEqualTo("Content  \" +\n    \"Content")
     }
@@ -515,13 +515,14 @@ internal class PrinterTest {
     fun `preserves whitespace when not breaking lines when in string literal`() {
         val subject = subject()
 
-        val result = subject.print(
-            listOf(
-                BeginToken(length = 0, state = State.STRING_LITERAL),
-                WhitespaceToken(length = 0, content = "  "),
-                LeafNodeToken("After whitespace")
+        val result =
+            subject.print(
+                listOf(
+                    BeginToken(length = 0, state = State.STRING_LITERAL),
+                    WhitespaceToken(length = 0, content = "  "),
+                    LeafNodeToken("After whitespace")
+                )
             )
-        )
 
         assertThat(result).isEqualTo("  After whitespace")
     }
@@ -530,14 +531,15 @@ internal class PrinterTest {
     fun `puts whitespace on next line if it does not fit in string literal`() {
         val subject = subject(maxLineLength = 10, continuationIndent = 4)
 
-        val result = subject.print(
-            listOf(
-                BeginToken(length = 0, state = State.STRING_LITERAL),
-                LeafNodeToken("Content"),
-                WhitespaceToken(length = 10, content = " "),
-                LeafNodeToken("Content")
+        val result =
+            subject.print(
+                listOf(
+                    BeginToken(length = 0, state = State.STRING_LITERAL),
+                    LeafNodeToken("Content"),
+                    WhitespaceToken(length = 10, content = " "),
+                    LeafNodeToken("Content")
+                )
             )
-        )
 
         assertThat(result).isEqualTo("Content\" +\n    \" Content")
     }
@@ -546,14 +548,15 @@ internal class PrinterTest {
     fun `breaks with enough room for string closing characters in string literal`() {
         val subject = subject(maxLineLength = 9, continuationIndent = 4)
 
-        val result = subject.print(
-            listOf(
-                BeginToken(length = 0, state = State.STRING_LITERAL),
-                LeafNodeToken("Content"),
-                WhitespaceToken(length = 2, content = ""),
-                LeafNodeToken("Content")
+        val result =
+            subject.print(
+                listOf(
+                    BeginToken(length = 0, state = State.STRING_LITERAL),
+                    LeafNodeToken("Content"),
+                    WhitespaceToken(length = 2, content = ""),
+                    LeafNodeToken("Content")
+                )
             )
-        )
 
         assertThat(result).isEqualTo("Content\" +\n    \"Content")
     }
@@ -562,17 +565,18 @@ internal class PrinterTest {
     fun `respects current indent when breaking string literal`() {
         val subject = subject(maxLineLength = 80, continuationIndent = 4)
 
-        val result = subject.print(
-            listOf(
-                LeafNodeToken("outside block"),
-                BeginToken(length = 0, state = State.CODE),
-                WhitespaceToken(length = 81, content = ""),
-                BeginToken(length = 0, state = State.STRING_LITERAL),
-                LeafNodeToken("Content"),
-                WhitespaceToken(length = 80, content = ""),
-                LeafNodeToken("Content")
+        val result =
+            subject.print(
+                listOf(
+                    LeafNodeToken("outside block"),
+                    BeginToken(length = 0, state = State.CODE),
+                    WhitespaceToken(length = 81, content = ""),
+                    BeginToken(length = 0, state = State.STRING_LITERAL),
+                    LeafNodeToken("Content"),
+                    WhitespaceToken(length = 80, content = ""),
+                    LeafNodeToken("Content")
+                )
             )
-        )
 
         assertThat(result).isEqualTo("outside block\n    Content\" +\n        \"Content")
     }
@@ -581,13 +585,14 @@ internal class PrinterTest {
     fun `does not break multiline string literal`() {
         val subject = subject(maxLineLength = 80)
 
-        val result = subject.print(
-            listOf(
-                BeginToken(length = 0, state = State.MULTILINE_STRING_LITERAL),
-                WhitespaceToken(length = 81, content = "  "),
-                LeafNodeToken("After whitespace")
+        val result =
+            subject.print(
+                listOf(
+                    BeginToken(length = 0, state = State.MULTILINE_STRING_LITERAL),
+                    WhitespaceToken(length = 81, content = "  "),
+                    LeafNodeToken("After whitespace")
+                )
             )
-        )
 
         assertThat(result).isEqualTo("  After whitespace")
     }
@@ -596,13 +601,14 @@ internal class PrinterTest {
     fun `does not insert breaks on WhitespaceToken in state PACKAGE_IMPORT`() {
         val subject = subject(maxLineLength = 20)
 
-        val result = subject.print(
-            listOf(
-                BeginToken(length = 0, state = State.PACKAGE_IMPORT),
-                WhitespaceToken(length = 21, content = " "),
-                LeafNodeToken("After whitespace")
+        val result =
+            subject.print(
+                listOf(
+                    BeginToken(length = 0, state = State.PACKAGE_IMPORT),
+                    WhitespaceToken(length = 21, content = " "),
+                    LeafNodeToken("After whitespace")
+                )
             )
-        )
 
         assertThat(result).isEqualTo(" After whitespace")
     }
@@ -611,32 +617,34 @@ internal class PrinterTest {
     fun `does not insert breaks on SynchronizedBreakToken in state PACKAGE_IMPORT`() {
         val subject = subject(maxLineLength = 20)
 
-        val result = subject.print(
-            listOf(
-                BeginToken(length = 21, state = State.PACKAGE_IMPORT),
-                SynchronizedBreakToken(whitespaceLength = 0),
-                LeafNodeToken("After whitespace")
+        val result =
+            subject.print(
+                listOf(
+                    BeginToken(length = 21, state = State.PACKAGE_IMPORT),
+                    SynchronizedBreakToken(whitespaceLength = 0),
+                    LeafNodeToken("After whitespace")
+                )
             )
-        )
 
         assertThat(result).isEqualTo("After whitespace")
     }
-    
+
     @Test
     fun `prints short KDoc without line breaks in single line format`() {
         val subject = subject(maxLineLength = 40)
-        
-        val result = subject.print(
-            listOf(
-                BeginToken(length = 40, state = State.CODE),
-                LeafNodeToken("/**"),
-                ClosingSynchronizedBreakToken(whitespaceLength = 1),
-                KDocContentToken("Some KDoc."),
-                ClosingSynchronizedBreakToken(whitespaceLength = 0),
-                LeafNodeToken(" */")
+
+        val result =
+            subject.print(
+                listOf(
+                    BeginToken(length = 40, state = State.CODE),
+                    LeafNodeToken("/**"),
+                    ClosingSynchronizedBreakToken(whitespaceLength = 1),
+                    KDocContentToken("Some KDoc."),
+                    ClosingSynchronizedBreakToken(whitespaceLength = 0),
+                    LeafNodeToken(" */")
+                )
             )
-        )
-        
+
         assertThat(result).isEqualTo("/** Some KDoc. */")
     }
 
@@ -644,16 +652,17 @@ internal class PrinterTest {
     fun `prints short KDoc with line breaks in multiline format`() {
         val subject = subject(maxLineLength = 40)
 
-        val result = subject.print(
-            listOf(
-                BeginToken(length = 40, state = State.CODE),
-                LeafNodeToken("/**"),
-                ClosingForcedBreakToken,
-                KDocContentToken("Some KDoc.\nSome more KDoc."),
-                ClosingForcedBreakToken,
-                LeafNodeToken(" */")
+        val result =
+            subject.print(
+                listOf(
+                    BeginToken(length = 40, state = State.CODE),
+                    LeafNodeToken("/**"),
+                    ClosingForcedBreakToken,
+                    KDocContentToken("Some KDoc.\nSome more KDoc."),
+                    ClosingForcedBreakToken,
+                    LeafNodeToken(" */")
+                )
             )
-        )
 
         assertThat(result).isEqualTo("/**\n * Some KDoc.\n * Some more KDoc.\n */")
     }
@@ -662,16 +671,17 @@ internal class PrinterTest {
     fun `prints KDoc with leading whitespace in multiline format`() {
         val subject = subject(maxLineLength = 40)
 
-        val result = subject.print(
-            listOf(
-                BeginToken(length = 40, state = State.CODE),
-                LeafNodeToken("/**"),
-                ClosingForcedBreakToken,
-                KDocContentToken(" * An item\n * Another item"),
-                ClosingForcedBreakToken,
-                LeafNodeToken(" */")
+        val result =
+            subject.print(
+                listOf(
+                    BeginToken(length = 40, state = State.CODE),
+                    LeafNodeToken("/**"),
+                    ClosingForcedBreakToken,
+                    KDocContentToken(" * An item\n * Another item"),
+                    ClosingForcedBreakToken,
+                    LeafNodeToken(" */")
+                )
             )
-        )
 
         assertThat(result).isEqualTo("/**\n *  * An item\n *  * Another item\n */")
     }
@@ -680,16 +690,17 @@ internal class PrinterTest {
     fun `prints KDoc with blank lines with leading asterisk without trailing whitespace`() {
         val subject = subject(maxLineLength = 40)
 
-        val result = subject.print(
-            listOf(
-                BeginToken(length = 40, state = State.CODE),
-                LeafNodeToken("/**"),
-                ClosingForcedBreakToken,
-                KDocContentToken("Some KDoc.\n\nSome more KDoc."),
-                ClosingForcedBreakToken,
-                LeafNodeToken(" */")
+        val result =
+            subject.print(
+                listOf(
+                    BeginToken(length = 40, state = State.CODE),
+                    LeafNodeToken("/**"),
+                    ClosingForcedBreakToken,
+                    KDocContentToken("Some KDoc.\n\nSome more KDoc."),
+                    ClosingForcedBreakToken,
+                    LeafNodeToken(" */")
+                )
             )
-        )
 
         assertThat(result).isEqualTo("/**\n * Some KDoc.\n *\n * Some more KDoc.\n */")
     }
@@ -698,16 +709,17 @@ internal class PrinterTest {
     fun `prints KDoc with initial blank line with leading asterisk without trailing whitespace`() {
         val subject = subject(maxLineLength = 40)
 
-        val result = subject.print(
-            listOf(
-                BeginToken(length = 40, state = State.CODE),
-                LeafNodeToken("/**"),
-                ClosingForcedBreakToken,
-                KDocContentToken("\nSome KDoc."),
-                ClosingForcedBreakToken,
-                LeafNodeToken(" */")
+        val result =
+            subject.print(
+                listOf(
+                    BeginToken(length = 40, state = State.CODE),
+                    LeafNodeToken("/**"),
+                    ClosingForcedBreakToken,
+                    KDocContentToken("\nSome KDoc."),
+                    ClosingForcedBreakToken,
+                    LeafNodeToken(" */")
+                )
             )
-        )
 
         assertThat(result).isEqualTo("/**\n *\n * Some KDoc.\n */")
     }
@@ -716,16 +728,17 @@ internal class PrinterTest {
     fun `prints long KDoc in multiline format`() {
         val subject = subject(maxLineLength = 40)
 
-        val result = subject.print(
-            listOf(
-                BeginToken(length = 41, state = State.CODE),
-                LeafNodeToken("/**"),
-                ClosingSynchronizedBreakToken(whitespaceLength = 1),
-                KDocContentToken("Some KDoc."),
-                ClosingSynchronizedBreakToken(whitespaceLength = 0),
-                LeafNodeToken(" */")
+        val result =
+            subject.print(
+                listOf(
+                    BeginToken(length = 41, state = State.CODE),
+                    LeafNodeToken("/**"),
+                    ClosingSynchronizedBreakToken(whitespaceLength = 1),
+                    KDocContentToken("Some KDoc."),
+                    ClosingSynchronizedBreakToken(whitespaceLength = 0),
+                    LeafNodeToken(" */")
+                )
             )
-        )
 
         assertThat(result).isEqualTo("/**\n * Some KDoc.\n */")
     }
@@ -734,11 +747,12 @@ internal class PrinterTest {
         maxLineLength: Int = 100,
         standardIndent: Int = 2,
         continuationIndent: Int = 8
-    ) = Printer(
-        maxLineLength = maxLineLength,
-        standardIndent = standardIndent,
-        continuationIndent = continuationIndent
-    )
+    ) =
+        Printer(
+            maxLineLength = maxLineLength,
+            standardIndent = standardIndent,
+            continuationIndent = continuationIndent
+        )
 
     companion object {
         @JvmStatic

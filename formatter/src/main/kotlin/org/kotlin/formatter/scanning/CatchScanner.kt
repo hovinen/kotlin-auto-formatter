@@ -10,22 +10,23 @@ import org.kotlin.formatter.Token
 import org.kotlin.formatter.nonBreakingSpaceToken
 import org.kotlin.formatter.scanning.nodepattern.nodePattern
 
-/**
- * A [NodeScanner] for `catch` clauses.
- */
+/** A [NodeScanner] for `catch` clauses. */
 internal class CatchScanner(private val kotlinScanner: KotlinScanner) : NodeScanner {
-    private val nodePattern = nodePattern {
-        nodeOfType(KtTokens.CATCH_KEYWORD) thenMapToTokens { listOf(MarkerToken, LeafNodeToken("catch ")) }
-        possibleWhitespace()
-        nodeOfType(KtNodeTypes.VALUE_PARAMETER_LIST) thenMapToTokens { nodes ->
-            kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
+    private val nodePattern =
+        nodePattern {
+            nodeOfType(KtTokens.CATCH_KEYWORD) thenMapToTokens {
+                listOf(MarkerToken, LeafNodeToken("catch "))
+            }
+            possibleWhitespace()
+            nodeOfType(KtNodeTypes.VALUE_PARAMETER_LIST) thenMapToTokens { nodes ->
+                kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
+            }
+            possibleWhitespace() thenMapToTokens { listOf(nonBreakingSpaceToken()) }
+            anyNode() thenMapToTokens { nodes ->
+                kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
+            }
+            end()
         }
-        possibleWhitespace() thenMapToTokens { listOf(nonBreakingSpaceToken()) }
-        anyNode() thenMapToTokens { nodes ->
-            kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
-        }
-        end()
-    }
 
     override fun scan(node: ASTNode, scannerState: ScannerState): List<Token> =
         nodePattern.matchSequence(node.children().asIterable())
