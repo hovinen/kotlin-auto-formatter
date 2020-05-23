@@ -70,7 +70,10 @@ class NodePatternBuilder {
      */
     fun end(): NodePatternBuilder = nodeMatching { it == TerminalNode }
 
-    private fun nodeMatching(matcher: (ASTNode) -> Boolean): NodePatternBuilder {
+    /**
+     * Matches exactly those [ASTNode] for which [matcher] returns `true`.
+     */
+    fun nodeMatching(matcher: (ASTNode) -> Boolean): NodePatternBuilder {
         val finalState = terminalState()
         elementStack.push(
             Element(

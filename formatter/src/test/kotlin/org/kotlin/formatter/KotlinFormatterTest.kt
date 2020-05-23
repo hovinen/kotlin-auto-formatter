@@ -962,6 +962,13 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `does not output whitespace around the range operator`() {
+        val result = KotlinFormatter().format("0..100".trimIndent())
+
+        assertThat(result).isEqualTo("0..100")
+    }
+
+    @Test
     fun `does not include trailing whitespace on naked return`() {
         val result = KotlinFormatter(maxLineLength = 50).format("""
             fun myFunction() {
