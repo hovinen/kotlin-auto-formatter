@@ -984,6 +984,24 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `indents multiline string literal with trimIndent call`() {
+        val result = KotlinFormatter(maxLineLength = 50).format("""
+            val aString = aFunction(${"\"\"\""}
+                Some content
+            ${"\"\"\""}.trimIndent())
+        """.trimIndent())
+
+        assertThat(result).isEqualTo("""
+            val aString =
+                aFunction(
+                    ${"\"\"\""}
+                        Some content
+                    ${"\"\"\""}.trimIndent()
+                )
+        """.trimIndent())
+    }
+
+    @Test
     fun `does not break between else and opening brace of block`() {
         val result = KotlinFormatter(maxLineLength = 50).format("""
             fun myFunction() {
