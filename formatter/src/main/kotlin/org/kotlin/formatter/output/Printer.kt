@@ -78,9 +78,9 @@ class Printer(
      * at the start of each line of a long comment. This behaviour is governed by the [State] of
      * the current syntactic block as given by the most recent [BeginToken].
      *
-     * This method does not support [org.kotlin.formatter.BlockFromLastForcedBreakToken] and ignores
-     * any such tokens encountered. The [TokenPreprocessor] replaces any such tokens with tokens
-     * supported by this class.
+     * This method does not support [org.kotlin.formatter.BlockFromMarkerToken] or
+     * [org.kotlin.formatter.MarkerToken] and ignores any such tokens encountered. The
+     * [TokenPreprocessor] replaces any such tokens with tokens supported by this class.
      *
      * See the documentation of [Token] and its subclasses for more information on the printing
      * behaviour of each token.
