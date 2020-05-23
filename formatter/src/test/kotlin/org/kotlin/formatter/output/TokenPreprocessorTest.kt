@@ -38,7 +38,7 @@ internal class TokenPreprocessorTest {
     fun `outputs a WhitespaceToken with the length of the following token`(token: Token, lengthExpected: Int) {
         val subject = TokenPreprocessor()
         val input = listOf(
-            WhitespaceToken(length = 0, content = " "),
+            WhitespaceToken(content = " "),
             token
         )
 
@@ -56,8 +56,8 @@ internal class TokenPreprocessorTest {
     fun `outputs a WhitespaceToken with the length of the following block`() {
         val subject = TokenPreprocessor()
         val input = listOf(
-            WhitespaceToken(length = 0, content = " "),
-            BeginToken(length = 0, state = State.CODE),
+            WhitespaceToken(content = " "),
+            BeginToken(state = State.CODE),
             LeafNodeToken("any token"),
             EndToken
         )
@@ -87,7 +87,7 @@ internal class TokenPreprocessorTest {
     }
 
     @Test
-    fun `preserves emptyBreakPoint when not immediately preceeded by a WhitespaceToken`() {
+    fun `preserves emptyBreakPoint when not preceded by a WhitespaceToken`() {
         val subject = TokenPreprocessor()
         val input = listOf(
             emptyBreakPoint(),
@@ -105,11 +105,34 @@ internal class TokenPreprocessorTest {
     }
 
     @Test
+    fun `preserves emptyBreakPoint when not immediately preceded by a WhitespaceToken`() {
+        val subject = TokenPreprocessor()
+        val input = listOf(
+            WhitespaceToken(content = " "),
+            LeafNodeToken("any token"),
+            emptyBreakPoint(),
+            LeafNodeToken("any token")
+        )
+
+        val result = subject.preprocess(input)
+
+        assertThat(result).isEqualTo(
+            listOf(
+                WhitespaceToken(length = 10, content = " "),
+                LeafNodeToken("any token"),
+                WhitespaceToken(length = 9, content = ""),
+                LeafNodeToken("any token")
+            )
+        )
+    }
+
+    @Test
     fun `does not include the length of following tokens in the length of a WhitespaceToken`() {
         val subject = TokenPreprocessor()
         val input = listOf(
-            WhitespaceToken(length = 0, content = " "),
+            WhitespaceToken( content = " "),
             LeafNodeToken("any token"),
+            WhitespaceToken(content = " "),
             LeafNodeToken("another token")
         )
 
@@ -123,7 +146,7 @@ internal class TokenPreprocessorTest {
     fun `outputs a BeginToken, EndToken pair with length`(token: Token, lengthExpected: Int) {
         val subject = TokenPreprocessor()
         val input = listOf(
-            BeginToken(length = 0, state = State.CODE),
+            BeginToken(state = State.CODE),
             token,
             EndToken
         )
@@ -137,7 +160,7 @@ internal class TokenPreprocessorTest {
     fun `outputs a BeginToken, EndToken pair with length of two tokens`() {
         val subject = TokenPreprocessor()
         val input = listOf(
-            BeginToken(length = 0, state = State.CODE),
+            BeginToken(state = State.CODE),
             LeafNodeToken("token 1"),
             LeafNodeToken("token 2"),
             EndToken
@@ -159,7 +182,7 @@ internal class TokenPreprocessorTest {
     fun `moves an EndToken to after a following LeafNodeToken`() {
         val subject = TokenPreprocessor()
         val input = listOf(
-            BeginToken(length = 0, state = State.CODE),
+            BeginToken(state = State.CODE),
             EndToken,
             LeafNodeToken("token")
         )
@@ -179,8 +202,8 @@ internal class TokenPreprocessorTest {
     fun `moves an inner EndToken to after a following LeafNodeToken`() {
         val subject = TokenPreprocessor()
         val input = listOf(
-            BeginToken(length = 0, state = State.CODE),
-            BeginToken(length = 0, state = State.CODE),
+            BeginToken(state = State.CODE),
+            BeginToken(state = State.CODE),
             EndToken,
             EndToken,
             LeafNodeToken("token")
@@ -203,7 +226,7 @@ internal class TokenPreprocessorTest {
     fun `outputs BeginToken using the state of the input token`() {
         val subject = TokenPreprocessor()
         val input = listOf(
-            BeginToken(length = 0, state = State.STRING_LITERAL),
+            BeginToken(state = State.STRING_LITERAL),
             LeafNodeToken("any token"),
             EndToken
         )
@@ -424,8 +447,8 @@ internal class TokenPreprocessorTest {
             listOf(
                 Arguments.of(LeafNodeToken("any token"), 9),
                 Arguments.of(KDocContentToken("any content"), 11),
-                Arguments.of(WhitespaceToken(length = 0, content = "  "), 1),
-                Arguments.of(WhitespaceToken(length = 0, content = ""), 0),
+                Arguments.of(WhitespaceToken(content = "  "), 1),
+                Arguments.of(WhitespaceToken(content = ""), 0),
                 Arguments.of(SynchronizedBreakToken(whitespaceLength = 2), 2)
             )
 

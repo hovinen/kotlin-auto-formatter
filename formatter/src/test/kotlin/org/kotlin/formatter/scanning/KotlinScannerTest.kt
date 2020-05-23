@@ -847,7 +847,6 @@ internal class KotlinScannerTest {
     }
 
     @Test
-    @Disabled("Not sure about this")
     fun `does not output BeginToken, EndToken pair for class constructor`() {
         val subject = subject()
         val node = kotlinLoader.parseKotlin("class MyClass(param1: Int, param2: Int)")

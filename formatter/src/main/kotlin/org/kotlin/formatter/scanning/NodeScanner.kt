@@ -41,6 +41,9 @@ internal fun nodeScannerForElementType(
         KtNodeTypes.IF -> {
             IfExpressionScanner(kotlinScanner)
         }
+        KtNodeTypes.WHILE -> {
+            WhileExpressionScanner(kotlinScanner)
+        }
         KDocTokens.KDOC -> {
             KDocScanner(kotlinScanner)
         }
@@ -110,7 +113,7 @@ internal fun nodeScannerForElementType(
         KtFileElementType.INSTANCE, is KtScriptElementType, KtNodeTypes.LITERAL_STRING_TEMPLATE_ENTRY -> {
             SimpleScanner(kotlinScanner, ScannerState.BLOCK)
         }
-        KtNodeTypes.WHEN_ENTRY, KtNodeTypes.ANNOTATION_ENTRY, KtNodeTypes.PARENTHESIZED, KtNodeTypes.SUPER_TYPE_CALL_ENTRY -> {
+        KtNodeTypes.WHEN_ENTRY, KtNodeTypes.ANNOTATION_ENTRY, KtNodeTypes.PREFIX_EXPRESSION, KtNodeTypes.PARENTHESIZED, KtNodeTypes.SUPER_TYPE_CALL_ENTRY -> {
             SimpleBlockScanner(kotlinScanner, ScannerState.STATEMENT, State.CODE)
         }
         KtNodeTypes.SHORT_STRING_TEMPLATE_ENTRY -> {

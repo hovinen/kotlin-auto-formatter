@@ -75,7 +75,7 @@ class TokenPreprocessor {
 
             when (token) {
                 is WhitespaceToken -> {
-                    if (token.content.isNotEmpty() || !(resultStack.peek() is WhitespaceStackElement)) {
+                    if (token.content.isNotEmpty() || !lastTokenWasWhitespace()) {
                         resultStack.push(WhitespaceStackElement(token.content))
                     }
                 }
@@ -109,6 +109,9 @@ class TokenPreprocessor {
         }
         return popBlock().tokens
     }
+
+    private fun lastTokenWasWhitespace() =
+        resultStack.peek() is WhitespaceStackElement && resultStack.peek().tokens.isEmpty()
 
     private fun handleEndToken() {
         val blockElement = popBlock().apply { replaceSynchronizedBreaks() }
@@ -150,9 +153,8 @@ class TokenPreprocessor {
             resultStack.peek().tokens
                 .add(ForcedBreakToken(count = min(element.content.countNewlines(), 2)))
         } else {
-            val textLength = firstToken?.textLength ?: 0
             resultStack.peek().tokens.add(
-                WhitespaceToken(length = textLength + element.contentLength, content = element.content)
+                WhitespaceToken(length = element.totalLength, content = element.content)
             )
         }
         resultStack.peek().tokens.addAll(element.tokens)
@@ -209,7 +211,11 @@ private class BlockStackElement(
 }
 
 private class WhitespaceStackElement(internal val content: String): StackElement() {
-    internal val contentLength: Int = if (content.isEmpty()) 0 else 1
+    private val contentLength: Int = if (content.isEmpty()) 0 else 1
+
+    internal val totalLength: Int get() = contentLength + initialTextLength
+
+    private val initialTextLength: Int get() = tokens.firstOrNull()?.textLength ?: 0
 }
 
 private class MarkerElement: StackElement()

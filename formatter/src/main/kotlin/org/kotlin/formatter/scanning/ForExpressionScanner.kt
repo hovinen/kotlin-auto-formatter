@@ -14,14 +14,13 @@ import org.kotlin.formatter.scanning.nodepattern.nodePattern
 
 /** A [NodeScanner] for `for` loop expressions. */
 internal class ForExpressionScanner(private val kotlinScanner: KotlinScanner): NodeScanner {
-    private val whenForPattern = nodePattern {
-        oneOrMore { anyNode() } thenMapToTokens { nodes ->
-            kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
-        }
+    private val nodePattern = nodePattern {
+        nodeOfType(KtTokens.FOR_KEYWORD)
+        possibleWhitespace()
         nodeOfType(KtTokens.LPAR)
         oneOrMore { anyNode() } thenMapToTokens { nodes ->
             val tokens = kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
-            listOf(LeafNodeToken("("), BeginToken(State.CODE))
+            listOf(LeafNodeToken("for ("), BeginToken(State.CODE))
                 .plus(tokens)
                 .plus(ClosingSynchronizedBreakToken(whitespaceLength = 0))
                 .plus(EndToken)
@@ -35,5 +34,5 @@ internal class ForExpressionScanner(private val kotlinScanner: KotlinScanner): N
     }
 
     override fun scan(node: ASTNode, scannerState: ScannerState): List<Token> =
-        inBeginEndBlock(whenForPattern.matchSequence(node.children().asIterable()), State.CODE)
+        inBeginEndBlock(nodePattern.matchSequence(node.children().asIterable()), State.CODE)
 }

@@ -532,6 +532,22 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `breaks if with negated condition at the correct location`() {
+        val result = KotlinFormatter(maxLineLength = 37).format("""
+            if (aCondition || !(aNegatedCondition)) {
+            }
+        """.trimIndent())
+
+        assertThat(result).isEqualTo("""
+            if (aCondition ||
+                !(aNegatedCondition)
+            ) {
+            }
+        """.trimIndent())
+    }
+
+
+    @Test
     fun `format breaks at logical operator in a while statement`() {
         val result = KotlinFormatter(maxLineLength = 50).format("""
             fun myFunction() {

@@ -4,11 +4,14 @@ import org.jetbrains.kotlin.KtNodeTypes
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.psi.psiUtil.children
+import org.kotlin.formatter.BeginToken
 import org.kotlin.formatter.ClosingSynchronizedBreakToken
+import org.kotlin.formatter.EndToken
 import org.kotlin.formatter.LeafNodeToken
 import org.kotlin.formatter.State
 import org.kotlin.formatter.SynchronizedBreakToken
 import org.kotlin.formatter.Token
+import org.kotlin.formatter.emptyBreakPoint
 import org.kotlin.formatter.inBeginEndBlock
 
 /**
@@ -21,7 +24,7 @@ internal class ParameterListScanner(private val kotlinScanner: KotlinScanner): N
     override fun scan(node: ASTNode, scannerState: ScannerState): List<Token> {
         isFirstEntry = true
         val children = node.children().toList()
-        return inBeginEndBlock(kotlinScanner.scanNodes(children, ScannerState.STATEMENT) { childNode, _ -> scanEntry(childNode) }, State.CODE)
+        return kotlinScanner.scanNodes(children, ScannerState.STATEMENT) { childNode, _ -> scanEntry(childNode) }
     }
 
     private fun scanEntry(node: ASTNode): List<Token> {
@@ -38,10 +41,11 @@ internal class ParameterListScanner(private val kotlinScanner: KotlinScanner): N
                 listOf(breakToken).plus(childTokens)
             }
             KtTokens.WHITE_SPACE -> listOf()
+            KtTokens.LPAR -> listOf(LeafNodeToken("("), BeginToken(State.CODE))
             KtTokens.RPAR -> if (isFirstEntry) {
-                listOf(LeafNodeToken(")"))
+                listOf(EndToken, LeafNodeToken(")"))
             } else {
-                listOf(ClosingSynchronizedBreakToken(whitespaceLength = 0), LeafNodeToken(")"))
+                listOf(ClosingSynchronizedBreakToken(whitespaceLength = 0), EndToken, LeafNodeToken(")"))
             }
             else -> kotlinScanner.scanInState(node, ScannerState.STATEMENT)
         }

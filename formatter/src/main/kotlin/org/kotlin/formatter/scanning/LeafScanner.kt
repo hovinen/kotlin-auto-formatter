@@ -6,7 +6,6 @@ import org.jetbrains.kotlin.kdoc.lexer.KDocTokens
 import org.jetbrains.kotlin.lexer.KtTokens
 import org.kotlin.formatter.BeginToken
 import org.kotlin.formatter.EndToken
-import org.kotlin.formatter.ForcedBreakToken
 import org.kotlin.formatter.LeafNodeToken
 import org.kotlin.formatter.State
 import org.kotlin.formatter.Token
