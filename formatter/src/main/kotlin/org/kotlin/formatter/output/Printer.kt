@@ -165,7 +165,7 @@ class Printer(
                 if (!breakingAllowed || whitespacePlusFollowingTokenFitOnLine(token)) {
                     if (inStringLiteral) {
                         appendTextOnSameLine(token.content)
-                    } else {
+                    } else if (token.content.isNotEmpty()) {
                         appendTextOnSameLine(" ")
                     }
                 } else {

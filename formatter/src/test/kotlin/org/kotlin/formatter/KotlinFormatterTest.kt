@@ -211,6 +211,20 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `break before a dot when next block does not fit on line`() {
+        val result = KotlinFormatter(maxLineLength = 45).format("""
+            anObject.aMethod(aParameter, anotherParameter)
+                .anotherMethod()
+        """.trimIndent())
+
+        assertThat(result).isEqualTo("""
+            anObject
+                .aMethod(aParameter, anotherParameter)
+                .anotherMethod()
+        """.trimIndent())
+    }
+
+    @Test
     fun `format does not indent a class after a class after a package declaration`() {
         val result = KotlinFormatter(maxLineLength = 50).format("""
             package apackage
