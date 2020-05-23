@@ -167,6 +167,50 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `maintains exactly one space between companion object and opening brace`() {
+        val result = KotlinFormatter().format("""
+            class AClass {
+                companion object {
+                }
+            }
+        """.trimIndent())
+
+        assertThat(result).isEqualTo("""
+            class AClass {
+                companion object {
+                }
+            }
+        """.trimIndent())
+    }
+
+    @Test
+    fun `prefers to break in parameter list to before constructor`() {
+        val result = KotlinFormatter(maxLineLength = 54).format("""
+            class AClass internal constructor(aParameter: String) {
+            }
+        """.trimIndent())
+
+        assertThat(result).isEqualTo("""
+            class AClass internal constructor(
+                aParameter: String
+            ) {
+            }
+        """.trimIndent())
+    }
+
+    @Test
+    fun `prefers to break before beginning of function literal`() {
+        val result = KotlinFormatter(maxLineLength = 37).format("""
+            fun aFunction(aParameter: String) = { aValue -> doSomething() }
+        """.trimIndent())
+
+        assertThat(result).isEqualTo("""
+            fun aFunction(aParameter: String) =
+                { aValue -> doSomething() }
+        """.trimIndent())
+    }
+
+    @Test
     fun `format does not indent a class after a class after a package declaration`() {
         val result = KotlinFormatter(maxLineLength = 50).format("""
             package apackage

@@ -21,7 +21,7 @@ internal class ParameterListScanner(private val kotlinScanner: KotlinScanner): N
     override fun scan(node: ASTNode, scannerState: ScannerState): List<Token> {
         isFirstEntry = true
         val children = node.children().toList()
-        return kotlinScanner.scanNodes(children, ScannerState.STATEMENT, this::scanEntry)
+        return inBeginEndBlock(kotlinScanner.scanNodes(children, ScannerState.STATEMENT, this::scanEntry), State.CODE)
     }
 
     private fun scanEntry(node: ASTNode, scannerState: ScannerState): List<Token> {

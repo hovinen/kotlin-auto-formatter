@@ -23,7 +23,7 @@ internal class ClassScanner(private val kotlinScanner: KotlinScanner): NodeScann
         possibleWhitespace()
         exactlyOne {
             nodeOfOneOfTypes(KtTokens.CLASS_KEYWORD, KtTokens.OBJECT_KEYWORD, KtTokens.INTERFACE_KEYWORD)
-            oneOrMoreFrugal { anyNode() }
+            zeroOrMoreFrugal { anyNode() }
         } thenMapToTokens { nodes ->
             kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
         }
