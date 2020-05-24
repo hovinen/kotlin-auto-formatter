@@ -2225,6 +2225,40 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `sorts annotations before modifiers on declarations`() {
+        val result =
+            KotlinFormatter().format("""
+            private
+            @AnAnnotation fun myFunction()
+        """.trimIndent())
+
+        assertThat(result).isEqualTo("""
+            @AnAnnotation
+            private fun myFunction()
+        """.trimIndent())
+    }
+
+    @Test
+    fun `sorts modifier keywords on declarations`() {
+        val result =
+            KotlinFormatter(maxLineLength = 88).format(
+                """
+                    data operator infix inline companion enum annotation inner suspend vararg tailrec
+                        lateinit override external final open abstract sealed const expect actual public
+                        protected private internal fun myFunction()
+                """.trimIndent()
+            )
+
+        assertThat(result).isEqualTo(
+            """
+                public protected private internal expect actual final open abstract sealed const
+                    external override lateinit tailrec vararg suspend inner enum annotation companion
+                    inline infix operator data fun myFunction()
+            """.trimIndent()
+        )
+    }
+
+    @Test
     fun `does not strip trailing whitespace in multiline string literals`() {
         val subject = KotlinFormatter()
 
