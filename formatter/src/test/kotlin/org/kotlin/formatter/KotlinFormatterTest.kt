@@ -260,6 +260,24 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `breaks before a return type exceeds the column limit`() {
+        val result =
+            KotlinFormatter(maxLineLength = 45).format(
+                """
+                    fun aFunction(aParameter: String): AClass<Type> =
+                        AClass()
+                """.trimIndent()
+            )
+
+        assertThat(result).isEqualTo(
+            """
+                fun aFunction(aParameter: String):
+                    AClass<Type> = AClass()
+            """.trimIndent()
+        )
+    }
+
+    @Test
     fun `prefers to break before beginning of function literal`() {
         val result =
             KotlinFormatter(maxLineLength = 37).format(

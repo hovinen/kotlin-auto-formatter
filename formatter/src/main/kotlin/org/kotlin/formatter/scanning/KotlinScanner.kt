@@ -75,7 +75,8 @@ class KotlinScanner {
         }
     }
 
-    private fun whitespaceElementToTokens(node: LeafPsiElement, scannerState: ScannerState): List<Token> =
+    private fun whitespaceElementToTokens(node: LeafPsiElement, scannerState: ScannerState):
+        List<Token> =
         if (node.isAtEndOfFile || hasNewlineInBlockState(node, scannerState)) {
             toForcedBreak(node)
         } else if (hasNewlineInPackageImportState(node, scannerState)) {
