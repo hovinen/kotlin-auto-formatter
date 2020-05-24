@@ -75,9 +75,11 @@ class KotlinScanner {
         }
     }
 
-    private fun whitespaceElementToTokens(node: LeafPsiElement, scannerState: ScannerState) =
+    private fun whitespaceElementToTokens(node: LeafPsiElement, scannerState: ScannerState): List<Token> =
         if (node.isAtEndOfFile || hasNewlineInBlockState(node, scannerState)) {
             toForcedBreak(node)
+        } else if (hasNewlineInPackageImportState(node, scannerState)) {
+            listOf(ForcedBreakToken(count = 1))
         } else {
             listOf(WhitespaceToken(node.text))
         }
@@ -86,8 +88,10 @@ class KotlinScanner {
         get() = treeNext == null
 
     private fun hasNewlineInBlockState(node: LeafPsiElement, scannerState: ScannerState) =
-        node.textContains('\n') &&
-            setOf(ScannerState.BLOCK, ScannerState.PACKAGE_IMPORT).contains(scannerState)
+        node.textContains('\n') && scannerState == ScannerState.BLOCK
+
+    private fun hasNewlineInPackageImportState(node: LeafPsiElement, scannerState: ScannerState) =
+        node.textContains('\n') && scannerState == ScannerState.PACKAGE_IMPORT
 }
 
 /**

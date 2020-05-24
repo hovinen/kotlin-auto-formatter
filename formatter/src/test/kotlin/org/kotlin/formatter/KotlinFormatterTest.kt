@@ -2259,6 +2259,25 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `removes whitespace between imports`() {
+        val result =
+            KotlinFormatter().format(
+                """
+                    import apackage.AClass
+
+                    import anotherpackage.AnotherClass
+                """.trimIndent()
+            )
+
+        assertThat(result).isEqualTo(
+            """
+                import apackage.AClass
+                import anotherpackage.AnotherClass
+            """.trimIndent()
+        )
+    }
+
+    @Test
     fun `does not strip trailing whitespace in multiline string literals`() {
         val subject = KotlinFormatter()
 
