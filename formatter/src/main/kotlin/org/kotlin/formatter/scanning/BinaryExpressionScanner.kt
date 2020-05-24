@@ -3,6 +3,8 @@ package org.kotlin.formatter.scanning
 import org.jetbrains.kotlin.KtNodeTypes
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.psi.psiUtil.children
+import org.kotlin.formatter.BeginToken
+import org.kotlin.formatter.EndToken
 import org.kotlin.formatter.State
 import org.kotlin.formatter.Token
 import org.kotlin.formatter.WhitespaceToken
@@ -16,16 +18,40 @@ internal class BinaryExpressionScanner(private val kotlinScanner: KotlinScanner)
     private val expressionPattern =
         nodePattern {
             either {
-                oneOrMoreFrugal { anyNode() } thenMapToTokens { firstNode ->
-                    kotlinScanner.scanNodes(firstNode, ScannerState.STATEMENT)
-                }
-                possibleWhitespace()
-                rangeOperator() thenMapToTokens { operator ->
-                    kotlinScanner.scanNodes(operator, ScannerState.STATEMENT)
-                }
-                possibleWhitespace()
-                oneOrMore { anyNode() } thenMapToTokens { nodes ->
-                    kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
+                either {
+                    oneOrMoreFrugal { anyNode() } thenMapToTokens { firstNode ->
+                        kotlinScanner.scanNodes(firstNode, ScannerState.STATEMENT)
+                    }
+                    possibleWhitespace()
+                    rangeOperator() thenMapToTokens { operator ->
+                        kotlinScanner.scanNodes(operator, ScannerState.STATEMENT)
+                    }
+                    possibleWhitespace()
+                    oneOrMore { anyNode() } thenMapToTokens { nodes ->
+                        kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
+                    }
+                } or {
+                    oneOrMoreFrugal { anyNode() } thenMapToTokens { firstNode ->
+                        kotlinScanner.scanNodes(firstNode, ScannerState.STATEMENT)
+                    }
+                    possibleWhitespace() thenMapToTokens { nodes ->
+                        if (nodes.isNotEmpty()) {
+                            listOf(WhitespaceToken(nodes.first().text))
+                        } else {
+                            listOf(WhitespaceToken(" "))
+                        }
+                    }
+                    elvisOperator() thenMapToTokens { operator ->
+                        listOf(BeginToken(State.CODE)).plus(
+                            kotlinScanner.scanNodes(operator, ScannerState.STATEMENT)
+                        )
+                    }
+                    possibleWhitespace()
+                    oneOrMore { anyNode() } thenMapToTokens { nodes ->
+                        listOf(nonBreakingSpaceToken())
+                            .plus(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT))
+                            .plus(EndToken)
+                    }
                 }
             } or {
                 oneOrMoreFrugal { anyNode() } thenMapToTokens { firstNode ->
@@ -52,6 +78,9 @@ internal class BinaryExpressionScanner(private val kotlinScanner: KotlinScanner)
 
     private fun NodePatternBuilder.rangeOperator() =
         nodeMatching { it.elementType == KtNodeTypes.OPERATION_REFERENCE && it.text == ".." }
+
+    private fun NodePatternBuilder.elvisOperator() =
+        nodeMatching { it.elementType == KtNodeTypes.OPERATION_REFERENCE && it.text == "?:" }
 
     override fun scan(node: ASTNode, scannerState: ScannerState): List<Token> =
         inBeginEndBlock(expressionPattern.matchSequence(node.children().toList()), State.CODE)

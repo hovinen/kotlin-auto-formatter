@@ -1040,6 +1040,25 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `breaks before the elvis operator`() {
+        val result =
+            KotlinFormatter(maxLineLength = 34).format(
+                """
+                    aVariable =
+                        aNullableValue ?: anAlternative
+                """.trimIndent()
+            )
+
+        assertThat(result).isEqualTo(
+            """
+                aVariable =
+                    aNullableValue
+                        ?: anAlternative
+            """.trimIndent()
+        )
+    }
+
+    @Test
     fun `format breaks function literal after arguments`() {
         val result =
             KotlinFormatter(maxLineLength = 50).format(
