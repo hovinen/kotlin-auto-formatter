@@ -31,7 +31,7 @@ tasks {
         reports {
             xml.isEnabled = false
             csv.isEnabled = false
-            html.destination = file("${buildDir}/jacoco")
+            html.destination = file("$buildDir/jacoco")
         }
     }
 }
