@@ -1,12 +1,12 @@
 package org.kotlin.formatter
 
+import java.nio.file.Files
+import java.nio.file.Path
 import org.kotlin.formatter.loading.KotlinFileLoader
 import org.kotlin.formatter.output.Printer
 import org.kotlin.formatter.output.TokenPreprocessor
 import org.kotlin.formatter.scanning.KotlinScanner
 import org.kotlin.formatter.scanning.nodepattern.NodeSequenceNotMatchedException
-import java.nio.file.Files
-import java.nio.file.Path
 
 /**
  * Automatic formatter for Kotlin code to fit in a given column limit.

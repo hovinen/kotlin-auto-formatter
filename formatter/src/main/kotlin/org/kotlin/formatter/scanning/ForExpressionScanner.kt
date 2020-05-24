@@ -13,7 +13,7 @@ import org.kotlin.formatter.inBeginEndBlock
 import org.kotlin.formatter.scanning.nodepattern.nodePattern
 
 /** A [NodeScanner] for `for` loop expressions. */
-internal class ForExpressionScanner(private val kotlinScanner: KotlinScanner): NodeScanner {
+internal class ForExpressionScanner(private val kotlinScanner: KotlinScanner) : NodeScanner {
     private val nodePattern =
         nodePattern {
             nodeOfType(KtTokens.FOR_KEYWORD)

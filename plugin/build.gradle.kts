@@ -2,6 +2,7 @@ plugins {
     kotlin("jvm") version "1.3.70"
     groovy
     `java-gradle-plugin`
+    id("org.jlleitschuh.gradle.ktlint") version "9.2.1"
 }
 
 repositories {

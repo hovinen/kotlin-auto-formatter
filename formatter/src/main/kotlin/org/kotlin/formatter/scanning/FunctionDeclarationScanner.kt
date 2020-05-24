@@ -13,7 +13,7 @@ import org.kotlin.formatter.scanning.nodepattern.NodePatternBuilder
 import org.kotlin.formatter.scanning.nodepattern.nodePattern
 
 /** A [NodeScanner] for function declarations. */
-internal class FunctionDeclarationScanner(private val kotlinScanner: KotlinScanner): NodeScanner {
+internal class FunctionDeclarationScanner(private val kotlinScanner: KotlinScanner) : NodeScanner {
     private val modifierListScanner = ModifierListScanner(kotlinScanner, markerCount = 2)
     private val nodePattern =
         nodePattern {

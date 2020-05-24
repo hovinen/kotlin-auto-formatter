@@ -16,7 +16,7 @@ data class LeafNodeToken(internal val text: String) : Token() {
     /** The length of the [text] in this token in characters. */
     internal val textLength: Int = text.length
 
-    override fun toString(): String = "LeafNodeToken(text='${text}')"
+    override fun toString(): String = "LeafNodeToken(text='$text')"
 }
 
 /** A directive to output a single space character without inserting a line break. */
@@ -36,10 +36,10 @@ fun nonBreakingSpaceToken(content: String = " "): Token = LeafNodeToken(text = c
  * The content is otherwise output unchanged with no additional line breaking.
  */
 // TODO: Support passing the content through a separate formatter from the Printer.
-data class KDocContentToken(internal val content: String): Token() {
+data class KDocContentToken(internal val content: String) : Token() {
     internal val textLength: Int = content.length
 
-    override fun toString(): String = "KDocContentToken(content='${content}')"
+    override fun toString(): String = "KDocContentToken(content='$content')"
 }
 
 /**

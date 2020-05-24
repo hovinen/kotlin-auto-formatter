@@ -11,7 +11,7 @@ import org.kotlin.formatter.nonBreakingSpaceToken
 import org.kotlin.formatter.scanning.nodepattern.nodePattern
 
 /** A [NodeScanner] for class and interface definitions. */
-internal class ClassScanner(private val kotlinScanner: KotlinScanner): NodeScanner {
+internal class ClassScanner(private val kotlinScanner: KotlinScanner) : NodeScanner {
     private val nodePattern =
         nodePattern {
             optionalKDoc(kotlinScanner)

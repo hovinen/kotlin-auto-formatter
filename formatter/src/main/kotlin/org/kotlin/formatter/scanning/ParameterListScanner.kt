@@ -11,14 +11,13 @@ import org.kotlin.formatter.LeafNodeToken
 import org.kotlin.formatter.State
 import org.kotlin.formatter.SynchronizedBreakToken
 import org.kotlin.formatter.Token
-import org.kotlin.formatter.emptyBreakPoint
 import org.kotlin.formatter.inBeginEndBlock
 
 /**
  * A [NodeScanner] for a list of parameters in a function or class declaration, or the arguments of
  * a function call expression.
  */
-internal class ParameterListScanner(private val kotlinScanner: KotlinScanner): NodeScanner {
+internal class ParameterListScanner(private val kotlinScanner: KotlinScanner) : NodeScanner {
     private var isFirstEntry = false
 
     override fun scan(node: ASTNode, scannerState: ScannerState): List<Token> {

@@ -12,7 +12,7 @@ import org.kotlin.formatter.scanning.nodepattern.NodePatternBuilder
 import org.kotlin.formatter.scanning.nodepattern.nodePattern
 
 /** A [NodeScanner] for binary expressions. */
-internal class BinaryExpressionScanner(private val kotlinScanner: KotlinScanner): NodeScanner {
+internal class BinaryExpressionScanner(private val kotlinScanner: KotlinScanner) : NodeScanner {
     private val expressionPattern =
         nodePattern {
             either {

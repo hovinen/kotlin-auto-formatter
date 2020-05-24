@@ -14,7 +14,7 @@ internal class SimpleBlockScanner(
     private val kotlinScanner: KotlinScanner,
     private val scannerState: ScannerState,
     private val state: State
-): NodeScanner {
+) : NodeScanner {
     override fun scan(node: ASTNode, scannerState: ScannerState): List<Token> =
         inBeginEndBlock(
             kotlinScanner.scanNodes(node.children().asIterable(), this.scannerState),

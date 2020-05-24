@@ -8,7 +8,7 @@ import org.kotlin.formatter.Token
 internal class SimpleScanner(
     private val kotlinScanner: KotlinScanner,
     private val scannerState: ScannerState
-): NodeScanner {
+) : NodeScanner {
     override fun scan(node: ASTNode, scannerState: ScannerState): List<Token> =
         kotlinScanner.scanNodes(node.children().asIterable(), this.scannerState)
 }

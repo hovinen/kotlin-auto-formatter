@@ -9,7 +9,7 @@ import org.kotlin.formatter.emptyBreakPoint
 import org.kotlin.formatter.inBeginEndBlock
 
 /** A [NodeScanner] for string templates. */
-internal class StringLiteralScanner(private val kotlinScanner: KotlinScanner): NodeScanner {
+internal class StringLiteralScanner(private val kotlinScanner: KotlinScanner) : NodeScanner {
     override fun scan(node: ASTNode, scannerState: ScannerState): List<Token> {
         val tokens = mutableListOf<Token>()
         var lastChild: ASTNode? = null

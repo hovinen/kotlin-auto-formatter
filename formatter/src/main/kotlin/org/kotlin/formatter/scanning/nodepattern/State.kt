@@ -1,8 +1,8 @@
 package org.kotlin.formatter.scanning.nodepattern
 
+import java.util.Stack
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.kotlin.formatter.Token
-import java.util.Stack
 
 /**
  * A single state in a nondeterministic finite state automaton with ε-moves.

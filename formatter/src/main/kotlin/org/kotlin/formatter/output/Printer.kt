@@ -1,5 +1,6 @@
 package org.kotlin.formatter.output
 
+import java.util.Stack
 import org.kotlin.formatter.BeginToken
 import org.kotlin.formatter.ClosingForcedBreakToken
 import org.kotlin.formatter.ClosingSynchronizedBreakToken
@@ -11,7 +12,6 @@ import org.kotlin.formatter.State
 import org.kotlin.formatter.SynchronizedBreakToken
 import org.kotlin.formatter.Token
 import org.kotlin.formatter.WhitespaceToken
-import java.util.Stack
 
 /**
  * Outputs a sequence of [Token], applying line breaks to keep as much as possible within a

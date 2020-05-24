@@ -1,5 +1,7 @@
 package org.kotlin.formatter.output
 
+import java.lang.Integer.min
+import java.util.Stack
 import org.kotlin.formatter.BeginToken
 import org.kotlin.formatter.BlockFromMarkerToken
 import org.kotlin.formatter.ClosingForcedBreakToken
@@ -13,8 +15,6 @@ import org.kotlin.formatter.State
 import org.kotlin.formatter.SynchronizedBreakToken
 import org.kotlin.formatter.Token
 import org.kotlin.formatter.WhitespaceToken
-import java.lang.Integer.min
-import java.util.Stack
 
 /**
  * Prepares a list of [Token] for output.
@@ -185,7 +185,7 @@ private sealed class StackElement(internal val tokens: MutableList<Token> = muta
 private class BlockStackElement(
     internal val state: State,
     tokens: MutableList<Token> = mutableListOf()
-): StackElement(tokens) {
+) : StackElement(tokens) {
     internal fun replaceSynchronizedBreaks() {
         if (shouldConvertSynchronizedBreaksToForcedBreaks()) {
             var level = 0
@@ -215,7 +215,7 @@ private class BlockStackElement(
             (this is KDocContentToken && content.contains('\n'))
 }
 
-private class WhitespaceStackElement(internal val content: String): StackElement() {
+private class WhitespaceStackElement(internal val content: String) : StackElement() {
     private val contentLength: Int = if (content.isEmpty()) 0 else 1
 
     internal val totalLength: Int
@@ -225,7 +225,7 @@ private class WhitespaceStackElement(internal val content: String): StackElement
         get() = tokens.firstOrNull()?.textLength ?: 0
 }
 
-private class MarkerElement: StackElement()
+private class MarkerElement : StackElement()
 
 private val Token.textLength: Int
     get() =

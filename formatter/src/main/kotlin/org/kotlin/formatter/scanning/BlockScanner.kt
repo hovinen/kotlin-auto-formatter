@@ -13,7 +13,7 @@ import org.kotlin.formatter.Token
 import org.kotlin.formatter.scanning.nodepattern.nodePattern
 
 /** A [NodeScanner] for block statements and class content. */
-internal class BlockScanner(private val kotlinScanner: KotlinScanner): NodeScanner {
+internal class BlockScanner(private val kotlinScanner: KotlinScanner) : NodeScanner {
     private val nodePattern =
         nodePattern {
             either {

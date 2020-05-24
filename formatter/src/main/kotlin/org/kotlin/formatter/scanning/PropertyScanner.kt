@@ -16,7 +16,7 @@ import org.kotlin.formatter.scanning.nodepattern.NodePatternBuilder
 import org.kotlin.formatter.scanning.nodepattern.nodePattern
 
 /** A [NodeScanner] for property declarations. */
-internal class PropertyScanner(private val kotlinScanner: KotlinScanner): NodeScanner {
+internal class PropertyScanner(private val kotlinScanner: KotlinScanner) : NodeScanner {
     private val nodePattern =
         nodePattern {
             exactlyOne {

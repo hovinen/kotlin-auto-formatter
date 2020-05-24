@@ -15,7 +15,7 @@ import org.kotlin.formatter.inBeginEndBlock
 import org.kotlin.formatter.scanning.nodepattern.nodePattern
 
 /** A [NodeScanner] for member access and safe member access expressions. */
-internal class DotQualifiedExpressionScanner(private val kotlinScanner: KotlinScanner): NodeScanner {
+internal class DotQualifiedExpressionScanner(private val kotlinScanner: KotlinScanner) : NodeScanner {
     override fun scan(node: ASTNode, scannerState: ScannerState): List<Token> =
         inBeginEndBlock(
             dotQualifiedExpressionPattern(true).matchSequence(node.children().asIterable()),

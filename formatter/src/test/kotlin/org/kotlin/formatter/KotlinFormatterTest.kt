@@ -1268,10 +1268,9 @@ class KotlinFormatterTest {
         val result =
             KotlinFormatter(maxLineLength = 50).format(
                 """
-                    val aString = aFunction(${"\"\"\""}
+                    val aString = aFunction(${'"'}""
                         Some content
-                    ${"\"" +
-                            "\"\""}.trimIndent())
+                    ${'"'}"".trimIndent())
                 """.trimIndent()
             )
 
@@ -1279,10 +1278,9 @@ class KotlinFormatterTest {
             """
                 val aString =
                     aFunction(
-                        ${"\"\"" +
-                    "\""}
+                        ${'"'}""
                             Some content
-                        ${"\"\"\""}.trimIndent()
+                        ${'"'}"".trimIndent()
                     )
             """.trimIndent()
         )

@@ -1,11 +1,10 @@
 package org.kotlin.formatter.scanning.nodepattern
 
+import java.util.Stack
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.LeafPsiElement
 import org.jetbrains.kotlin.lexer.KtTokens
-import org.jetbrains.kotlin.psi.psiUtil.children
 import org.kotlin.formatter.Token
-import java.util.Stack
 
 /**
  * A nondeterministic finite state automaton with ε-moves acting on a stream of [ASTNode].
@@ -41,8 +40,8 @@ class NodePattern internal constructor(private val initialState: State) {
         val states = paths.filterIsInstance<PathStepOnState>().map { it.state }.toMutableSet()
         paths = epsilonStep(paths, states)
         paths = step(paths, TerminalNode)
-        return paths.firstOrNull { it is FinalPathStep }?.runActions()?.tokens ?:
-            throw NodeSequenceNotMatchedException(nodes)
+        return paths.firstOrNull { it is FinalPathStep }?.runActions()?.tokens
+            ?: throw NodeSequenceNotMatchedException(nodes)
     }
 
     private fun setNodeOnPaths(paths: List<PathStep>, node: ASTNode): List<PathStep> =
@@ -153,4 +152,4 @@ private class FinalPathStep(internal val state: State, internal val previous: Pa
     }
 
 /** An [ASTNode] representing the end of input. */
-internal object TerminalNode: LeafPsiElement(KtTokens.EOF, "")
+internal object TerminalNode : LeafPsiElement(KtTokens.EOF, "")
