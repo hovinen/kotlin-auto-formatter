@@ -1,6 +1,7 @@
 plugins {
     kotlin("jvm") version "1.3.70"
     id("org.jlleitschuh.gradle.ktlint") version "9.2.1"
+    jacoco
 }
 
 repositories {
@@ -23,5 +24,14 @@ tasks {
     }
     test {
         useJUnitPlatform()
+        finalizedBy(jacocoTestReport) // report is always generated after tests run
+    }
+    jacocoTestReport {
+        dependsOn(test) // tests are required to run before generating the report
+        reports {
+            xml.isEnabled = false
+            csv.isEnabled = false
+            html.destination = file("${buildDir}/jacoco")
+        }
     }
 }
