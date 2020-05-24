@@ -1,21 +1,21 @@
 package org.kotlin.formatter.output
 
-import org.kotlin.formatter.BeginToken
-import org.kotlin.formatter.ClosingForcedBreakToken
-import org.kotlin.formatter.ClosingSynchronizedBreakToken
-import org.kotlin.formatter.EndToken
-import org.kotlin.formatter.ForcedBreakToken
-import org.kotlin.formatter.LeafNodeToken
-import org.kotlin.formatter.State
-import org.kotlin.formatter.SynchronizedBreakToken
-import org.kotlin.formatter.Token
-import org.kotlin.formatter.WhitespaceToken
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
+import org.kotlin.formatter.BeginToken
+import org.kotlin.formatter.ClosingForcedBreakToken
+import org.kotlin.formatter.ClosingSynchronizedBreakToken
+import org.kotlin.formatter.EndToken
+import org.kotlin.formatter.ForcedBreakToken
 import org.kotlin.formatter.KDocContentToken
+import org.kotlin.formatter.LeafNodeToken
+import org.kotlin.formatter.State
+import org.kotlin.formatter.SynchronizedBreakToken
+import org.kotlin.formatter.Token
+import org.kotlin.formatter.WhitespaceToken
 
 internal class PrinterTest {
     @Test

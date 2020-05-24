@@ -1645,6 +1645,27 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `breaks before inheritance spec when necessary`() {
+        val subject = KotlinFormatter(maxLineLength = 48)
+
+        val result =
+            subject.format(
+                """
+                    class MyClass(aParameter: String) : AnInterface {
+                    }
+                """.trimIndent()
+            )
+
+        assertThat(result).isEqualTo(
+            """
+                class MyClass(aParameter: String) :
+                    AnInterface {
+                    }
+            """.trimIndent()
+        )
+    }
+
+    @Test
     fun `maintains a line break between KDoc and class declaration`() {
         val subject = KotlinFormatter(maxLineLength = 40)
 

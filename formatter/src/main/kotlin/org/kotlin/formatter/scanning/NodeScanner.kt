@@ -108,7 +108,8 @@ internal fun nodeScannerForElementType(kotlinScanner: KotlinScanner, elementType
                 SimpleScanner(kotlinScanner, ScannerState.BLOCK)
             }
         KtNodeTypes.WHEN_ENTRY, KtNodeTypes.ANNOTATION_ENTRY, KtNodeTypes.PREFIX_EXPRESSION,
-            KtNodeTypes.PARENTHESIZED, KtNodeTypes.SUPER_TYPE_CALL_ENTRY -> {
+            KtNodeTypes.PARENTHESIZED, KtNodeTypes.SUPER_TYPE_ENTRY,
+            KtNodeTypes.SUPER_TYPE_CALL_ENTRY -> {
                 SimpleBlockScanner(kotlinScanner, ScannerState.STATEMENT, State.CODE)
             }
         KtNodeTypes.SHORT_STRING_TEMPLATE_ENTRY -> {
