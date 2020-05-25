@@ -1,7 +1,8 @@
 package org.kotlin.formatter
 
-import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.Paths
+import org.jetbrains.kotlin.utils.addToStdlib.indexOfOrNull
 import org.kotlin.formatter.loading.KotlinFileLoader
 import org.kotlin.formatter.output.Printer
 import org.kotlin.formatter.output.TokenPreprocessor
@@ -46,9 +47,9 @@ class KotlinFormatter(
      * replacing the content of that file with the formatted output.
      */
     fun formatFile(path: Path) {
-        val input = Files.readString(path, Charsets.UTF_8)
+        val input = path.toFile().readText(Charsets.UTF_8)
         try {
-            Files.writeString(path, format(input), Charsets.UTF_8)
+            path.toFile().writeText(format(input), Charsets.UTF_8)
         } catch (thrown: NodeSequenceNotMatchedException) {
             println(
                 "Could not process $path " +
@@ -58,24 +59,14 @@ class KotlinFormatter(
         }
     }
 
-    private fun lineNumber(input: String, offset: Int?): Int {
+    private fun lineNumber(input: String, offset: Int?): Int =
         if (offset != null) {
-            var currentOffset = offset
-            var line = 0
-            input.split('\n')
-                .forEach {
-                    if (currentOffset < it.length) {
-                        return line
-                    } else {
-                        currentOffset -= it.length
-                        line++
-                    }
-                }
-            return line
+            val lineOffsets = generateSequence(-1) { input.indexOfOrNull('\n', it + 1) }.toList()
+            val index = lineOffsets.indexOfFirst { it > offset }
+            if (index == -1) lineOffsets.size else index
         } else {
-            return 0
+            0
         }
-    }
 }
 
 fun main(args: Array<String>) {
@@ -83,5 +74,5 @@ fun main(args: Array<String>) {
         System.err.println("Usage: KotlinFormatter <file>")
         return
     }
-    KotlinFormatter().formatFile(Path.of(args[0]))
+    KotlinFormatter().formatFile(Paths.get(args[0]))
 }

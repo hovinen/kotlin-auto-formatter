@@ -1,8 +1,14 @@
 package org.kotlin.formatter
 
+import java.io.ByteArrayOutputStream
+import java.io.PrintStream
+import java.nio.file.Path
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Disabled
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.io.TempDir
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 
@@ -2323,5 +2329,75 @@ class KotlinFormatterTest {
         val result = subject.format("package org.kotlin.formatter")
 
         assertThat(result).isEqualTo("package org.kotlin.formatter")
+    }
+
+    @Nested
+    inner class FormatFile {
+        private val originalOut = System.out
+
+        @AfterEach
+        fun resetOut() {
+            System.setOut(originalOut)
+        }
+
+        @Test
+        fun `formatFile formats the given file`(@TempDir directory: Path) {
+            val filePath = directory.resolve("file.kt")
+            filePath.toFile().writeText("class MyClass {\nval aProperty: String\n}", Charsets.UTF_8)
+            val subject = KotlinFormatter()
+
+            subject.formatFile(filePath)
+
+            assertThat(filePath.toFile().readText(Charsets.UTF_8))
+                .isEqualTo(
+                    """
+                        class MyClass {
+                            val aProperty: String
+                        }
+                    """.trimIndent()
+                )
+        }
+
+        @Test
+        fun `formatFile reports an error with line number information`(@TempDir directory: Path) {
+            val filePath = directory.resolve("file.kt")
+            filePath.toFile().writeText("/* Some comment */\n\nif INVALID\n", Charsets.UTF_8)
+            val stream = redirectOutput()
+            val subject = KotlinFormatter()
+
+            subject.formatFile(filePath)
+
+            assertThat(String(stream.toByteArray(), Charsets.UTF_8)).contains("(line 3)")
+        }
+
+        @Test
+        fun `formatFile reports an error on the last line`(@TempDir directory: Path) {
+            val filePath = directory.resolve("file.kt")
+            filePath.toFile().writeText("/* Some comment */\n\nif INVALID", Charsets.UTF_8)
+            val stream = redirectOutput()
+            val subject = KotlinFormatter()
+
+            subject.formatFile(filePath)
+
+            assertThat(String(stream.toByteArray(), Charsets.UTF_8)).contains("(line 3)")
+        }
+
+        @Test
+        fun `formatFile reports an error on the first line`(@TempDir directory: Path) {
+            val filePath = directory.resolve("file.kt")
+            filePath.toFile().writeText("if INVALID\n", Charsets.UTF_8)
+            val stream = redirectOutput()
+            val subject = KotlinFormatter()
+
+            subject.formatFile(filePath)
+
+            assertThat(String(stream.toByteArray(), Charsets.UTF_8)).contains("(line 1)")
+        }
+
+        private fun redirectOutput(): ByteArrayOutputStream {
+            val stream = ByteArrayOutputStream()
+            System.setOut(PrintStream(stream))
+            return stream
+        }
     }
 }
