@@ -2249,12 +2249,36 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `puts simple annotations on the same line as function parameters`() {
+        val result = KotlinFormatter().format("fun aFunction(@AnAnnotation aParameter: String)")
+
+        assertThat(result).isEqualTo("fun aFunction(@AnAnnotation aParameter: String)")
+    }
+
+    @Test
+    fun `indents parameters at the same level as their annotations`() {
+        val result =
+            KotlinFormatter(maxLineLength = 40).format(
+                """fun aFunction(@AnAnnotation("Some value") aParameter: String)"""
+            )
+
+        assertThat(result).isEqualTo("""
+            fun aFunction(
+                @AnAnnotation("Some value")
+                aParameter: String
+            )
+        """.trimIndent())
+    }
+
+    @Test
     fun `sorts annotations before modifiers on declarations`() {
         val result =
-            KotlinFormatter().format("""
-            private
-            @AnAnnotation fun myFunction()
-        """.trimIndent())
+            KotlinFormatter().format(
+                """
+                    private
+                    @AnAnnotation fun myFunction()
+                """.trimIndent()
+            )
 
         assertThat(result).isEqualTo("""
             @AnAnnotation

@@ -19,17 +19,26 @@ import org.kotlin.formatter.scanning.nodepattern.nodePattern
  * [Kotlin coding conventions](https://kotlinlang.org/docs/reference/coding-conventions.html#modifiers).
  *
  * @property markerCount how many [MarkerToken] should be inserted after each annotation
+ * @property breakMode strategy on placing breaks after annotations
  */
 internal class ModifierListScanner(
     private val kotlinScanner: KotlinScanner,
-    private val markerCount: Int = 1
+    private val markerCount: Int = 1,
+    private val breakMode: BreakMode = BreakMode.TYPE
 ) : NodeScanner {
+    /** Governs the [Token] which should appear immediately after each annotation. */
+    internal enum class BreakMode(internal val breakToken: Token) {
+        TYPE(ForcedBreakToken(count = 1)),
+        FUNCTION_PROPERTY(ForcedBreakToken(count = 1)),
+        PARAMETER(WhitespaceToken(" "))
+    }
+
     private val nodePattern =
         nodePattern {
             zeroOrMore {
                 nodeOfType(KtNodeTypes.ANNOTATION_ENTRY) thenMapToTokens { nodes ->
                     kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
-                        .plus(ForcedBreakToken(count = 1))
+                        .plus(breakMode.breakToken)
                         .plus(List(markerCount) { MarkerToken })
                 }
                 possibleWhitespace()

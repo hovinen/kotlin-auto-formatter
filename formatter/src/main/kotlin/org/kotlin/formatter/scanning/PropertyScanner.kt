@@ -46,7 +46,11 @@ internal class PropertyScanner(private val kotlinScanner: KotlinScanner) : NodeS
  */
 internal fun NodePatternBuilder.declarationWithOptionalModifierList(
     kotlinScanner: KotlinScanner,
-    modifierListScanner: ModifierListScanner = ModifierListScanner(kotlinScanner),
+    modifierListScanner: ModifierListScanner =
+        ModifierListScanner(
+            kotlinScanner,
+            breakMode = ModifierListScanner.BreakMode.FUNCTION_PROPERTY
+        ),
     markerCount: Int = 1
 ) {
     optionalKDoc(kotlinScanner)

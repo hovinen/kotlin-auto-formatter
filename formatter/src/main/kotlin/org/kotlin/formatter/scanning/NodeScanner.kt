@@ -85,9 +85,6 @@ internal fun nodeScannerForElementType(kotlinScanner: KotlinScanner, elementType
             KtNodeTypes.IMPORT_ALIAS -> {
                 SimpleBlockScanner(kotlinScanner, ScannerState.PACKAGE_IMPORT, State.PACKAGE_IMPORT)
             }
-        KtNodeTypes.VALUE_PARAMETER, KtNodeTypes.VALUE_ARGUMENT -> {
-            SimpleBlockScanner(kotlinScanner, ScannerState.STATEMENT, State.CODE)
-        }
         KtNodeTypes.MODIFIER_LIST -> {
             ModifierListScanner(kotlinScanner)
         }
@@ -108,7 +105,7 @@ internal fun nodeScannerForElementType(kotlinScanner: KotlinScanner, elementType
                 SimpleScanner(kotlinScanner, ScannerState.BLOCK)
             }
         KtNodeTypes.WHEN_ENTRY, KtNodeTypes.ANNOTATION_ENTRY, KtNodeTypes.PREFIX_EXPRESSION,
-            KtNodeTypes.PARENTHESIZED, KtNodeTypes.SUPER_TYPE_ENTRY,
+            KtNodeTypes.PARENTHESIZED, KtNodeTypes.VALUE_PARAMETER, KtNodeTypes.SUPER_TYPE_ENTRY,
             KtNodeTypes.SUPER_TYPE_CALL_ENTRY, KtNodeTypes.TYPE_REFERENCE -> {
                 SimpleBlockScanner(kotlinScanner, ScannerState.STATEMENT, State.CODE)
             }
