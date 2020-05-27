@@ -2290,12 +2290,14 @@ class KotlinFormatterTest {
                 """fun aFunction(@AnAnnotation("Some value") aParameter: String)"""
             )
 
-        assertThat(result).isEqualTo("""
+        assertThat(result).isEqualTo(
+            """
             fun aFunction(
                 @AnAnnotation("Some value")
                 aParameter: String
             )
-        """.trimIndent())
+        """.trimIndent()
+        )
     }
 
     @Test
@@ -2305,23 +2307,23 @@ class KotlinFormatterTest {
                 """aFunction(aParameter = "A long value which should wrap")"""
             )
 
-        assertThat(result).isEqualTo("""
-            aFunction(
-                aParameter =
-                    "A long value which should wrap"
-            )
-        """.trimIndent())
+        assertThat(result).isEqualTo(
+            """
+                aFunction(
+                    aParameter =
+                        "A long value which should wrap"
+                )
+            """.trimIndent()
+        )
     }
 
     @Test
     fun `sorts annotations before modifiers on declarations`() {
         val result =
-            KotlinFormatter().format(
-                """
+            KotlinFormatter().format("""
                     private
                     @AnAnnotation fun myFunction()
-                """.trimIndent()
-            )
+                """.trimIndent())
 
         assertThat(result).isEqualTo("""
             @AnAnnotation
@@ -2415,14 +2417,13 @@ class KotlinFormatterTest {
 
             subject.formatFile(filePath)
 
-            assertThat(filePath.toFile().readText(Charsets.UTF_8))
-                .isEqualTo(
-                    """
-                        class MyClass {
-                            val aProperty: String
-                        }
-                    """.trimIndent()
-                )
+            assertThat(filePath.toFile().readText(Charsets.UTF_8)).isEqualTo(
+                """
+                    class MyClass {
+                        val aProperty: String
+                    }
+                """.trimIndent()
+            )
         }
 
         @Test

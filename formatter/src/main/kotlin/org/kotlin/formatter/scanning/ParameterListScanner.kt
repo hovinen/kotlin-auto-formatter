@@ -22,19 +22,20 @@ import org.kotlin.formatter.scanning.nodepattern.nodePattern
 internal class ParameterListScanner(private val kotlinScanner: KotlinScanner) : NodeScanner {
     private val modifierListScanner =
         ModifierListScanner(kotlinScanner, breakMode = ModifierListScanner.BreakMode.PARAMETER)
-    private val parameterPattern = nodePattern {
-        zeroOrOne {
-            nodeOfType(KtNodeTypes.MODIFIER_LIST) thenMapToTokens { nodes ->
-                modifierListScanner.scan(nodes.first(), ScannerState.STATEMENT)
-                    .plus(WhitespaceToken(" "))
+    private val parameterPattern =
+        nodePattern {
+            zeroOrOne {
+                nodeOfType(KtNodeTypes.MODIFIER_LIST) thenMapToTokens { nodes ->
+                    modifierListScanner.scan(nodes.first(), ScannerState.STATEMENT)
+                        .plus(WhitespaceToken(" "))
+                }
+                possibleWhitespace()
             }
-            possibleWhitespace()
+            oneOrMore { anyNode() } thenMapToTokens { nodes ->
+                inBeginEndBlock(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT), State.CODE)
+            }
+            end()
         }
-        oneOrMore { anyNode() } thenMapToTokens { nodes ->
-            inBeginEndBlock(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT), State.CODE)
-        }
-        end()
-    }
     private var isFirstEntry = false
 
     override fun scan(node: ASTNode, scannerState: ScannerState): List<Token> {
