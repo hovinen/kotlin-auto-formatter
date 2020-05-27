@@ -12,6 +12,7 @@ import org.kotlin.formatter.State
 import org.kotlin.formatter.SynchronizedBreakToken
 import org.kotlin.formatter.Token
 import org.kotlin.formatter.WhitespaceToken
+import org.kotlin.formatter.inBeginEndBlock
 import org.kotlin.formatter.scanning.nodepattern.nodePattern
 
 /**
@@ -30,7 +31,7 @@ internal class ParameterListScanner(private val kotlinScanner: KotlinScanner) : 
             possibleWhitespace()
         }
         oneOrMore { anyNode() } thenMapToTokens { nodes ->
-            kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
+            inBeginEndBlock(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT), State.CODE)
         }
         end()
     }

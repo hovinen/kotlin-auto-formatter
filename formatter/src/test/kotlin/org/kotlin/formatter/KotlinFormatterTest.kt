@@ -2299,6 +2299,21 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `indents named parameters with continuation indent`() {
+        val result =
+            KotlinFormatter(maxLineLength = 42).format(
+                """aFunction(aParameter = "A long value which should wrap")"""
+            )
+
+        assertThat(result).isEqualTo("""
+            aFunction(
+                aParameter =
+                    "A long value which should wrap"
+            )
+        """.trimIndent())
+    }
+
+    @Test
     fun `sorts annotations before modifiers on declarations`() {
         val result =
             KotlinFormatter().format(
