@@ -1495,6 +1495,34 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `breaks before try expression inside function literal`() {
+        val result =
+            KotlinFormatter().format(
+                """
+                    aFunctionAcceptingALambda {
+                        try {
+                            aFunction()
+                        } catch (e: Exception) {
+                            anotherFunction()
+                        }
+                    }
+                """.trimIndent()
+            )
+
+        assertThat(result).isEqualTo(
+            """
+                aFunctionAcceptingALambda {
+                    try {
+                        aFunction()
+                    } catch (e: Exception) {
+                        anotherFunction()
+                    }
+                }
+            """.trimIndent()
+        )
+    }
+
+    @Test
     fun `format breaks the short form of the summary fragment`() {
         val result =
             KotlinFormatter(maxLineLength = 69).format(
