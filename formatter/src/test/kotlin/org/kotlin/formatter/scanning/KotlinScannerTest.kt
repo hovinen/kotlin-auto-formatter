@@ -376,10 +376,10 @@ internal class KotlinScannerTest {
         val node =
             kotlinLoader.parseKotlin(
                 """
-            class MyClass {
-                val property: Int = 0
-            }
-        """.trimIndent()
+                    class MyClass {
+                        val property: Int = 0
+                    }
+                """.trimIndent()
             )
 
         val result = subject.scan(node)
@@ -546,10 +546,12 @@ internal class KotlinScannerTest {
     @Test
     fun `outputs BeginToken, EndToken pair around when`() {
         val subject = subject()
-        val node = kotlinLoader.parseKotlin("""
-            when (variable) {
-            }
-        """.trimIndent())
+        val node = kotlinLoader.parseKotlin(
+            """
+                when (variable) {
+                }
+            """.trimIndent()
+        )
 
         val result = subject.scan(node)
 
@@ -568,10 +570,12 @@ internal class KotlinScannerTest {
     @Test
     fun `handles a when without expression`() {
         val subject = subject()
-        val node = kotlinLoader.parseKotlin("""
-            when {
-            }
-        """.trimIndent())
+        val node = kotlinLoader.parseKotlin(
+            """
+                when {
+                }
+            """.trimIndent()
+        )
 
         val result = subject.scan(node)
 
@@ -604,12 +608,14 @@ internal class KotlinScannerTest {
     @Test
     fun `outputs ClosingForcedBreakToken before closing brace of when`() {
         val subject = subject()
-        val node = kotlinLoader.parseKotlin("""
-            when (variable) {
-                1 -> {
+        val node = kotlinLoader.parseKotlin(
+            """
+                when (variable) {
+                    1 -> {
+                    }
                 }
-            }
-        """.trimIndent())
+            """.trimIndent()
+        )
 
         val result = subject.scan(node)
 
@@ -658,12 +664,13 @@ internal class KotlinScannerTest {
     @Test
     fun `suppresses whitespace between KDoc and function declaration`() {
         val subject = subject()
-        val node =
-            kotlinLoader.parseKotlin("""
-            /** Some KDoc */
-            fun myFunction() {
-            }
-        """.trimIndent())
+        val node = kotlinLoader.parseKotlin(
+            """
+                /** Some KDoc */
+                fun myFunction() {
+                }
+            """.trimIndent()
+        )
 
         val result = subject.scan(node)
 
@@ -1033,6 +1040,55 @@ internal class KotlinScannerTest {
     }
 
     @Test
+    fun `outputs a break and a LeafNodeToken on a multiline string literal with trimIndent`() {
+        val subject = subject()
+        val node = kotlinLoader.parseKotlin("\"\"\"A string\"\"\".trimIndent()")
+
+        val result = subject.scan(node)
+
+        assertThat(result).containsSubsequence(
+            listOf(
+                LeafNodeToken("\"\"\""),
+                BeginToken(State.CODE),
+                SynchronizedBreakToken(whitespaceLength = 0),
+                LeafNodeToken("A string"),
+                ClosingSynchronizedBreakToken(whitespaceLength = 0),
+                EndToken,
+                LeafNodeToken("\"\"\".trimIndent()")
+            )
+        )
+    }
+
+    @Test
+    fun `outputs a forced break on newline in a multiline string template with trimIndent`() {
+        val subject = subject()
+        val node = kotlinLoader.parseKotlin("\"\"\"A\nstring\"\"\".trimIndent()")
+
+        val result = subject.scan(node)
+
+        assertThat(result).containsSubsequence(
+            listOf(LeafNodeToken("A"), ForcedBreakToken(count = 1), LeafNodeToken("string"))
+        )
+    }
+
+    @Test
+    fun `applies trimIndent to multline string template content with trimIndent`() {
+        val subject = subject()
+        val node =
+            kotlinLoader.parseKotlin(
+                """
+                    ""${'"'}
+                        A string
+                    ""${'"'}.trimIndent()
+                """.trimIndent()
+            )
+
+        val result = subject.scan(node)
+
+        assertThat(result).contains(LeafNodeToken("A string"))
+    }
+
+    @Test
     fun `outputs a BeginToken with state LINE_COMMENT on line comment`() {
         val subject = subject()
         val node = kotlinLoader.parseKotlin("// A comment")
@@ -1127,11 +1183,13 @@ internal class KotlinScannerTest {
     @Test
     fun `outputs KDocContentToken without leading asterisks`() {
         val subject = subject()
-        val node = kotlinLoader.parseKotlin("""
-            /**
-             * Some KDoc
-             */
-        """.trimIndent())
+        val node = kotlinLoader.parseKotlin(
+            """
+                /**
+                 * Some KDoc
+                 */
+            """.trimIndent()
+        )
 
         val result = subject.scan(node)
 
@@ -1152,12 +1210,12 @@ internal class KotlinScannerTest {
         val node =
             kotlinLoader.parseKotlin(
                 """
-            /**
-             * Some KDoc
-             *
-             * Some more KDoc
-             */
-        """.trimIndent()
+                    /**
+                     * Some KDoc
+                     *
+                     * Some more KDoc
+                     */
+                """.trimIndent()
             )
 
         val result = subject.scan(node)
@@ -1179,11 +1237,11 @@ internal class KotlinScannerTest {
         val node =
             kotlinLoader.parseKotlin(
                 """
-            /**
-             * @param parameter A parameter
-             *     with some more content
-             */
-        """.trimIndent()
+                    /**
+                     * @param parameter A parameter
+                     *     with some more content
+                     */
+                """.trimIndent()
             )
 
         val result = subject.scan(node)
@@ -1202,10 +1260,12 @@ internal class KotlinScannerTest {
     @Test
     fun `outputs a ForcedLineBreak after a KDoc`() {
         val subject = subject()
-        val node = kotlinLoader.parseKotlin("""
-            /** Some KDoc. */
-            class MyClass
-        """.trimIndent())
+        val node = kotlinLoader.parseKotlin(
+            """
+                /** Some KDoc. */
+                class MyClass
+            """.trimIndent()
+        )
 
         val result = subject.scan(node)
 
@@ -1217,10 +1277,12 @@ internal class KotlinScannerTest {
     @Test
     fun `outputs a BeginToken, EndToken pair around a class which has KDoc`() {
         val subject = subject()
-        val node = kotlinLoader.parseKotlin("""
-            /** Some KDoc. */
-            class MyClass
-        """.trimIndent())
+        val node = kotlinLoader.parseKotlin(
+            """
+                /** Some KDoc. */
+                class MyClass
+            """.trimIndent()
+        )
 
         val result = subject.scan(node)
 
@@ -1298,10 +1360,10 @@ internal class KotlinScannerTest {
         val node =
             kotlinLoader.parseKotlin(
                 """
-            package org.kotlin.formatter
-            
-            import org.kotlin.formatter.package.AClass
-        """.trimIndent()
+                    package org.kotlin.formatter
+                    
+                    import org.kotlin.formatter.package.AClass
+                """.trimIndent()
             )
 
         val result = subject.scan(node)

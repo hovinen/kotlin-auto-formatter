@@ -164,28 +164,7 @@ class Printer(
                 appendKDocContent(token.content)
             }
             is WhitespaceToken -> {
-                if (!breakingAllowed || whitespacePlusFollowingTokenFitOnLine(token)) {
-                    if (inStringLiteral) {
-                        appendTextOnSameLine(token.content)
-                    } else if (token.content.isNotEmpty()) {
-                        appendTextOnSameLine(" ")
-                    }
-                } else {
-                    if (!atStartOfLine) {
-                        val whitespaceFitsOnFirstLine =
-                            spaceRemaining >= "${token.content}$STRING_BREAK_TERMINATOR".length
-                        if (inStringLiteral && whitespaceFitsOnFirstLine) {
-                            appendTextOnSameLine(token.content)
-                        }
-                        indent(continuationIndent)
-                        if (inStringLiteral && !whitespaceFitsOnFirstLine) {
-                            appendTextOnSameLine(token.content)
-                        }
-                    }
-                    if (inComment) {
-                        appendTextOnSameLine(" ")
-                    }
-                }
+                appendWhitespaceToken(token)
             }
             is ForcedBreakToken -> {
                 if (inComment) {
@@ -255,6 +234,31 @@ class Printer(
     }
 
     private fun <E> List<E>.tail(): List<E> = subList(1, size)
+
+    private fun appendWhitespaceToken(token: WhitespaceToken) {
+        if (!breakingAllowed || whitespacePlusFollowingTokenFitOnLine(token)) {
+            if (inStringLiteral) {
+                appendTextOnSameLine(token.content)
+            } else if (token.content.isNotEmpty()) {
+                appendTextOnSameLine(" ")
+            }
+        } else {
+            if (!atStartOfLine) {
+                val whitespaceFitsOnFirstLine =
+                    spaceRemaining >= "${token.content}$STRING_BREAK_TERMINATOR".length
+                if (inStringLiteral && whitespaceFitsOnFirstLine) {
+                    appendTextOnSameLine(token.content)
+                }
+                indent(continuationIndent)
+                if (inStringLiteral && !whitespaceFitsOnFirstLine) {
+                    appendTextOnSameLine(token.content)
+                }
+            }
+            if (inComment) {
+                appendTextOnSameLine(" ")
+            }
+        }
+    }
 
     private fun appendTextOnSameLine(text: String) {
         result.append(text)

@@ -16,6 +16,5 @@ This tool is still work in progress, but can already handle a wide variety of ca
  * Organizing of imports and removal of unused imports.
  * Enforcing more horizontal whitespace rules from the Kotlin coding conventions.
  * Autoformatting KDoc.
- * Improving the autoformatting of multiline string templates which use `trimIndent()`.
  * Creation of an IntelliJ plugin.
  * Configuration of the maximum line length from `.editorconfig`.
