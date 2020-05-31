@@ -89,8 +89,7 @@ internal class DotQualifiedExpressionScanner(private val kotlinScanner: KotlinSc
 
         private fun NodePatternBuilder.multilineStringTemplate(): NodePatternBuilder =
             nodeMatching {
-                it.elementType == KtNodeTypes.STRING_TEMPLATE && it.firstChildNode.text == "\"\"" +
-                    "\""
+                it.elementType == KtNodeTypes.STRING_TEMPLATE && it.firstChildNode.text == "\"\"\""
             }
 
         private fun NodePatternBuilder.trimIndentCall(): NodePatternBuilder =
