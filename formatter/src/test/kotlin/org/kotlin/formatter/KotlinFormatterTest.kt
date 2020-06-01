@@ -1232,6 +1232,27 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `does not break a string if the rest fits on the line`() {
+        val result =
+            KotlinFormatter(maxLineLength = 52).format(
+                """
+                    fun myFunction() {
+                        val aNewVariable = "A string initializer which should not wrap"
+                    }
+                """.trimIndent()
+            )
+
+        assertThat(result).isEqualTo(
+            """
+                fun myFunction() {
+                    val aNewVariable =
+                        "A string initializer which should not wrap"
+                }
+            """.trimIndent()
+        )
+    }
+
+    @Test
     fun `format breaks expressions recursively when required`() {
         val result =
             KotlinFormatter(maxLineLength = 50).format(

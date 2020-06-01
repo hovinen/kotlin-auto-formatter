@@ -271,7 +271,6 @@ class Printer(
     private fun whitespacePlusFollowingTokenFitOnLine(token: WhitespaceToken) =
         when (blockStack.peek().state) {
             State.MULTILINE_STRING_LITERAL -> true
-            State.STRING_LITERAL -> token.length + STRING_BREAK_TERMINATOR.length <= spaceRemaining
             else -> token.length <= spaceRemaining
         }
 
@@ -335,6 +334,7 @@ class Printer(
 
     companion object {
         private const val STRING_BREAK_TERMINATOR = "\" +"
+        internal const val STRING_BREAK_TERMINATOR_LENGTH = STRING_BREAK_TERMINATOR.length
         private val STRING_LITERAL_STATES =
             setOf(State.STRING_LITERAL, State.MULTILINE_STRING_LITERAL)
         private val COMMENT_STATES =

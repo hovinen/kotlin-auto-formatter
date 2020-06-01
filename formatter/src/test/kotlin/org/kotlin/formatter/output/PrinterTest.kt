@@ -545,23 +545,6 @@ internal class PrinterTest {
     }
 
     @Test
-    fun `breaks with enough room for string closing characters in string literal`() {
-        val subject = subject(maxLineLength = 9, continuationIndent = 4)
-
-        val result =
-            subject.print(
-                listOf(
-                    BeginToken(length = 0, state = State.STRING_LITERAL),
-                    LeafNodeToken("Content"),
-                    WhitespaceToken(length = 2, content = ""),
-                    LeafNodeToken("Content")
-                )
-            )
-
-        assertThat(result).isEqualTo("Content\" +\n    \"Content")
-    }
-
-    @Test
     fun `respects current indent when breaking string literal`() {
         val subject = subject(maxLineLength = 80, continuationIndent = 4)
 

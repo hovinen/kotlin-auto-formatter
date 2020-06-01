@@ -76,7 +76,12 @@ class TokenPreprocessor {
             when (token) {
                 is WhitespaceToken -> {
                     if (token.content.isNotEmpty() || !lastTokenWasWhitespace()) {
-                        resultStack.push(WhitespaceStackElement(token.content))
+                        resultStack.push(
+                            WhitespaceStackElement(
+                                token.content,
+                                resultStack.peek().inStringLiteral
+                            )
+                        )
                     }
                 }
                 is BeginToken -> {
@@ -149,20 +154,45 @@ class TokenPreprocessor {
 
     private fun appendTokensInWhitespaceElement(element: WhitespaceStackElement) {
         val firstToken = element.tokens.firstOrNull()
-        if (firstToken is BeginToken && firstToken.state.isComment && element.content.contains('\n')
-        ) {
+        if (followingBlockIsCommentWithNewlines(firstToken, element)) {
             resultStack.peek()
                 .tokens
                 .add(ForcedBreakToken(count = min(element.content.countNewlines(), 2)))
         } else {
+            val length = adjustTotalLengthForStringLiteral(element)
             resultStack.peek()
                 .tokens
-                .add(WhitespaceToken(length = element.totalLength, content = element.content))
+                .add(WhitespaceToken(length = length, content = element.content))
         }
         resultStack.peek().tokens.addAll(element.tokens)
     }
 
+    private fun followingBlockIsCommentWithNewlines(
+        firstToken: Token?,
+        element: WhitespaceStackElement
+    ) = firstToken is BeginToken && firstToken.state.isComment && element.content.contains('\n')
+
     private fun String.countNewlines(): Int = count { it == '\n' }
+
+    private fun adjustTotalLengthForStringLiteral(element: WhitespaceStackElement): Int {
+        return if (!resultStack.peek().inStringLiteral) {
+            element.totalLength
+        } else if (precedingEndOfStringLiteral(element)) {
+            element.totalLength + 1
+        } else {
+            element.totalLength + Printer.STRING_BREAK_TERMINATOR_LENGTH
+        }
+    }
+
+    private fun precedingEndOfStringLiteral(element: WhitespaceStackElement): Boolean =
+        if (element.tokens.size < 2) {
+            true
+        } else if (element.tokens.size == 2) {
+            val lastToken = element.tokens.last()
+            lastToken is LeafNodeToken && lastToken.text == "\""
+        } else {
+            false
+        }
 }
 
 private sealed class StackElement(internal val tokens: MutableList<Token> = mutableListOf()) {
@@ -180,6 +210,8 @@ private sealed class StackElement(internal val tokens: MutableList<Token> = muta
                     }
                 }
                 .sum()
+
+    internal open val inStringLiteral = false
 }
 
 private class BlockStackElement(
@@ -213,9 +245,14 @@ private class BlockStackElement(
     private fun Token.forcesSynchronizedBreakConversionToForcedBreak(): Boolean =
         this is ForcedBreakToken || this is ClosingForcedBreakToken ||
             (this is KDocContentToken && content.contains('\n'))
+
+    override val inStringLiteral = state == State.STRING_LITERAL
 }
 
-private class WhitespaceStackElement(internal val content: String) : StackElement() {
+private class WhitespaceStackElement(
+    internal val content: String,
+    override val inStringLiteral: Boolean
+) : StackElement() {
     private val contentLength: Int = if (content.isEmpty()) 0 else 1
 
     internal val totalLength: Int
@@ -233,5 +270,6 @@ private val Token.textLength: Int
             is LeafNodeToken -> textLength
             is KDocContentToken -> textLength
             is BeginToken -> length
+            is WhitespaceToken -> length
             else -> 0
         }

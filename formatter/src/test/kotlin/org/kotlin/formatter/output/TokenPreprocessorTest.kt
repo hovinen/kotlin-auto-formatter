@@ -131,6 +131,78 @@ internal class TokenPreprocessorTest {
         assertThat(result).contains(WhitespaceToken(length = 10, content = " "))
     }
 
+    @Test
+    fun `adds length of string wrapping tokens to WhitespaceToken when in string literal`() {
+        val subject = TokenPreprocessor()
+        val input =
+            listOf(
+                BeginToken(State.STRING_LITERAL),
+                WhitespaceToken(content = " "),
+                LeafNodeToken("a token"),
+                WhitespaceToken(content = " "),
+                LeafNodeToken("\""),
+                EndToken
+            )
+
+        val result = subject.preprocess(input)
+
+        assertThat(result).contains(WhitespaceToken(length = 11, content = " "))
+    }
+
+    @Test
+    fun `adds length of string wrapping tokens to non-initial WhitespaceToken in string literal`() {
+        val subject = TokenPreprocessor()
+        val input =
+            listOf(
+                BeginToken(State.STRING_LITERAL),
+                WhitespaceToken(content = " "),
+                LeafNodeToken("a token"),
+                WhitespaceToken(content = " "),
+                LeafNodeToken("another token"),
+                WhitespaceToken(content = " "),
+                LeafNodeToken("\""),
+                EndToken
+            )
+
+        val result = subject.preprocess(input)
+
+        assertThat(result).contains(WhitespaceToken(length = 17, content = " "))
+    }
+
+    @Test
+    fun `adds length of string termination token to WhitespaceToken at end of string literal`() {
+        val subject = TokenPreprocessor()
+        val input =
+            listOf(
+                BeginToken(State.STRING_LITERAL),
+                WhitespaceToken(content = " "),
+                LeafNodeToken("a token"),
+                LeafNodeToken("\""),
+                EndToken
+            )
+
+        val result = subject.preprocess(input)
+
+        assertThat(result).contains(WhitespaceToken(length = 9, content = " "))
+    }
+
+    @Test
+    fun `counts empty trailing LeafNodeToken as end of string`() {
+        val subject = TokenPreprocessor()
+        val input =
+            listOf(
+                BeginToken(State.STRING_LITERAL),
+                WhitespaceToken(content = " "),
+                LeafNodeToken("a token"),
+                LeafNodeToken("\""),
+                EndToken
+            )
+
+        val result = subject.preprocess(input)
+
+        assertThat(result).contains(WhitespaceToken(length = 9, content = " "))
+    }
+
     @ParameterizedTest
     @MethodSource("tokenLengthCases")
     fun `outputs a BeginToken, EndToken pair with length`(token: Token, lengthExpected: Int) {
