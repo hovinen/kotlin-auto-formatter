@@ -2,6 +2,7 @@ plugins {
     kotlin("jvm") version "1.3.70"
     id("org.jlleitschuh.gradle.ktlint") version "9.2.1"
     jacoco
+    application
 }
 
 repositories {
@@ -34,4 +35,8 @@ tasks {
             html.destination = file("$buildDir/jacoco")
         }
     }
+}
+
+application {
+    mainClassName = "org.kotlin.formatter.KotlinFormatterKt"
 }
