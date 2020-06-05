@@ -3,6 +3,7 @@ plugins {
     id("org.jlleitschuh.gradle.ktlint") version "9.2.1"
     jacoco
     application
+    `maven-publish`
 }
 
 repositories {
@@ -39,4 +40,37 @@ tasks {
 
 application {
     mainClassName = "org.kotlin.formatter.KotlinFormatterKt"
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            from(components["kotlin"])
+            pom {
+                name.set("Kotlin autoformatter")
+                description.set("An automated opinionated formatter for Kotlin")
+                url.set("https://github.com/hovinen/kotlin-auto-formatter")
+                licenses {
+                    license {
+                        name.set("GNU General Public License 3")
+                        url.set("https://www.gnu.org/licenses/gpl-3.0.html")
+                    }
+                }
+                developers {
+                    developer {
+                        id.set("hovinen")
+                        name.set("Bradford Hovinen")
+                        email.set("hovinen@gmail.com")
+                    }
+                }
+                scm {
+                    connection.set("scm:git:https://github.com/hovinen/kotlin-auto-formatter.git")
+                    developerConnection.set(
+                        "scm:git:https://github.com/hovinen/kotlin-auto-formatter.git"
+                    )
+                    url.set("https://github.com/hovinen/kotlin-auto-formatter")
+                }
+            }
+        }
+    }
 }
