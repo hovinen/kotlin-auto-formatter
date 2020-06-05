@@ -1,2 +1,2 @@
-group = "org.kotlin.formatter"
+group = "tech.formatter-kt"
 version = "0.1-SNAPSHOT"
