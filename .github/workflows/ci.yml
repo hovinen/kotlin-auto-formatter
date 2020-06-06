@@ -30,11 +30,18 @@ jobs:
     - name: Run tests and linter
       run: ./gradlew check
 
-    - name: Publish
+    - name: Publish library
       if: github.ref == 'refs/heads/master'
       env:
         ORG_GRADLE_PROJECT_mavenUser: ${{secrets.MAVENUSER}}
         ORG_GRADLE_PROJECT_mavenPassword: ${{secrets.MAVENPASSWORD}}
         ORG_GRADLE_PROJECT_signingKey: ${{secrets.SIGNINGKEY}}
         ORG_GRADLE_PROJECT_signingPassword: ${{secrets.SIGNINGPASSWORD}}
+      run: ./gradlew publish
+
+    - name: Publish Gradle plugin
+      if: github.ref == 'refs/heads/master'
+      env:
+        GRADLE_PUBLISH_key: ${{secrets.GRADLEPUBLISHKEY}}
+        GRADLE_PUBLISH_secret: ${{secrets.GRADLEPUBLISHSECRET}}
       run: ./gradlew publish

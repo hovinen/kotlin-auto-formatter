@@ -3,6 +3,7 @@ plugins {
     groovy
     `java-gradle-plugin`
     id("org.jlleitschuh.gradle.ktlint") version "9.2.1"
+    id("com.gradle.plugin-publish") version "0.12.0"
 }
 
 repositories {
@@ -36,5 +37,21 @@ tasks {
     }
     test {
         useJUnitPlatform()
+    }
+}
+
+pluginBundle {
+    website = "https://github.com/hovinen/kotlin-auto-formatter"
+    vcsUrl = "https://github.com/hovinen/kotlin-auto-formatter"
+
+    description = "Automatically formats Kotlin code"
+
+    (plugins) {
+        "kotlinFormatterPlugin" {
+            // id is captured from java-gradle-plugin configuration
+            displayName = "Kotlin autoformatter"
+            tags = listOf("kotlin", "formatting")
+            version = "0.1-SNAPSHOT"
+        }
     }
 }
