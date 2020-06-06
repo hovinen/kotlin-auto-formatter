@@ -41,7 +41,4 @@ jobs:
 
     - name: Publish Gradle plugin
       if: github.ref == 'refs/heads/master'
-      env:
-        GRADLE_PUBLISH_key: ${{secrets.GRADLEPUBLISHKEY}}
-        GRADLE_PUBLISH_secret: ${{secrets.GRADLEPUBLISHSECRET}}
-      run: ./gradlew publishPlugins
+      run: ./gradlew publishPlugins -Dgradle.publish.key="${{secrets.GRADLEPUBLISHKEY}}" -Dgradle.publish.secret="${{secrets.GRADLEPUBLISHSECRET}}"
