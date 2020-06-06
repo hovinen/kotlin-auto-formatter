@@ -1,13 +1,17 @@
+import org.jetbrains.dokka.gradle.DokkaTask
+
 plugins {
     kotlin("jvm") version "1.3.70"
     id("org.jlleitschuh.gradle.ktlint") version "9.2.1"
     jacoco
     application
+    id("org.jetbrains.dokka") version "0.10.1"
     `maven-publish`
 }
 
 repositories {
     mavenCentral()
+    jcenter()
 }
 
 dependencies {
@@ -38,6 +42,22 @@ tasks {
     }
 }
 
+val dokka by tasks.getting(DokkaTask::class) {
+    outputFormat = "html"
+    outputDirectory = "$buildDir/dokka"
+}
+
+val dokkaJar by tasks.creating(Jar::class) {
+    archiveClassifier.set("javadoc")
+    from(dokka.outputs)
+    dependsOn(dokka)
+}
+
+val sourcesJar by tasks.creating(Jar::class) {
+    archiveClassifier.set("sources")
+    from(sourceSets.main.get().allSource)
+}
+
 application {
     mainClassName = "org.kotlin.formatter.KotlinFormatterKt"
 }
@@ -46,6 +66,8 @@ publishing {
     publications {
         create<MavenPublication>("maven") {
             from(components["kotlin"])
+            artifact(dokkaJar)
+            artifact(sourcesJar)
             pom {
                 name.set("Kotlin autoformatter")
                 description.set("An automated opinionated formatter for Kotlin")

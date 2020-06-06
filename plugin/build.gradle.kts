@@ -20,8 +20,8 @@ dependencies {
 gradlePlugin {
     plugins {
         create("kotlinFormatterPlugin") {
-            id = "org.kotlin.formatter"
-            version = "0.0.1"
+            id = "tech.formatter-kt.formatter"
+            version = "0.1-SNAPSHOT"
             implementationClass = "org.kotlin.formatter.plugin.KotlinFormatterPlugin"
         }
     }

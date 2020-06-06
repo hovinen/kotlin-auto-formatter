@@ -1,2 +1,4 @@
-group = "tech.formatter-kt"
-version = "0.1-SNAPSHOT"
+allprojects {
+    group = "tech.formatter-kt"
+    version = "0.1-SNAPSHOT"
+}
