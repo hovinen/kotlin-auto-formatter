@@ -29,3 +29,7 @@ jobs:
 
     - name: Run tests and linter
       run: ./gradlew check
+
+    - name: Publish
+      if: github.ref == 'refs/heads/master'
+      run: ./gradlew -PmavenUser=${{secrets.MavenUser}} -PmavenPassword=${{secrets.MavenPassword}} publish

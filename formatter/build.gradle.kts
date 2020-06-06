@@ -6,6 +6,7 @@ plugins {
     jacoco
     application
     id("org.jetbrains.dokka") version "0.10.1"
+    signing
     `maven-publish`
 }
 
@@ -48,12 +49,14 @@ val dokka by tasks.getting(DokkaTask::class) {
 }
 
 val dokkaJar by tasks.creating(Jar::class) {
+    group = JavaBasePlugin.DOCUMENTATION_GROUP
     archiveClassifier.set("javadoc")
     from(dokka.outputs)
     dependsOn(dokka)
 }
 
 val sourcesJar by tasks.creating(Jar::class) {
+    group = JavaBasePlugin.DOCUMENTATION_GROUP
     archiveClassifier.set("sources")
     from(sourceSets.main.get().allSource)
 }
@@ -95,4 +98,21 @@ publishing {
             }
         }
     }
+    repositories {
+        maven {
+            name = "sonatype"
+            url = uri("https://oss.sonatype.org/content/repositories/snapshots")
+            credentials {
+                username = project.findProperty("mavenUser") as String?
+                password = project.findProperty("mavenPassword") as String?
+            }
+        }
+    }
+}
+
+signing {
+    val signingKey: String? by project
+    val signingPassword: String? by project
+    useInMemoryPgpKeys(signingKey, signingPassword)
+    sign(publishing.publications["maven"])
 }
