@@ -237,7 +237,7 @@ class Printer(
 
     private fun appendWhitespaceToken(token: WhitespaceToken) {
         if (!breakingAllowed || whitespacePlusFollowingTokenFitOnLine(token)) {
-            if (inStringLiteral) {
+            if (inStringLiteral || inComment) {
                 appendTextOnSameLine(token.content)
             } else if (token.content.isNotEmpty()) {
                 appendTextOnSameLine(" ")
