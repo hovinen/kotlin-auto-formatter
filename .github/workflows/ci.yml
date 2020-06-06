@@ -44,4 +44,4 @@ jobs:
       env:
         GRADLE_PUBLISH_key: ${{secrets.GRADLEPUBLISHKEY}}
         GRADLE_PUBLISH_secret: ${{secrets.GRADLEPUBLISHSECRET}}
-      run: ./gradlew publish
+      run: ./gradlew publishPlugins
