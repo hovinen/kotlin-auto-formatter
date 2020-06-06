@@ -103,16 +103,18 @@ publishing {
             name = "sonatype"
             url = uri("https://oss.sonatype.org/content/repositories/snapshots")
             credentials {
-                username = project.findProperty("MAVENUSER") as String?
-                password = project.findProperty("MAVENPASSWORD") as String?
+                val mavenUser: String? by project
+                val mavenPassword: String? by project
+                username = mavenUser
+                password = mavenPassword
             }
         }
     }
 }
 
 signing {
-    val signingKey = project.findProperty("SIGNINGKEY") as String?
-    val signingPassword = project.findProperty("SIGNINGPASSWORD") as String?
+    val signingKey: String? by project
+    val signingPassword: String? by project
     useInMemoryPgpKeys(signingKey, signingPassword)
     sign(publishing.publications["maven"])
 }
