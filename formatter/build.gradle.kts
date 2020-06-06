@@ -103,8 +103,10 @@ publishing {
             name = "sonatype"
             url = uri("https://oss.sonatype.org/content/repositories/snapshots")
             credentials {
-                username = project.findProperty("mavenUser") as String?
-                password = project.findProperty("mavenPassword") as String?
+                val mavenUser: String? by project
+                val mavenPassword: String? by project
+                username = mavenUser
+                password = mavenPassword
             }
         }
     }

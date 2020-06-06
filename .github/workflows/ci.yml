@@ -32,4 +32,4 @@ jobs:
 
     - name: Publish
       if: github.ref == 'refs/heads/master'
-      run: ./gradlew -PmavenUser=${{secrets.MavenUser}} -PmavenPassword=${{secrets.MavenPassword}} publish
+      run: ./gradlew publish
