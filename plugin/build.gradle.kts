@@ -51,7 +51,6 @@ pluginBundle {
             // id is captured from java-gradle-plugin configuration
             displayName = "Kotlin autoformatter"
             tags = listOf("kotlin", "formatting")
-            version = "0.1-SNAPSHOT"
         }
     }
 }
