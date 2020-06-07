@@ -1709,12 +1709,13 @@ class KotlinFormatterTest {
 
     @Test
     fun `breaks before inheritance spec when necessary`() {
-        val subject = KotlinFormatter(maxLineLength = 48)
+        val subject = KotlinFormatter(maxLineLength = 46)
 
         val result =
             subject.format(
                 """
                     class MyClass(aParameter: String) : AnInterface {
+                        val aProperty: String = ""
                     }
                 """.trimIndent()
             )
@@ -1723,7 +1724,56 @@ class KotlinFormatterTest {
             """
                 class MyClass(aParameter: String) :
                     AnInterface {
+                
+                    val aProperty: String = ""
+                }
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun `does not break before object expression when unnecessary`() {
+        val subject = KotlinFormatter()
+
+        val result =
+            subject.format(
+                """
+                    fun aFunction() {
+                        val pomModel: PomModel = object : UserDataHolderBase(), PomModel {
+                            val aProperty: String = ""
+                            val anotherProperty: String = ""
+                        }
                     }
+                """.trimIndent()
+            )
+
+        assertThat(result).isEqualTo(
+            """
+                fun aFunction() {
+                    val pomModel: PomModel = object : UserDataHolderBase(), PomModel {
+                        val aProperty: String = ""
+                        val anotherProperty: String = ""
+                    }
+                }
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun `inserts whitespace before and after colon before super type list`() {
+        val subject = KotlinFormatter()
+
+        val result = subject.format(
+            """
+                class MyClass():AnInterface {
+                }
+            """.trimIndent()
+        )
+
+        assertThat(result).isEqualTo(
+            """
+                class MyClass() : AnInterface {
+                }
             """.trimIndent()
         )
     }
@@ -2183,12 +2233,13 @@ class KotlinFormatterTest {
     fun `maintains spacing in follow-up lines of TODO comment`() {
         val subject = KotlinFormatter()
 
-        val result = subject.format(
-            """
-                // TODO(ticket): Some item
-                //  with some more information
-            """.trimIndent()
-        )
+        val result =
+            subject.format(
+                """
+                    // TODO(ticket): Some item
+                    //  with some more information
+                """.trimIndent()
+            )
 
         assertThat(result).isEqualTo(
             """

@@ -687,9 +687,9 @@ internal class KotlinScannerTest {
         val node =
             kotlinLoader.parseKotlin(
                 """
-            class MyClass(val aParameter: Int) : AnInterface {
-            }
-        """
+                    class MyClass(val aParameter: Int) : AnInterface {
+                    }
+                """
             )
 
         val result = subject.scan(node)
@@ -699,8 +699,8 @@ internal class KotlinScannerTest {
             LeafNodeToken("class"),
             LeafNodeToken("MyClass"),
             LeafNodeToken("AnInterface"),
-            nonBreakingSpaceToken(),
-            LeafNodeToken("{"),
+            LeafNodeToken(" {"),
+            ClosingSynchronizedBreakToken(whitespaceLength = 0),
             BlockFromMarkerToken
         )
     }

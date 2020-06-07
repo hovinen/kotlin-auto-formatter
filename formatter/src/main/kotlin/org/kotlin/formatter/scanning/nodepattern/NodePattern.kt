@@ -146,10 +146,11 @@ private class ContinuingPathStep(
  */
 private class FinalPathStep(internal val state: State, internal val previous: PathStep) :
     PathStep() {
-        override fun runActions(): Evaluation = previous.runActions()
 
-        override fun withNode(node: ASTNode): PathStep = this
-    }
+    override fun runActions(): Evaluation = previous.runActions()
+
+    override fun withNode(node: ASTNode): PathStep = this
+}
 
 /** An [ASTNode] representing the end of input. */
 internal object TerminalNode : LeafPsiElement(KtTokens.EOF, "")
