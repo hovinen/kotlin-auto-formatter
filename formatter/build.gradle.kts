@@ -6,7 +6,6 @@ plugins {
     jacoco
     application
     id("org.jetbrains.dokka") version "0.10.1"
-    signing
     `maven-publish`
 }
 
@@ -69,6 +68,8 @@ publishing {
     publications {
         create<MavenPublication>("maven") {
             from(components["kotlin"])
+            group = "tech.formatter-kt"
+            version = "0.1-SNAPSHOT"
             artifact(dokkaJar)
             artifact(sourcesJar)
             pom {
@@ -110,11 +111,4 @@ publishing {
             }
         }
     }
-}
-
-signing {
-    val signingKey: String? by project
-    val signingPassword: String? by project
-    useInMemoryPgpKeys(signingKey, signingPassword)
-    sign(publishing.publications["maven"])
 }
