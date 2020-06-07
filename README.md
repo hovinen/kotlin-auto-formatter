@@ -30,6 +30,22 @@ To run it, use
 This formatter comes with a Gradle plugin which adds the task `formatKotlin`. This task runs the
 formatter on all Kotlin source files.
 
+To use the plugin, add the following to your `build.gradle.kts`:
+
+```kotlin
+plugins {
+    id("tech.formatter-kt.formatter") version "0.2"
+}
+```
+
+Or, if you are using the Groovy DSL, in `build.gradle`:
+
+```groovy
+plugins {
+    id 'tech.formatter-kt.formatter' version '0.2'
+}
+```
+
 ### As a library
 
 It is possible to invoke the formatter directly from other Java/Kotlin code. See the class
