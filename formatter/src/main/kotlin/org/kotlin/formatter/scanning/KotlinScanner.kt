@@ -3,9 +3,12 @@ package org.kotlin.formatter.scanning
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.LeafPsiElement
 import org.jetbrains.kotlin.lexer.KtTokens
+import org.kotlin.formatter.ClosingSynchronizedBreakToken
 import org.kotlin.formatter.ForcedBreakToken
+import org.kotlin.formatter.State
 import org.kotlin.formatter.Token
 import org.kotlin.formatter.WhitespaceToken
+import org.kotlin.formatter.inBeginEndBlock
 import org.kotlin.formatter.scanning.nodepattern.NodePatternBuilder
 import org.kotlin.formatter.scanning.nodepattern.nodePattern
 
@@ -58,7 +61,7 @@ class KotlinScanner {
     ) =
         nodePattern {
             zeroOrMore {
-                either { commentWithPossibleWhitspace() } or {
+                either { commentWithPossibleWhitespace() } or {
                     anyNode() thenMapToTokens { nodes ->
                         singleNodeScanner(nodes.first(), scannerState)
                     }
@@ -98,25 +101,51 @@ class KotlinScanner {
 /**
  * Adds to the receiver [NodePatternBuilder] a sequence matching whitespace, a comment surrounded by
  * whitespace, or the empty sequence.
+ *
+ * The output comment is surrounded by forced line breaks if it is an end of line comment or a
+ * block comment with more than one line. A block comment in one line is followed by a simple
+ * whitespace.
  */
 fun NodePatternBuilder.possibleWhitespaceWithComment() {
-    either { commentWithPossibleWhitspace() } or { possibleWhitespace() }
+    either { commentWithPossibleWhitespace() } or { possibleWhitespace() }
 }
 
-private fun NodePatternBuilder.commentWithPossibleWhitspace() {
-    possibleWhitespace() thenMapToTokens { nodes ->
-        if (nodes.isNotEmpty()) {
-            toForcedBreak(nodes.first())
-        } else {
-            listOf()
+private fun NodePatternBuilder.commentWithPossibleWhitespace() {
+    either {
+        possibleWhitespace() thenMapToTokens { nodes ->
+            if (nodes.isNotEmpty()) {
+                toForcedBreak(nodes.first())
+            } else {
+                listOf()
+            }
         }
+        nodeOfOneOfTypes(KtTokens.EOL_COMMENT) thenMapToTokens { nodes ->
+            LeafScanner().scanCommentNode(nodes.first())
+        }
+        possibleWhitespace() thenMapToTokens { nodes ->
+            if (nodes.isNotEmpty()) {
+                toForcedBreak(nodes.first())
+            } else {
+                listOf()
+            }
+        }
+    } or {
+        possibleWhitespaceOutputToToken()
+        nodeOfOneOfTypes(KtTokens.BLOCK_COMMENT) thenMapToTokens { nodes ->
+            inBeginEndBlock(
+                LeafScanner().scanCommentNode(nodes.first())
+                    .plus(ClosingSynchronizedBreakToken(whitespaceLength = 1)),
+                State.CODE
+            )
+        }
+        possibleWhitespace()
     }
-    nodeOfOneOfTypes(KtTokens.EOL_COMMENT, KtTokens.BLOCK_COMMENT) thenMapToTokens { nodes ->
-        LeafScanner().scanCommentNode(nodes.first())
-    }
+}
+
+private fun NodePatternBuilder.possibleWhitespaceOutputToToken() {
     possibleWhitespace() thenMapToTokens { nodes ->
         if (nodes.isNotEmpty()) {
-            toForcedBreak(nodes.first())
+            listOf(WhitespaceToken(nodes.first().text))
         } else {
             listOf()
         }

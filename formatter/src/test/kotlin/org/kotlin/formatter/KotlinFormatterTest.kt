@@ -1779,6 +1779,105 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `does not insert break between annotation and constructor keyword`() {
+        val subject = KotlinFormatter()
+
+        val result = subject.format(
+            """
+                class MyClass @AnAnnotation constructor() {
+                }
+            """.trimIndent()
+        )
+
+        assertThat(result).isEqualTo(
+            """
+                class MyClass @AnAnnotation constructor() {
+                }
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun `preserves whitespace bewteen annotations in primary constructor`() {
+        val subject = KotlinFormatter()
+
+        val result =
+            subject.format(
+                """
+                    class MyClass @AnAnnotation @AnotherAnnotation constructor() {
+                    }
+                """.trimIndent()
+            )
+
+        assertThat(result).isEqualTo(
+            """
+                class MyClass @AnAnnotation @AnotherAnnotation constructor() {
+                }
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun `removes whitespace between constructor and arguments`() {
+        val subject = KotlinFormatter()
+
+        val result =
+            subject.format(
+                """
+                    class MyClass @AnAnnotation constructor () {
+                    }
+                """.trimIndent()
+            )
+
+        assertThat(result).isEqualTo(
+            """
+                class MyClass @AnAnnotation constructor() {
+                }
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun `preserves comments after primary constructor annotation list`() {
+        val subject = KotlinFormatter()
+
+        val result =
+            subject.format(
+                """
+                    class MyClass @AnAnnotation /* A comment */ constructor () {
+                    }
+                """.trimIndent()
+            )
+
+        assertThat(result).isEqualTo(
+            """
+                class MyClass @AnAnnotation /* A comment */ constructor() {
+                }
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun `preserves comments before primary constructor annotation list`() {
+        val subject = KotlinFormatter()
+
+        val result =
+            subject.format(
+                """
+                    class MyClass /* A comment */ @AnAnnotation constructor () {
+                    }
+                """.trimIndent()
+            )
+
+        assertThat(result).isEqualTo(
+            """
+                class MyClass /* A comment */ @AnAnnotation constructor() {
+                }
+            """.trimIndent()
+        )
+    }
+
+    @Test
     fun `maintains a line break between KDoc and class declaration`() {
         val subject = KotlinFormatter(maxLineLength = 40)
 
@@ -2319,7 +2418,6 @@ class KotlinFormatterTest {
         assertThat(result).isEqualTo(
             """
                 aVariable =
-                
                     /* Some comment text which is too long to fit on line
                      * Some further text */
                     anotherVariable + aThirdVariable

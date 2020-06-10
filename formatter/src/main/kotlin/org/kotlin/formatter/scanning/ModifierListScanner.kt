@@ -30,7 +30,8 @@ internal class ModifierListScanner(
     internal enum class BreakMode(internal val breakToken: Token) {
         TYPE(ForcedBreakToken(count = 1)),
         FUNCTION_PROPERTY(ForcedBreakToken(count = 1)),
-        PARAMETER(WhitespaceToken(" "))
+        PARAMETER(WhitespaceToken(" ")),
+        CONSTRUCTOR(WhitespaceToken(" "))
     }
 
     private val nodePattern =

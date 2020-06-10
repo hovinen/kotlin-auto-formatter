@@ -97,6 +97,9 @@ internal fun nodeScannerForElementType(kotlinScanner: KotlinScanner, elementType
         KtNodeTypes.CATCH -> {
             CatchScanner(kotlinScanner)
         }
+        KtNodeTypes.PRIMARY_CONSTRUCTOR -> {
+            PrimaryConstructorScanner(kotlinScanner)
+        }
         KtNodeTypes.PROPERTY_ACCESSOR -> {
             SimpleBlockScanner(kotlinScanner, ScannerState.STATEMENT, State.CODE)
         }
