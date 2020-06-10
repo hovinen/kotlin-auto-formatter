@@ -9,6 +9,7 @@ import org.kotlin.formatter.BlockFromMarkerToken
 import org.kotlin.formatter.ClosingForcedBreakToken
 import org.kotlin.formatter.ClosingSynchronizedBreakToken
 import org.kotlin.formatter.EndToken
+import org.kotlin.formatter.ForcedBreakToken
 import org.kotlin.formatter.LeafNodeToken
 import org.kotlin.formatter.MarkerToken
 import org.kotlin.formatter.State
@@ -69,11 +70,20 @@ internal class ClassScanner(private val kotlinScanner: KotlinScanner) : NodeScan
 
     private val classBodyNodePattern =
         nodePattern {
-            nodeOfType(KtTokens.LBRACE)
-            zeroOrMoreFrugal { anyNode() } thenMapToTokens { nodes ->
-                listOf(BlockFromMarkerToken, BeginToken(State.CODE)).plus(
+            nodeOfType(KtTokens.LBRACE) thenMapToTokens {
+                listOf(BlockFromMarkerToken, BeginToken(State.CODE))
+            }
+            zeroOrOne {
+                whitespaceWithNewline() thenMapToTokens { nodes ->
+                    if (nodes.first().text.hasDoubleNewline) {
+                        listOf(ForcedBreakToken(count = 1))
+                    } else {
+                        kotlinScanner.scanNodes(nodes, ScannerState.BLOCK)
+                    }
+                }
+                oneOrMoreFrugal { anyNode() } thenMapToTokens { nodes ->
                     kotlinScanner.scanNodes(nodes, ScannerState.BLOCK)
-                )
+                }
             }
             zeroOrOne { whitespaceWithNewline() } thenMapToTokens { nodes ->
                 if (nodes.isNotEmpty()) listOf(ClosingForcedBreakToken) else listOf()
@@ -81,6 +91,9 @@ internal class ClassScanner(private val kotlinScanner: KotlinScanner) : NodeScan
             nodeOfType(KtTokens.RBRACE) thenMapToTokens { listOf(EndToken, LeafNodeToken("}")) }
             end()
         }
+
+    private val String.hasDoubleNewline: Boolean
+        get() = count { it == '\n' } > 1
 
     override fun scan(node: ASTNode, scannerState: ScannerState): List<Token> =
         nodePattern.matchSequence(node.children().asIterable())

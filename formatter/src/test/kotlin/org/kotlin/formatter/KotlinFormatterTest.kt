@@ -1732,6 +1732,32 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `does not insert an extra blank line at the beginning of a class`() {
+        val subject = KotlinFormatter(maxLineLength = 46)
+
+        val result =
+            subject.format(
+                """
+                    class MyClass(aParameter: String) :
+                        AnInterface {
+                    
+                        val aProperty: String = ""
+                    }
+                """.trimIndent()
+            )
+
+        assertThat(result).isEqualTo(
+            """
+                class MyClass(aParameter: String) :
+                    AnInterface {
+                
+                    val aProperty: String = ""
+                }
+            """.trimIndent()
+        )
+    }
+
+    @Test
     fun `does not break before object expression when unnecessary`() {
         val subject = KotlinFormatter()
 
