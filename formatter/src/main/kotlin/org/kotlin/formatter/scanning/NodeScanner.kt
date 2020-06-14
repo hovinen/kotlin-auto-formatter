@@ -48,6 +48,9 @@ internal fun nodeScannerForElementType(kotlinScanner: KotlinScanner, elementType
         KtNodeTypes.VALUE_PARAMETER_LIST, KtNodeTypes.VALUE_ARGUMENT_LIST -> {
             ParameterListScanner(kotlinScanner)
         }
+        KtNodeTypes.COLLECTION_LITERAL_EXPRESSION -> {
+            CollectionLiteralExpressionScanner(kotlinScanner)
+        }
         KtNodeTypes.CLASS, KtNodeTypes.OBJECT_DECLARATION -> {
             ClassScanner(kotlinScanner)
         }

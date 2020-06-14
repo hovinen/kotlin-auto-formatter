@@ -493,6 +493,100 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `treats array initializers in annotations as blocks`() {
+        val result =
+            KotlinFormatter(maxLineLength = 50).format(
+                """
+                    class MyClass {
+                        @AnAnnotation(["An argument", "Another argument", "A third argument"])
+                        fun myFunction()
+                    }
+                """.trimIndent()
+            )
+
+        assertThat(result).isEqualTo(
+            """
+                class MyClass {
+                    @AnAnnotation(
+                        [
+                            "An argument",
+                            "Another argument",
+                            "A third argument"
+                        ]
+                    )
+                    fun myFunction()
+                }
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun `adds spaces between array elements in an annotation`() {
+        val result =
+            KotlinFormatter(maxLineLength = 50).format(
+                """
+                    class MyClass {
+                        @AnAnnotation(["1","2","3"])
+                        fun myFunction()
+                    }
+                """.trimIndent()
+            )
+
+        assertThat(result).isEqualTo(
+            """
+                class MyClass {
+                    @AnAnnotation(["1", "2", "3"])
+                    fun myFunction()
+                }
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun `removes extraneous spaces in array initializer in an annotation`() {
+        val result =
+            KotlinFormatter(maxLineLength = 50).format(
+                """
+                    class MyClass {
+                        @AnAnnotation(["1" ,"2" ,"3"])
+                        fun myFunction()
+                    }
+                """.trimIndent()
+            )
+
+        assertThat(result).isEqualTo(
+            """
+                class MyClass {
+                    @AnAnnotation(["1", "2", "3"])
+                    fun myFunction()
+                }
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun `does not insert a space before a sole element in an array in an annotation`() {
+        val result =
+            KotlinFormatter(maxLineLength = 50).format(
+                """
+                    class MyClass {
+                        @AnAnnotation(["1"])
+                        fun myFunction()
+                    }
+                """.trimIndent()
+            )
+
+        assertThat(result).isEqualTo(
+            """
+                class MyClass {
+                    @AnAnnotation(["1"])
+                    fun myFunction()
+                }
+            """.trimIndent()
+        )
+    }
+
+    @Test
     fun `breaks between annotations and multiline declarations`() {
         val result =
             KotlinFormatter(maxLineLength = 50).format(
