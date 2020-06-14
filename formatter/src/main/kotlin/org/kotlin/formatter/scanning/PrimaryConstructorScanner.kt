@@ -12,6 +12,7 @@ internal class PrimaryConstructorScanner(private val kotlinScanner: KotlinScanne
     private val modifierListScanner =
         ModifierListScanner(
             kotlinScanner = kotlinScanner,
+            markerCount = 0,
             breakMode = ModifierListScanner.BreakMode.CONSTRUCTOR
         )
     private val nodePattern =

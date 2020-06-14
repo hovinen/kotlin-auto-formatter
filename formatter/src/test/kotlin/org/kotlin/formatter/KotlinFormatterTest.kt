@@ -1960,7 +1960,35 @@ class KotlinFormatterTest {
     }
 
     @Test
-    fun `preserves whitespace bewteen annotations in primary constructor`() {
+    fun `does not insert break between annotation and constructor keyword if there are params`() {
+        val subject = KotlinFormatter(maxLineLength = 50)
+
+        val result =
+            subject.format(
+                """
+                    class MyClass @AnAnnotation private constructor(
+                        aParameter: String,
+                        anotherParameter: String,
+                        aThirdParameter: String
+                    ) {
+                    }
+                """.trimIndent()
+            )
+
+        assertThat(result).isEqualTo(
+            """
+                class MyClass @AnAnnotation private constructor(
+                    aParameter: String,
+                    anotherParameter: String,
+                    aThirdParameter: String
+                ) {
+                }
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun `preserves whitespace between annotations in primary constructor`() {
         val subject = KotlinFormatter()
 
         val result =

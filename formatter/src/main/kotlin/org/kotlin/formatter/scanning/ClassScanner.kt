@@ -17,6 +17,7 @@ import org.kotlin.formatter.Token
 import org.kotlin.formatter.WhitespaceToken
 import org.kotlin.formatter.inBeginEndBlock
 import org.kotlin.formatter.nonBreakingSpaceToken
+import org.kotlin.formatter.scanning.nodepattern.NodePattern
 import org.kotlin.formatter.scanning.nodepattern.nodePattern
 
 /** A [NodeScanner] for class and interface definitions. */
@@ -68,7 +69,7 @@ internal class ClassScanner(private val kotlinScanner: KotlinScanner) : NodeScan
             end()
         }
 
-    private val classBodyNodePattern =
+    private val classBodyNodePattern: NodePattern =
         nodePattern {
             nodeOfType(KtTokens.LBRACE) thenMapToTokens {
                 listOf(BlockFromMarkerToken, BeginToken(State.CODE))
