@@ -574,6 +574,48 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `allows block comments between annotations`() {
+        val result =
+            KotlinFormatter(maxLineLength = 50).format(
+                """
+                    @AnAnnotation
+                    /* A comment */
+                    @AnotherAnnotation
+                    val aProperty: String
+                """.trimIndent()
+            )
+
+        assertThat(result).isEqualTo(
+            """
+                @AnAnnotation
+                /* A comment */
+                @AnotherAnnotation
+                val aProperty: String
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun `allows EOL comments after annotations`() {
+        val result =
+            KotlinFormatter(maxLineLength = 50).format(
+                """
+                    @AnAnnotation // A comment
+                    @AnotherAnnotation
+                    val aProperty: String
+                """.trimIndent()
+            )
+
+        assertThat(result).isEqualTo(
+            """
+                @AnAnnotation // A comment
+                @AnotherAnnotation
+                val aProperty: String
+            """.trimIndent()
+        )
+    }
+
+    @Test
     fun `includes space between modifiers and property`() {
         val result =
             KotlinFormatter(maxLineLength = 50).format(

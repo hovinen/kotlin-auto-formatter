@@ -2,7 +2,6 @@ package org.kotlin.formatter.scanning
 
 import org.jetbrains.kotlin.KtNodeTypes
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
-import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.LeafPsiElement
 import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.psi.psiUtil.children
 import org.kotlin.formatter.ForcedBreakToken
@@ -36,11 +35,23 @@ internal class ModifierListScanner(
 
     private val nodePattern =
         nodePattern {
+            zeroOrMore { whitespace() }
             zeroOrMore {
                 nodeOfType(KtNodeTypes.ANNOTATION_ENTRY) thenMapToTokens { nodes ->
                     kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
-                        .plus(breakMode.breakToken)
-                        .plus(List(markerCount) { MarkerToken })
+                }
+                zeroOrOne {
+                    possibleWhitespace() thenMapToTokens { nodes ->
+                        if (nodes.firstOrNull()?.textContains('\n') == true) {
+                            listOf(ForcedBreakToken(count = 1))
+                        } else {
+                            listOf(WhitespaceToken(" "))
+                        }
+                    }
+                    nodeOfOneOfTypes(KtTokens.EOL_COMMENT, KtTokens.BLOCK_COMMENT) thenMapToTokens
+                        { nodes -> LeafScanner().scanCommentNode(nodes.first()) }
+                } thenMapTokens { tokens ->
+                    tokens.plus(breakMode.breakToken).plus(List(markerCount) { MarkerToken })
                 }
                 possibleWhitespace()
             }
@@ -49,7 +60,6 @@ internal class ModifierListScanner(
                     kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
                         .plus(WhitespaceToken(" "))
                 }
-                possibleWhitespace()
             }
             end()
         }
@@ -58,11 +68,10 @@ internal class ModifierListScanner(
         nodePattern.matchSequence(sortModifierNodes(node.children().asIterable()))
 
     private fun sortModifierNodes(nodes: Iterable<ASTNode>): Iterable<ASTNode> {
-        val annotationNodes = nodes.filter { it.elementType == KtNodeTypes.ANNOTATION_ENTRY }
+        val nonKeywordNodes = nodes.filter { !KtTokens.MODIFIER_KEYWORDS.contains(it.elementType) }
         val keywordNodes =
             sortModifiers(nodes.filter { KtTokens.MODIFIER_KEYWORDS.contains(it.elementType) })
-        return annotationNodes.flatMap { listOf(it, singleSpaceNode) }
-            .plus(keywordNodes.flatMap { listOf(it, singleSpaceNode) })
+        return nonKeywordNodes.plus(keywordNodes)
     }
 
     private fun sortModifiers(modifiers: List<ASTNode>): List<ASTNode> =
@@ -73,8 +82,6 @@ internal class ModifierListScanner(
         )
 
     companion object {
-        private val singleSpaceNode = LeafPsiElement(KtTokens.WHITE_SPACE, " ")
-
         // From https://kotlinlang.org/docs/reference/coding-conventions.html#modifiers
         private val modifierSortOrder =
             mapOf(

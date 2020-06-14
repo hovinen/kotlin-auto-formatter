@@ -106,14 +106,13 @@ class KotlinScanner {
  * block comment with more than one line. A block comment in one line is followed by a simple
  * whitespace.
  */
-fun NodePatternBuilder.possibleWhitespaceWithComment() {
+fun NodePatternBuilder.possibleWhitespaceWithComment(): NodePatternBuilder =
     either { commentWithPossibleWhitespace() } or { possibleWhitespace() }
-}
 
 private fun NodePatternBuilder.commentWithPossibleWhitespace() {
     either {
         possibleWhitespace() thenMapToTokens { nodes ->
-            if (nodes.isNotEmpty()) {
+            if (nodes.isNotEmpty() && nodes.first().textContains('\n')) {
                 toForcedBreak(nodes.first())
             } else {
                 listOf()
