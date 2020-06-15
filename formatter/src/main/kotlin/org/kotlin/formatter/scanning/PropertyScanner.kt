@@ -64,17 +64,22 @@ internal fun NodePatternBuilder.declarationWithOptionalModifierList(
             }
             possibleWhitespace()
             anyNode() thenMapToTokens { nodes ->
-                kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
+                kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT).plus(nonBreakingSpaceToken())
             }
+            possibleWhitespace()
         }
         zeroOrMoreFrugal { anyNode() } thenMapToTokens { nodes ->
             kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
         }
     } or {
-        oneOrMoreFrugal { anyNode() } thenMapToTokens { nodes ->
-            List(markerCount) { MarkerToken }.plus(
-                kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
-            )
+        anyNode() thenMapToTokens { nodes ->
+            List(markerCount) { MarkerToken }
+                .plus(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT))
+                .plus(nonBreakingSpaceToken())
+        }
+        possibleWhitespace()
+        zeroOrMoreFrugal { anyNode() } thenMapToTokens { nodes ->
+            kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
         }
     }
 }

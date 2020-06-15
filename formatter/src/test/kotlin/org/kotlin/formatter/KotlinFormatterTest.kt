@@ -1235,6 +1235,46 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `prefers not to break before a function name`() {
+        val result =
+            KotlinFormatter(maxLineLength = 50).format(
+                """
+                    fun `an extremely long function name which does not fit`() {
+                        aFunction()
+                    }
+                """.trimIndent()
+            )
+
+        assertThat(result).isEqualTo(
+            """
+                fun `an extremely long function name which does not fit`() {
+                    aFunction()
+                }
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun `prefers not to break before a function name after modifier`() {
+        val result =
+            KotlinFormatter(maxLineLength = 50).format(
+                """
+                    internal fun `an extremely long function name which does not fit`() {
+                        aFunction()
+                    }
+                """.trimIndent()
+            )
+
+        assertThat(result).isEqualTo(
+            """
+                internal fun `an extremely long function name which does not fit`() {
+                    aFunction()
+                }
+            """.trimIndent()
+        )
+    }
+
+    @Test
     fun `format breaks strings at a single word boundary when possible`() {
         val result =
             KotlinFormatter(maxLineLength = 50).format(
@@ -1586,9 +1626,9 @@ class KotlinFormatterTest {
 
     @Test
     fun `does not insert whitespace into an empty block`() {
-        val result = KotlinFormatter().format("""val object = MyInterface {}""".trimIndent())
+        val result = KotlinFormatter().format("""val myObject = MyInterface {}""".trimIndent())
 
-        assertThat(result).isEqualTo("""val object = MyInterface {}""".trimIndent())
+        assertThat(result).isEqualTo("""val myObject = MyInterface {}""".trimIndent())
     }
 
     @ParameterizedTest
