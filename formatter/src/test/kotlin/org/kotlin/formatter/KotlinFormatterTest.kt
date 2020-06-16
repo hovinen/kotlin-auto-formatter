@@ -2602,6 +2602,28 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `maintains line break after TODO comment`() {
+        val subject = KotlinFormatter()
+
+        val result =
+            subject.format(
+                """
+                    // TODO(ticket): Some item
+                    //  with something
+                    fun aFunction()
+                """.trimIndent()
+            )
+
+        assertThat(result).isEqualTo(
+            """
+                // TODO(ticket): Some item
+                //  with something
+                fun aFunction()
+            """.trimIndent()
+        )
+    }
+
+    @Test
     fun `maintains spacing before KDoc tag`() {
         val subject = KotlinFormatter(maxLineLength = 60)
 

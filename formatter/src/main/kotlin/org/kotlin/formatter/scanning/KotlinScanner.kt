@@ -118,14 +118,16 @@ private fun NodePatternBuilder.commentWithPossibleWhitespace() {
                 listOf()
             }
         }
-        nodeOfOneOfTypes(KtTokens.EOL_COMMENT) thenMapToTokens { nodes ->
-            LeafScanner().scanCommentNode(nodes.first())
-        }
-        possibleWhitespace() thenMapToTokens { nodes ->
-            if (nodes.isNotEmpty()) {
-                toForcedBreak(nodes.first())
-            } else {
-                listOf()
+        oneOrMore {
+            nodeOfType(KtTokens.EOL_COMMENT) thenMapToTokens { nodes ->
+                LeafScanner().scanCommentNode(nodes.first())
+            }
+            possibleWhitespace() thenMapToTokens { nodes ->
+                if (nodes.isNotEmpty()) {
+                    toForcedBreak(nodes.first())
+                } else {
+                    listOf()
+                }
             }
         }
     } or {
