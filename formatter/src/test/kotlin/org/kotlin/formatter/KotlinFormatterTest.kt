@@ -1297,6 +1297,29 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `indents the right hand side of an initializer one step beyond the type`() {
+        val result =
+            KotlinFormatter(maxLineLength = 66).format(
+                """
+                    class AClass {
+                        fun myFunction(aParameter: String, anotherParameter: String): String =
+                            "A string initializer which should move to the next"
+                    }
+                """.trimIndent()
+            )
+
+        assertThat(result).isEqualTo(
+            """
+                class AClass {
+                    fun myFunction(aParameter: String, anotherParameter: String):
+                        String =
+                            "A string initializer which should move to the next"
+                }
+            """.trimIndent()
+        )
+    }
+
+    @Test
     fun `format breaks strings at multiple word boundaries when possible`() {
         val result =
             KotlinFormatter(maxLineLength = 50).format(

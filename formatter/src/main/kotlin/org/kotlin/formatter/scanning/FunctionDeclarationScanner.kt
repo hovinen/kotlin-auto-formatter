@@ -6,8 +6,10 @@ import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.psi.psiUtil.children
 import org.kotlin.formatter.BlockFromMarkerToken
 import org.kotlin.formatter.LeafNodeToken
+import org.kotlin.formatter.State
 import org.kotlin.formatter.Token
 import org.kotlin.formatter.WhitespaceToken
+import org.kotlin.formatter.inBeginEndBlock
 import org.kotlin.formatter.nonBreakingSpaceToken
 import org.kotlin.formatter.scanning.nodepattern.NodePatternBuilder
 import org.kotlin.formatter.scanning.nodepattern.nodePattern
@@ -57,5 +59,5 @@ private fun NodePatternBuilder.optionalFunctionInitializer(kotlinScanner: Kotlin
         zeroOrMoreFrugal { anyNode() } thenMapToTokens { nodes ->
             kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
         }
-    } thenMapTokens { it.plus(BlockFromMarkerToken) }
+    } thenMapTokens { inBeginEndBlock(it, State.CODE).plus(BlockFromMarkerToken) }
 }

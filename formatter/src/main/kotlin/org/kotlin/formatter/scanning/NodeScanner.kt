@@ -26,99 +26,104 @@ internal interface NodeScanner {
  */
 internal fun nodeScannerForElementType(kotlinScanner: KotlinScanner, elementType: IElementType):
     NodeScanner =
-    when (elementType) {
-        KtNodeTypes.BLOCK, KtNodeTypes.CLASS_BODY -> {
-            BlockScanner(kotlinScanner)
-        }
-        KtNodeTypes.WHEN -> {
-            WhenExpressionScanner(kotlinScanner)
-        }
-        KtNodeTypes.IF -> {
-            IfExpressionScanner(kotlinScanner)
-        }
-        KtNodeTypes.WHILE -> {
-            WhileExpressionScanner(kotlinScanner)
-        }
-        KDocTokens.KDOC -> {
-            KDocScanner(kotlinScanner)
-        }
-        KtNodeTypes.STRING_TEMPLATE -> {
-            StringLiteralScanner(kotlinScanner)
-        }
-        KtNodeTypes.VALUE_PARAMETER_LIST, KtNodeTypes.VALUE_ARGUMENT_LIST -> {
-            ParameterListScanner(kotlinScanner)
-        }
-        KtNodeTypes.COLLECTION_LITERAL_EXPRESSION -> {
-            CollectionLiteralExpressionScanner(kotlinScanner)
-        }
-        KtNodeTypes.CLASS, KtNodeTypes.OBJECT_DECLARATION -> {
-            ClassScanner(kotlinScanner)
-        }
-        KtNodeTypes.FUN -> {
-            FunctionDeclarationScanner(kotlinScanner)
-        }
-        KtNodeTypes.TYPEALIAS -> {
-            TypealiasScanner(kotlinScanner)
-        }
-        KtNodeTypes.ENUM_ENTRY -> {
-            EnumEntryScanner(kotlinScanner)
-        }
-        KtNodeTypes.DOT_QUALIFIED_EXPRESSION, KtNodeTypes.SAFE_ACCESS_EXPRESSION -> {
-            DotQualifiedExpressionScanner(kotlinScanner)
-        }
-        KtNodeTypes.FUNCTION_LITERAL -> {
-            FunctionLiteralScanner(kotlinScanner)
-        }
-        KtNodeTypes.CONDITION -> {
-            ConditionScanner(kotlinScanner)
-        }
-        KtNodeTypes.FOR -> {
-            ForExpressionScanner(kotlinScanner)
-        }
-        KtNodeTypes.BINARY_EXPRESSION -> {
-            BinaryExpressionScanner(kotlinScanner)
-        }
-        KtNodeTypes.CALL_EXPRESSION -> {
-            CallExpressionScanner(kotlinScanner)
-        }
-        KtNodeTypes.PROPERTY -> {
-            PropertyScanner(kotlinScanner)
-        }
-        KtNodeTypes.PACKAGE_DIRECTIVE, KtNodeTypes.IMPORT_LIST, KtNodeTypes.IMPORT_DIRECTIVE,
-            KtNodeTypes.IMPORT_ALIAS -> {
-                SimpleBlockScanner(kotlinScanner, ScannerState.PACKAGE_IMPORT, State.PACKAGE_IMPORT)
+        when (elementType) {
+            KtNodeTypes.BLOCK, KtNodeTypes.CLASS_BODY -> {
+                BlockScanner(kotlinScanner)
             }
-        KtNodeTypes.MODIFIER_LIST -> {
-            ModifierListScanner(kotlinScanner)
-        }
-        KtNodeTypes.RETURN -> {
-            ReturnScanner(kotlinScanner)
-        }
-        KtNodeTypes.THROW -> {
-            ThrowScanner(kotlinScanner)
-        }
-        KtNodeTypes.CATCH -> {
-            CatchScanner(kotlinScanner)
-        }
-        KtNodeTypes.PRIMARY_CONSTRUCTOR -> {
-            PrimaryConstructorScanner(kotlinScanner)
-        }
-        KtNodeTypes.PROPERTY_ACCESSOR -> {
-            SimpleBlockScanner(kotlinScanner, ScannerState.STATEMENT, State.CODE)
-        }
-        KtFileElementType.INSTANCE, is KtScriptElementType,
-            KtNodeTypes.LITERAL_STRING_TEMPLATE_ENTRY -> {
-                SimpleScanner(kotlinScanner, ScannerState.BLOCK)
+            KtNodeTypes.WHEN -> {
+                WhenExpressionScanner(kotlinScanner)
             }
-        KtNodeTypes.WHEN_ENTRY, KtNodeTypes.ANNOTATION_ENTRY, KtNodeTypes.PREFIX_EXPRESSION,
-            KtNodeTypes.PARENTHESIZED, KtNodeTypes.VALUE_PARAMETER, KtNodeTypes.SUPER_TYPE_ENTRY,
-            KtNodeTypes.SUPER_TYPE_CALL_ENTRY, KtNodeTypes.TYPE_REFERENCE, KtNodeTypes.TRY -> {
+            KtNodeTypes.IF -> {
+                IfExpressionScanner(kotlinScanner)
+            }
+            KtNodeTypes.WHILE -> {
+                WhileExpressionScanner(kotlinScanner)
+            }
+            KDocTokens.KDOC -> {
+                KDocScanner(kotlinScanner)
+            }
+            KtNodeTypes.STRING_TEMPLATE -> {
+                StringLiteralScanner(kotlinScanner)
+            }
+            KtNodeTypes.VALUE_PARAMETER_LIST, KtNodeTypes.VALUE_ARGUMENT_LIST -> {
+                ParameterListScanner(kotlinScanner)
+            }
+            KtNodeTypes.COLLECTION_LITERAL_EXPRESSION -> {
+                CollectionLiteralExpressionScanner(kotlinScanner)
+            }
+            KtNodeTypes.CLASS, KtNodeTypes.OBJECT_DECLARATION -> {
+                ClassScanner(kotlinScanner)
+            }
+            KtNodeTypes.FUN -> {
+                FunctionDeclarationScanner(kotlinScanner)
+            }
+            KtNodeTypes.TYPEALIAS -> {
+                TypealiasScanner(kotlinScanner)
+            }
+            KtNodeTypes.ENUM_ENTRY -> {
+                EnumEntryScanner(kotlinScanner)
+            }
+            KtNodeTypes.DOT_QUALIFIED_EXPRESSION, KtNodeTypes.SAFE_ACCESS_EXPRESSION -> {
+                DotQualifiedExpressionScanner(kotlinScanner)
+            }
+            KtNodeTypes.FUNCTION_LITERAL -> {
+                FunctionLiteralScanner(kotlinScanner)
+            }
+            KtNodeTypes.CONDITION -> {
+                ConditionScanner(kotlinScanner)
+            }
+            KtNodeTypes.FOR -> {
+                ForExpressionScanner(kotlinScanner)
+            }
+            KtNodeTypes.BINARY_EXPRESSION -> {
+                BinaryExpressionScanner(kotlinScanner)
+            }
+            KtNodeTypes.CALL_EXPRESSION -> {
+                CallExpressionScanner(kotlinScanner)
+            }
+            KtNodeTypes.PROPERTY -> {
+                PropertyScanner(kotlinScanner)
+            }
+            KtNodeTypes.PACKAGE_DIRECTIVE, KtNodeTypes.IMPORT_LIST, KtNodeTypes.IMPORT_DIRECTIVE,
+                KtNodeTypes.IMPORT_ALIAS -> {
+                    SimpleBlockScanner(
+                        kotlinScanner,
+                        ScannerState.PACKAGE_IMPORT,
+                        State.PACKAGE_IMPORT
+                    )
+                }
+            KtNodeTypes.MODIFIER_LIST -> {
+                ModifierListScanner(kotlinScanner)
+            }
+            KtNodeTypes.RETURN -> {
+                ReturnScanner(kotlinScanner)
+            }
+            KtNodeTypes.THROW -> {
+                ThrowScanner(kotlinScanner)
+            }
+            KtNodeTypes.CATCH -> {
+                CatchScanner(kotlinScanner)
+            }
+            KtNodeTypes.PRIMARY_CONSTRUCTOR -> {
+                PrimaryConstructorScanner(kotlinScanner)
+            }
+            KtNodeTypes.PROPERTY_ACCESSOR -> {
                 SimpleBlockScanner(kotlinScanner, ScannerState.STATEMENT, State.CODE)
             }
-        KtNodeTypes.SHORT_STRING_TEMPLATE_ENTRY -> {
-            SimpleBlockScanner(kotlinScanner, ScannerState.STATEMENT, State.STRING_LITERAL)
+            KtFileElementType.INSTANCE, is KtScriptElementType,
+                KtNodeTypes.LITERAL_STRING_TEMPLATE_ENTRY -> {
+                    SimpleScanner(kotlinScanner, ScannerState.BLOCK)
+                }
+            KtNodeTypes.WHEN_ENTRY, KtNodeTypes.ANNOTATION_ENTRY, KtNodeTypes.PREFIX_EXPRESSION,
+                KtNodeTypes.PARENTHESIZED, KtNodeTypes.VALUE_PARAMETER,
+                KtNodeTypes.SUPER_TYPE_ENTRY, KtNodeTypes.SUPER_TYPE_CALL_ENTRY,
+                KtNodeTypes.TYPE_REFERENCE, KtNodeTypes.TRY -> {
+                    SimpleBlockScanner(kotlinScanner, ScannerState.STATEMENT, State.CODE)
+                }
+            KtNodeTypes.SHORT_STRING_TEMPLATE_ENTRY -> {
+                SimpleBlockScanner(kotlinScanner, ScannerState.STATEMENT, State.STRING_LITERAL)
+            }
+            else -> {
+                SimpleScanner(kotlinScanner, ScannerState.STATEMENT)
+            }
         }
-        else -> {
-            SimpleScanner(kotlinScanner, ScannerState.STATEMENT)
-        }
-    }
