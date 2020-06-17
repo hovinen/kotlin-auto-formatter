@@ -587,6 +587,28 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `strips extraneous spacing from array initializer in annotation`() {
+        val result =
+            KotlinFormatter(maxLineLength = 50).format(
+                """
+                    class MyClass {
+                        @AnAnnotation([ "1" ])
+                        fun myFunction()
+                    }
+                """.trimIndent()
+            )
+
+        assertThat(result).isEqualTo(
+            """
+                class MyClass {
+                    @AnAnnotation(["1"])
+                    fun myFunction()
+                }
+            """.trimIndent()
+        )
+    }
+
+    @Test
     fun `breaks between annotations and multiline declarations`() {
         val result =
             KotlinFormatter(maxLineLength = 50).format(

@@ -44,7 +44,7 @@ internal class CollectionLiteralExpressionScanner(private val kotlinScanner: Kot
                     )
                 }
             } or {
-                oneOrMore { anyNode() } thenMapToTokens { nodes ->
+                oneOrMoreFrugal { anyNode() } thenMapToTokens { nodes ->
                     kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
                 }
             }
