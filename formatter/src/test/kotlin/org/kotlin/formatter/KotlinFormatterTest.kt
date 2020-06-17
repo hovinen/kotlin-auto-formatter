@@ -1387,6 +1387,30 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `treats breaking string literals as idempotent when first part exactly hits end`() {
+        val result =
+            KotlinFormatter(maxLineLength = 51).format(
+                """
+                    fun myFunction() {
+                        val aNewVariable =
+                            "A long string initializer which should " +
+                                "wrap to a new line and wrap again"
+                    }
+                """.trimIndent()
+            )
+
+        assertThat(result).isEqualTo(
+            """
+                fun myFunction() {
+                    val aNewVariable =
+                        "A long string initializer which should " +
+                            "wrap to a new line and wrap again"
+                }
+            """.trimIndent()
+        )
+    }
+
+    @Test
     fun `format does not break a string template inside an expression`() {
         val result =
             KotlinFormatter(maxLineLength = 50).format(

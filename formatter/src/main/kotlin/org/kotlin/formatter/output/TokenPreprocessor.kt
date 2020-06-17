@@ -66,7 +66,9 @@ class TokenPreprocessor {
         var foundEndTokens = 0
         resultStack.push(BlockStackElement(State.CODE))
         for (token in input) {
-            if (token !is LeafNodeToken && token !is EndToken) {
+            if ((token !is LeafNodeToken && token !is EndToken) ||
+                resultStack.peek().inStringLiteral
+            ) {
                 while (foundEndTokens > 0) {
                     handleEndToken()
                     foundEndTokens--

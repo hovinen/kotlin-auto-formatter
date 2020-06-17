@@ -250,6 +250,23 @@ internal class TokenPreprocessorTest {
     }
 
     @Test
+    fun `does not move an EndToken in string literal state`() {
+        val subject = TokenPreprocessor()
+        val input =
+            listOf(BeginToken(state = State.STRING_LITERAL), EndToken, LeafNodeToken("token"))
+
+        val result = subject.preprocess(input)
+
+        assertThat(result).isEqualTo(
+            listOf(
+                BeginToken(length = 0, state = State.STRING_LITERAL),
+                EndToken,
+                LeafNodeToken("token")
+            )
+        )
+    }
+
+    @Test
     fun `moves an inner EndToken to after a following LeafNodeToken`() {
         val subject = TokenPreprocessor()
         val input =
