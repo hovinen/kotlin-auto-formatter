@@ -6,6 +6,9 @@ plugins {
     id("com.gradle.plugin-publish") version "0.12.0"
 }
 
+group = "tech.formatter-kt"
+version = "0.3.1"
+
 repositories {
     mavenCentral()
 }
@@ -22,7 +25,7 @@ gradlePlugin {
     plugins {
         create("kotlinFormatterPlugin") {
             id = "tech.formatter-kt.formatter"
-            version = "0.3"
+            version = "0.3.1"
             implementationClass = "org.kotlin.formatter.plugin.KotlinFormatterPlugin"
         }
     }
