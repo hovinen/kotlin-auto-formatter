@@ -209,8 +209,8 @@ internal data class Evaluation(
         }
 
         /**
-         * An [EvaluationAction] to pop the top of [tokenStack], run the given [mapper] on that
-         * list of [Token], and accumulate the resulting list of [Token] to the new top [tokenStack]
+         * An [EvaluationAction] to pop the top of [tokenStack], run the given [mapper] on that list
+         * of [Token], and accumulate the resulting list of [Token] to the new top [tokenStack]
          * element.
          */
         internal fun tokenMappingAction(mapper: (List<Token>) -> List<Token>): EvaluationAction =

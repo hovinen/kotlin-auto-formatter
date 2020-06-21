@@ -52,8 +52,8 @@ class TokenPreprocessor {
      *  * There is a [ForcedBreakToken], [ClosingForcedBreakToken] in the same block.
      *  * There is already a [KDocContentToken] with a newline character in the same block.
      *
-     * Any [SynchronizedBreakToken] or [ClosingSynchronizedBreakToken] which immediately follows
-     * a [ForcedBreakToken] or [ClosingForcedBreakToken] is dropped.
+     * Any [SynchronizedBreakToken] or [ClosingSynchronizedBreakToken] which immediately follows a
+     * [ForcedBreakToken] or [ClosingForcedBreakToken] is dropped.
      *
      * Any [WhitespaceToken] containing newlines and immediately preceding a block of
      * [comment type][State.isComment] is converted into a [ForcedBreakToken] with the same number

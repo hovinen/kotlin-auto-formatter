@@ -52,8 +52,8 @@ data class KDocContentToken(internal val content: String) : Token() {
  *
  * If they do fit, then the output depends on the [State]:
  *
- *   * In ordinary Kotlin code and comments, the token is output as a single space character.
- *   * In string literals, the token content is output literally.
+ *  * In ordinary Kotlin code and comments, the token is output as a single space character.
+ *  * In string literals, the token content is output literally.
  *
  * If they do not fit, then the whitespace content is replaced by a newline followed by a
  * continuation indent from indentation level of the containing block. In the case of a sting

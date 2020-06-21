@@ -69,7 +69,7 @@ publishing {
         create<MavenPublication>("maven") {
             from(components["kotlin"])
             group = "tech.formatter-kt"
-            version = "0.1-SNAPSHOT"
+            version = "0.4-SNAPSHOT"
             artifact(dokkaJar)
             artifact(sourcesJar)
             pom {

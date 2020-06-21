@@ -102,9 +102,8 @@ class KotlinScanner {
  * Adds to the receiver [NodePatternBuilder] a sequence matching whitespace, a comment surrounded by
  * whitespace, or the empty sequence.
  *
- * The output comment is surrounded by forced line breaks if it is an end of line comment or a
- * block comment with more than one line. A block comment in one line is followed by a simple
- * whitespace.
+ * The output comment is surrounded by forced line breaks if it is an end of line comment or a block
+ * comment with more than one line. A block comment in one line is followed by a simple whitespace.
  */
 fun NodePatternBuilder.possibleWhitespaceWithComment(): NodePatternBuilder =
     either { commentWithPossibleWhitespace() } or { possibleWhitespace() }

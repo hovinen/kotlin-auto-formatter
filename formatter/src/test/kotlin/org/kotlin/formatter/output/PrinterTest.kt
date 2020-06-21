@@ -641,13 +641,13 @@ internal class PrinterTest {
                     BeginToken(length = 40, state = State.CODE),
                     LeafNodeToken("/**"),
                     ClosingForcedBreakToken,
-                    KDocContentToken("Some KDoc.\nSome more KDoc."),
+                    KDocContentToken("Some KDoc.\n\nSome more KDoc."),
                     ClosingForcedBreakToken,
                     LeafNodeToken(" */")
                 )
             )
 
-        assertThat(result).isEqualTo("/**\n * Some KDoc.\n * Some more KDoc.\n */")
+        assertThat(result).isEqualTo("/**\n * Some KDoc.\n *\n * Some more KDoc.\n */")
     }
 
     @Test
@@ -686,25 +686,6 @@ internal class PrinterTest {
             )
 
         assertThat(result).isEqualTo("/**\n * Some KDoc.\n *\n * Some more KDoc.\n */")
-    }
-
-    @Test
-    fun `prints KDoc with initial blank line with leading asterisk without trailing whitespace`() {
-        val subject = subject(maxLineLength = 40)
-
-        val result =
-            subject.print(
-                listOf(
-                    BeginToken(length = 40, state = State.CODE),
-                    LeafNodeToken("/**"),
-                    ClosingForcedBreakToken,
-                    KDocContentToken("\nSome KDoc."),
-                    ClosingForcedBreakToken,
-                    LeafNodeToken(" */")
-                )
-            )
-
-        assertThat(result).isEqualTo("/**\n *\n * Some KDoc.\n */")
     }
 
     @Test

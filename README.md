@@ -34,7 +34,7 @@ To use the plugin, add the following to your `build.gradle.kts`:
 
 ```kotlin
 plugins {
-    id("tech.formatter-kt.formatter") version "0.2"
+    id("tech.formatter-kt.formatter") version "0.4"
 }
 ```
 
@@ -42,7 +42,7 @@ Or, if you are using the Groovy DSL, in `build.gradle`:
 
 ```groovy
 plugins {
-    id 'tech.formatter-kt.formatter' version '0.2'
+    id 'tech.formatter-kt.formatter' version '0.4'
 }
 ```
 
@@ -78,7 +78,6 @@ It should be fine to use both ktlint and this formatter in the same project.
    ktfmt output is not.
  * Indentation amount and column limit are configurable in Kotlin autoformatter.
  * Runs on JDK 8+; ktfmt requires JDK 11+.
- * (currently) Can't autoformat KDoc; KDoc is left as is.
 
 ### Kotlin autoformatter vs. IntelliJ
 
@@ -93,7 +92,6 @@ It should be fine to use both ktlint and this formatter in the same project.
    Kotlin style guide.
  * Organizing of imports and removal of unused imports.
  * Enforcing more horizontal whitespace rules from the Kotlin coding conventions.
- * Autoformatting KDoc.
  * Creation of an IntelliJ plugin.
  * Allow configuration via command line arguments and Gradle plugin.
  * Configuration of the maximum line length from `.editorconfig`.

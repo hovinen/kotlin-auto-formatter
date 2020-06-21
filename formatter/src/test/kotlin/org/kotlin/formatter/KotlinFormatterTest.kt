@@ -1834,7 +1834,8 @@ class KotlinFormatterTest {
         assertThat(result).isEqualTo(
             """
                 /**
-                 * @param parameter an input parameter with a particularly long description
+                 * @param parameter an input parameter with a particularly
+                 *     long description
                  * @param anotherParameter another input parameter
                  */
             """.trimIndent()
@@ -2451,6 +2452,28 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `formats paragraphs in KDoc`() {
+        val subject = KotlinFormatter(maxLineLength = 40)
+
+        val result = subject.format(
+            """
+                /**
+                 * Some
+                 * KDoc.
+                 */
+            """.trimIndent()
+        )
+
+        assertThat(result).isEqualTo(
+            """
+                /**
+                 * Some KDoc.
+                 */
+            """.trimIndent()
+        )
+    }
+
+    @Test
     fun `handles continuation lines of tags in KDoc`() {
         val subject = KotlinFormatter(maxLineLength = 40)
 
@@ -2467,8 +2490,8 @@ class KotlinFormatterTest {
         assertThat(result).isEqualTo(
             """
                 /**
-                 * @property aProperty A property
-                 *     with some KDoc
+                 * @property aProperty A property with
+                 *     some KDoc
                  */
             """.trimIndent()
         )
@@ -2492,7 +2515,8 @@ class KotlinFormatterTest {
             """
                 /**
                  * @property aProperty Some KDoc
-                 * @property anotherProperty Some other KDoc
+                 * @property anotherProperty Some other
+                 *     KDoc
                  */
             """.trimIndent()
         )

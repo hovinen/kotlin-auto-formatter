@@ -11,9 +11,9 @@ import org.kotlin.formatter.Token
  *
  * The DSL methods consist of the following:
  *
- *   * *Matchers*, which match either single [ASTNode] or subsequences thereof.
- *   * *Actions*, which transform an accumulated sequence of [ASTNode] into a list of [Token].
- *   * *Token mappers*, which apply additional transformations to the output [Token].
+ *  * *Matchers*, which match either single [ASTNode] or subsequences thereof.
+ *  * *Actions*, which transform an accumulated sequence of [ASTNode] into a list of [Token].
+ *  * *Token mappers*, which apply additional transformations to the output [Token].
  *
  * The algorithm is based on
  * [Thompson's construction](https://en.wikipedia.org/wiki/Thompson%27s_construction) for NFAs from

@@ -28,13 +28,13 @@ import org.kotlin.formatter.WhitespaceToken
  *     possible. The [Google Kotlin style guide](https://developer.android.com/kotlin/style-guide)
  *     specifies 100 for this value.
  * @property standardIndent the amount in spaces by which to indent blocks, such as class and method
- *     content. The
- *     [Kotlin coding conventions](https://kotlinlang.org/docs/reference/coding-conventions.html)
- *     specify 4 for this value.
+ *     content. The [Kotlin coding
+ *     conventions](https://kotlinlang.org/docs/reference/coding-conventions.html) specify 4 for
+ *     this value.
  * @property continuationIndent the amount in spaces by which to indent when inserting a line break
- *     within statement. The
- *     [Kotlin coding conventions](https://kotlinlang.org/docs/reference/coding-conventions.html)
- *     specify 4 for this value.
+ *     within statement. The [Kotlin coding
+ *     conventions](https://kotlinlang.org/docs/reference/coding-conventions.html) specify 4 for
+ *     this value.
  */
 class Printer(
     private val maxLineLength: Int,
@@ -78,8 +78,8 @@ class Printer(
      *
      * Line breaks inside single-line string literals and long comments are treated properly. The
      * string literal is broken with a concatenation operator, while an initial asterisk is inserted
-     * at the start of each line of a long comment. This behaviour is governed by the [State] of
-     * the current syntactic block as given by the most recent [BeginToken].
+     * at the start of each line of a long comment. This behaviour is governed by the [State] of the
+     * current syntactic block as given by the most recent [BeginToken].
      *
      * This method does not support [org.kotlin.formatter.BlockFromMarkerToken] or
      * [org.kotlin.formatter.MarkerToken] and ignores any such tokens encountered. The
@@ -222,7 +222,8 @@ class Printer(
     }
 
     private fun appendKDocContent(content: String) {
-        val lines = content.split("\n")
+        val lines =
+            KDocFormatter(maxLineLength = spaceRemaining - " * ".length).format(content).split("\n")
         if (atStartOfLine) {
             appendTextOnSameLine(if (lines.first().isNotBlank()) " * " else " *")
         }

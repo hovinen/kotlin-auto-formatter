@@ -1,2 +1,2 @@
 group = "tech.formatter-kt"
-version = "0.1-SNAPSHOT"
+version = "0.4-SNAPSHOT"

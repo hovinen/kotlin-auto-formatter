@@ -1,8 +1,8 @@
 package org.kotlin.formatter
 
 /**
- * The state in which a [org.kotlin.formatter.output.Printer] operates while processing tokens in
- * a block marked by a [BeginToken], [EndToken] pair.
+ * The state in which a [org.kotlin.formatter.output.Printer] operates while processing tokens in a
+ * block marked by a [BeginToken], [EndToken] pair.
  *
  * This state influences how line breaks are determined and how they are inserted.
  */
