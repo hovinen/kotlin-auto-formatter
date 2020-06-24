@@ -25,7 +25,7 @@ gradlePlugin {
     plugins {
         create("kotlinFormatterPlugin") {
             id = "tech.formatter-kt.formatter"
-            version = "0.3.1"
+            version = "0.4"
             implementationClass = "org.kotlin.formatter.plugin.KotlinFormatterPlugin"
         }
     }
