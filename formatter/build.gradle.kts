@@ -1,8 +1,6 @@
 import org.jetbrains.dokka.gradle.DokkaTask
 
 plugins {
-    kotlin("jvm") version "1.3.70"
-    id("org.jlleitschuh.gradle.ktlint") version "9.2.1"
     jacoco
     application
     id("org.jetbrains.dokka") version "0.10.1"

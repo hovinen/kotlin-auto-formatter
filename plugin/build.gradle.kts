@@ -1,8 +1,6 @@
 plugins {
-    kotlin("jvm") version "1.3.70"
     groovy
     `java-gradle-plugin`
-    id("org.jlleitschuh.gradle.ktlint") version "9.2.1"
     id("com.gradle.plugin-publish") version "0.12.0"
 }
 
@@ -18,14 +16,13 @@ dependencies {
     implementation(kotlin("gradle-plugin"))
     implementation(gradleApi())
     implementation(localGroovy())
-    implementation(project(":formatter"))
 }
 
 gradlePlugin {
     plugins {
         create("kotlinFormatterPlugin") {
             id = "tech.formatter-kt.formatter"
-            version = "0.4"
+            version = project.version
             implementationClass = "org.kotlin.formatter.plugin.KotlinFormatterPlugin"
         }
     }
@@ -37,6 +34,9 @@ tasks {
     }
     compileTestKotlin {
         kotlinOptions.jvmTarget = "1.8"
+    }
+    jar {
+        from(project(":formatter").tasks["compileKotlin"].outputs)
     }
     test {
         useJUnitPlatform()
