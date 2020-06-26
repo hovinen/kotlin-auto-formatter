@@ -1196,6 +1196,58 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `preserves comment inside when expression`() {
+        val result =
+            KotlinFormatter(maxLineLength = 50).format(
+                """
+                    when (aCondition) {
+                        // A comment
+                        1 -> {
+                            aVariable = aValue
+                        }
+                    }
+                """.trimIndent()
+            )
+
+        assertThat(result).isEqualTo(
+            """
+                when (aCondition) {
+                    // A comment
+                    1 -> {
+                        aVariable = aValue
+                    }
+                }
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun `preserves comment at the end of a when expression`() {
+        val result =
+            KotlinFormatter(maxLineLength = 50).format(
+                """
+                    when (aCondition) {
+                        1 -> {
+                            aVariable = aValue
+                        }
+                        // A comment
+                    }
+                """.trimIndent()
+            )
+
+        assertThat(result).isEqualTo(
+            """
+                when (aCondition) {
+                    1 -> {
+                        aVariable = aValue
+                    }
+                    // A comment
+                }
+            """.trimIndent()
+        )
+    }
+
+    @Test
     fun `format breaks expressions at operators leaving operations at the end`() {
         val result =
             KotlinFormatter(maxLineLength = 50).format(

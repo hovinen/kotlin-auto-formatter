@@ -37,15 +37,15 @@ internal class WhenExpressionScanner(private val kotlinScanner: KotlinScanner) :
             }
             possibleWhitespace()
             nodeOfType(KtTokens.LBRACE) thenMapToTokens { listOf(LeafNodeToken("{"), EndToken) }
-            possibleWhitespace()
             zeroOrMore {
+                possibleWhitespaceWithComment(ignoreTrailingWhitespace = true)
                 nodeOfType(KtNodeTypes.WHEN_ENTRY) thenMapToTokens { nodes ->
                     listOf(ForcedBreakToken(count = 1)).plus(
                         kotlinScanner.scanNodes(nodes, ScannerState.BLOCK)
                     )
                 }
-                possibleWhitespace()
             }
+            possibleWhitespaceWithComment(ignoreTrailingWhitespace = true)
             nodeOfType(KtTokens.RBRACE) thenMapToTokens {
                 listOf(ClosingForcedBreakToken, LeafNodeToken("}"))
             }

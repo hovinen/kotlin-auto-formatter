@@ -61,7 +61,7 @@ class KotlinScanner {
     ) =
         nodePattern {
             zeroOrMore {
-                either { commentWithPossibleWhitespace() } or {
+                either { commentWithPossibleWhitespace(ignoreTrailingWhitespace = false) } or {
                     anyNode() thenMapToTokens { nodes ->
                         singleNodeScanner(nodes.first(), scannerState)
                     }
@@ -104,11 +104,17 @@ class KotlinScanner {
  *
  * The output comment is surrounded by forced line breaks if it is an end of line comment or a block
  * comment with more than one line. A block comment in one line is followed by a simple whitespace.
+ *
+ * Pass the flag [ignoreTrailingWhitespace] to ignore whitespace after the comment. Otherwise
+ * newlines after EOL comments are turned into [ForcedBreakToken].
  */
-fun NodePatternBuilder.possibleWhitespaceWithComment(): NodePatternBuilder =
-    either { commentWithPossibleWhitespace() } or { possibleWhitespace() }
+fun NodePatternBuilder.possibleWhitespaceWithComment(ignoreTrailingWhitespace: Boolean = false):
+    NodePatternBuilder =
+        either { commentWithPossibleWhitespace(ignoreTrailingWhitespace) } or {
+            possibleWhitespace()
+        }
 
-private fun NodePatternBuilder.commentWithPossibleWhitespace() {
+private fun NodePatternBuilder.commentWithPossibleWhitespace(ignoreTrailingWhitespace: Boolean) {
     either {
         possibleWhitespace() thenMapToTokens { nodes ->
             if (nodes.isNotEmpty() && nodes.first().textContains('\n')) {
@@ -122,7 +128,7 @@ private fun NodePatternBuilder.commentWithPossibleWhitespace() {
                 LeafScanner().scanCommentNode(nodes.first())
             }
             possibleWhitespace() thenMapToTokens { nodes ->
-                if (nodes.isNotEmpty()) {
+                if (nodes.isNotEmpty() && !ignoreTrailingWhitespace) {
                     toForcedBreak(nodes.first())
                 } else {
                     listOf()
