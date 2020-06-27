@@ -1,5 +1,6 @@
 package org.kotlin.formatter.plugin
 
+import java.nio.file.FileSystems
 import org.gradle.api.tasks.SourceTask
 import org.gradle.api.tasks.TaskAction
 import org.kotlin.formatter.KotlinFormatter
@@ -11,9 +12,13 @@ import org.kotlin.formatter.KotlinFormatter
  * existing content with the formatted output.
  */
 internal open class FormatKotlinTask : SourceTask() {
+    private val pathMatcher = FileSystems.getDefault().getPathMatcher("glob:**/*.kt")
+
     @TaskAction
     fun format() {
         val kotlinFormatter = KotlinFormatter()
-        source.forEach { kotlinFormatter.formatFile(it.toPath()) }
+        source.map { it.toPath() }
+            .filter { pathMatcher.matches(it) }
+            .forEach { kotlinFormatter.formatFile(it) }
     }
 }

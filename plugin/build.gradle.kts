@@ -16,6 +16,9 @@ dependencies {
     implementation(kotlin("gradle-plugin"))
     implementation(gradleApi())
     implementation(localGroovy())
+
+    testImplementation("org.junit.jupiter:junit-jupiter:5.6.0")
+    testImplementation("org.assertj:assertj-core:3.11.1")
 }
 
 gradlePlugin {
@@ -25,6 +28,12 @@ gradlePlugin {
             version = project.version
             implementationClass = "org.kotlin.formatter.plugin.KotlinFormatterPlugin"
         }
+    }
+}
+
+sourceSets {
+    test {
+        runtimeClasspath += configurations.getByName("library")
     }
 }
 
