@@ -5,6 +5,7 @@ plugins {
     application
     id("org.jetbrains.dokka") version "0.10.1"
     `maven-publish`
+    id("tech.formatter-kt.formatter") version "0.4.1"
 }
 
 repositories {
