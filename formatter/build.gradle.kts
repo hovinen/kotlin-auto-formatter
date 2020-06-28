@@ -6,6 +6,7 @@ plugins {
     id("org.jetbrains.dokka") version "0.10.1"
     `maven-publish`
     id("tech.formatter-kt.formatter") version "0.4.1"
+    id("com.github.dawnwords.jacoco.badge") version "0.2.0"
 }
 
 repositories {
@@ -34,7 +35,7 @@ tasks {
     jacocoTestReport {
         dependsOn(test) // tests are required to run before generating the report
         reports {
-            xml.isEnabled = false
+            xml.isEnabled = true
             csv.isEnabled = false
             html.destination = file("$buildDir/jacoco")
         }
@@ -110,4 +111,9 @@ publishing {
             }
         }
     }
+}
+
+jacocoBadgeGenSetting {
+    jacocoReportPath = "formatter/build/reports/jacoco/test/jacocoTestReport.xml"
+    readmePath = "README.md"
 }

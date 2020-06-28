@@ -1,6 +1,7 @@
 # Kotlin autoformatter
 
 [![Actions Status](https://github.com/hovinen/kotlin-auto-formatter/workflows/CI/badge.svg)](https://github.com/hovinen/kotlin-auto-formatter/actions)
+![LINE](https://img.shields.io/badge/line--coverage-98%25-brightgreen.svg)
 
 This is an automated and opinionated tool for reformatting Kotlin source files. Source files are
 reformatted so that the code fits within a specified column limit (by default, 100 columns, as
