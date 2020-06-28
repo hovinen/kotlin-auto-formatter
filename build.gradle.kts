@@ -23,7 +23,6 @@ project(":plugin") {
     val library: Configuration by configurations.creating
 
     configurations.getByName("compileClasspath").extendsFrom(library)
-    configurations.getByName("runtimeClasspath").extendsFrom(library)
     configurations.getByName("testRuntimeClasspath").extendsFrom(library)
 
     dependencies {

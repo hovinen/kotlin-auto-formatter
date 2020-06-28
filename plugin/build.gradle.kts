@@ -31,12 +31,6 @@ gradlePlugin {
     }
 }
 
-sourceSets {
-    test {
-        runtimeClasspath += configurations.getByName("library")
-    }
-}
-
 tasks {
     compileKotlin {
         kotlinOptions.jvmTarget = "1.8"
@@ -49,6 +43,12 @@ tasks {
     }
     test {
         useJUnitPlatform()
+    }
+    pluginUnderTestMetadata {
+        pluginClasspath.setFrom(
+            sourceSets.main.get().runtimeClasspath,
+            configurations.compileClasspath
+        )
     }
 }
 
