@@ -1340,15 +1340,15 @@ internal class KotlinScannerTest {
         val node =
             kotlinLoader.parseKotlin(
                 """
-            import org.kotlin.formatter.MyClass
             import org.kotlin.formatter.AnotherClass
+            import org.kotlin.formatter.MyClass
         """
             )
 
         val result = subject.scan(node)
 
         assertThat(result).containsSubsequence(
-            LeafNodeToken("MyClass"),
+            LeafNodeToken("AnotherClass"),
             ForcedBreakToken(count = 1),
             LeafNodeToken("import")
         )

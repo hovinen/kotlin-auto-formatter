@@ -84,8 +84,11 @@ internal fun nodeScannerForElementType(kotlinScanner: KotlinScanner, elementType
             KtNodeTypes.PROPERTY -> {
                 PropertyScanner(kotlinScanner)
             }
-            KtNodeTypes.PACKAGE_DIRECTIVE, KtNodeTypes.IMPORT_LIST, KtNodeTypes.IMPORT_DIRECTIVE,
-                KtNodeTypes.IMPORT_ALIAS -> {
+            KtNodeTypes.IMPORT_LIST -> {
+                ImportListScanner(kotlinScanner)
+            }
+            KtNodeTypes.PACKAGE_DIRECTIVE, KtNodeTypes.IMPORT_DIRECTIVE, KtNodeTypes.IMPORT_ALIAS ->
+                {
                     SimpleBlockScanner(
                         kotlinScanner,
                         ScannerState.PACKAGE_IMPORT,

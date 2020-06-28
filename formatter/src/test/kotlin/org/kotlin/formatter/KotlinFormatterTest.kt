@@ -1985,6 +1985,26 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `sorts import statements alphabetically`() {
+        val subject = KotlinFormatter()
+
+        val result =
+            subject.format(
+                """
+                    import org.kotlin.formatter.BClass
+                    import org.kotlin.formatter.AClass
+                """.trimIndent()
+            )
+
+        assertThat(result).isEqualTo(
+            """
+                import org.kotlin.formatter.AClass
+                import org.kotlin.formatter.BClass
+            """.trimIndent()
+        )
+    }
+
+    @Test
     fun `does not indent top level class declaration`() {
         val subject = KotlinFormatter()
 
@@ -2962,14 +2982,14 @@ class KotlinFormatterTest {
                 """
                     import apackage.AClass
                     
-                    import anotherpackage.AnotherClass
+                    import apackage.BClass
                 """.trimIndent()
             )
 
         assertThat(result).isEqualTo(
             """
                 import apackage.AClass
-                import anotherpackage.AnotherClass
+                import apackage.BClass
             """.trimIndent()
         )
     }
