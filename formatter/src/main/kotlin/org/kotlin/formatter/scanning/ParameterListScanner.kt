@@ -5,15 +5,16 @@ import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.psi.psiUtil.children
 import org.kotlin.formatter.BeginToken
+import org.kotlin.formatter.BlockFromMarkerToken
 import org.kotlin.formatter.ClosingSynchronizedBreakToken
 import org.kotlin.formatter.EndToken
 import org.kotlin.formatter.ForcedBreakToken
 import org.kotlin.formatter.LeafNodeToken
+import org.kotlin.formatter.MarkerToken
 import org.kotlin.formatter.State
 import org.kotlin.formatter.SynchronizedBreakToken
 import org.kotlin.formatter.Token
 import org.kotlin.formatter.WhitespaceToken
-import org.kotlin.formatter.inBeginEndBlock
 import org.kotlin.formatter.scanning.nodepattern.nodePattern
 
 /**
@@ -108,12 +109,17 @@ internal class ParameterListScanner(private val kotlinScanner: KotlinScanner) : 
             zeroOrOne {
                 nodeOfType(KtNodeTypes.MODIFIER_LIST) thenMapToTokens { nodes ->
                     modifierListScanner.scan(nodes.first(), ScannerState.STATEMENT)
-                        .plus(WhitespaceToken(" "))
                 }
                 possibleWhitespace()
+            } thenMapTokens { tokens ->
+                if (tokens.isEmpty()) {
+                    listOf(MarkerToken)
+                } else {
+                    tokens
+                }
             }
             oneOrMore { anyNode() } thenMapToTokens { nodes ->
-                inBeginEndBlock(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT), State.CODE)
+                kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT).plus(BlockFromMarkerToken)
             }
             end()
         }

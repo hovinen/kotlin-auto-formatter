@@ -2951,6 +2951,23 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `does not break after modifier list when an annotation is present`() {
+        val result =
+            KotlinFormatter(maxLineLength = 40).format(
+                """class AClass(@AnAnnotation("Some value") private val aParameter: String)"""
+            )
+
+        assertThat(result).isEqualTo(
+            """
+                class AClass(
+                    @AnAnnotation("Some value")
+                    private val aParameter: String
+                )
+            """.trimIndent()
+        )
+    }
+
+    @Test
     fun `indents named parameters with continuation indent`() {
         val result =
             KotlinFormatter(maxLineLength = 42).format(
