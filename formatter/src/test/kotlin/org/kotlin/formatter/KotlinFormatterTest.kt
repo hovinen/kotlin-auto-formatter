@@ -2897,6 +2897,36 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `preserves formatting of block comments in parameter lists`() {
+        val subject = KotlinFormatter(maxLineLength = 25)
+
+        val result =
+            subject.format(
+                """
+                    aFunction(
+                        0,
+                        /* A comment */ 1,
+                        2 /* A comment */,
+                        3, /* A comment */
+                        4
+                    )
+                """.trimIndent()
+            )
+
+        assertThat(result).isEqualTo(
+            """
+                aFunction(
+                    0,
+                    /* A comment */ 1,
+                    2 /* A comment */,
+                    3, /* A comment */
+                    4
+                )
+            """.trimIndent()
+        )
+    }
+
+    @Test
     fun `puts simple annotations on the same line as function parameters`() {
         val result = KotlinFormatter().format("fun aFunction(@AnAnnotation aParameter: String)")
 

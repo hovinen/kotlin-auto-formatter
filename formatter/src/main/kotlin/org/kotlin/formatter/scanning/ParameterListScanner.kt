@@ -7,6 +7,7 @@ import org.jetbrains.kotlin.psi.psiUtil.children
 import org.kotlin.formatter.BeginToken
 import org.kotlin.formatter.ClosingSynchronizedBreakToken
 import org.kotlin.formatter.EndToken
+import org.kotlin.formatter.ForcedBreakToken
 import org.kotlin.formatter.LeafNodeToken
 import org.kotlin.formatter.State
 import org.kotlin.formatter.SynchronizedBreakToken
@@ -22,6 +23,86 @@ import org.kotlin.formatter.scanning.nodepattern.nodePattern
 internal class ParameterListScanner(private val kotlinScanner: KotlinScanner) : NodeScanner {
     private val modifierListScanner =
         ModifierListScanner(kotlinScanner, breakMode = ModifierListScanner.BreakMode.PARAMETER)
+    private val parameterListPattern =
+        nodePattern {
+            either {
+                zeroOrOne {
+                    nodeOfType(KtTokens.LPAR) thenMapToTokens {
+                        listOf(LeafNodeToken("("), BeginToken(State.CODE))
+                    }
+                }
+                possibleWhitespaceWithComment()
+                nodeOfOneOfTypes(
+                    KtNodeTypes.VALUE_PARAMETER,
+                    KtNodeTypes.VALUE_ARGUMENT
+                ) thenMapToTokens { nodes ->
+                    listOf(SynchronizedBreakToken(whitespaceLength = 0)).plus(
+                        parameterPattern.matchSequence(nodes.first().children().asIterable())
+                    )
+                }
+                zeroOrMore {
+                    possibleWhitespaceWithComment()
+                    nodeOfType(KtTokens.COMMA) thenMapToTokens { listOf(LeafNodeToken(",")) }
+                    either {
+                        possibleWhitespace() thenMapToTokens { nodes ->
+                            listOf(SynchronizedBreakToken(whitespaceLength = 1))
+                        }
+                    } or {
+                        either {
+                            possibleWhitespace() thenMapToTokens { nodes ->
+                                val newlineCount =
+                                    nodes.firstOrNull()?.text?.count { it == '\n' } ?: 0
+                                if (newlineCount > 0) {
+                                    listOf(ForcedBreakToken(count = newlineCount))
+                                } else {
+                                    listOf(WhitespaceToken(" "))
+                                }
+                            }
+                            comment()
+                            whitespaceWithNewline() thenMapToTokens { nodes ->
+                                listOf(SynchronizedBreakToken(whitespaceLength = 1))
+                            }
+                        } or {
+                            possibleWhitespace() thenMapToTokens { nodes ->
+                                val newlineCount =
+                                    nodes.firstOrNull()?.text?.count { it == '\n' } ?: 0
+                                if (newlineCount > 1) {
+                                    listOf(ForcedBreakToken(count = newlineCount))
+                                } else {
+                                    listOf(SynchronizedBreakToken(whitespaceLength = 1))
+                                }
+                            }
+                            comment()
+                            possibleWhitespace() thenMapToTokens { nodes ->
+                                listOf(WhitespaceToken(" "))
+                            }
+                        }
+                    }
+                    nodeOfOneOfTypes(
+                        KtNodeTypes.VALUE_PARAMETER,
+                        KtNodeTypes.VALUE_ARGUMENT
+                    ) thenMapToTokens { nodes ->
+                        parameterPattern.matchSequence(nodes.first().children().asIterable())
+                    }
+                }
+                possibleWhitespaceWithComment()
+                zeroOrOne {
+                    nodeOfType(KtTokens.RPAR) thenMapToTokens {
+                        listOf(
+                            ClosingSynchronizedBreakToken(whitespaceLength = 0),
+                            EndToken,
+                            LeafNodeToken(")")
+                        )
+                    }
+                }
+            } or {
+                nodeOfType(KtTokens.LPAR) thenMapToTokens { listOf(LeafNodeToken("(")) }
+                possibleWhitespaceWithComment()
+                nodeOfType(KtTokens.RPAR) thenMapToTokens { listOf(LeafNodeToken(")")) }
+            }
+            end()
+        }
+
     private val parameterPattern =
         nodePattern {
             zeroOrOne {
@@ -36,38 +117,7 @@ internal class ParameterListScanner(private val kotlinScanner: KotlinScanner) : 
             }
             end()
         }
-    private var isFirstEntry = false
 
-    override fun scan(node: ASTNode, scannerState: ScannerState): List<Token> {
-        isFirstEntry = true
-        val children = node.children().toList()
-        return kotlinScanner.scanNodes(children, ScannerState.STATEMENT) { childNode, _ ->
-            scanEntry(childNode)
-        }
-    }
-
-    private fun scanEntry(node: ASTNode): List<Token> {
-        return when (node.elementType) {
-            KtNodeTypes.VALUE_PARAMETER, KtNodeTypes.VALUE_ARGUMENT -> {
-                val childTokens = parameterPattern.matchSequence(node.children().asIterable())
-                val breakToken =
-                    SynchronizedBreakToken(whitespaceLength = if (isFirstEntry) 0 else 1)
-                isFirstEntry = false
-                listOf(breakToken).plus(childTokens)
-            }
-            KtTokens.WHITE_SPACE -> listOf()
-            KtTokens.LPAR -> listOf(LeafNodeToken("("), BeginToken(State.CODE))
-            KtTokens.RPAR ->
-                if (isFirstEntry) {
-                    listOf(EndToken, LeafNodeToken(")"))
-                } else {
-                    listOf(
-                        ClosingSynchronizedBreakToken(whitespaceLength = 0),
-                        EndToken,
-                        LeafNodeToken(")")
-                    )
-                }
-            else -> kotlinScanner.scanInState(node, ScannerState.STATEMENT)
-        }
-    }
+    override fun scan(node: ASTNode, scannerState: ScannerState): List<Token> =
+        parameterListPattern.matchSequence(node.children().toList())
 }

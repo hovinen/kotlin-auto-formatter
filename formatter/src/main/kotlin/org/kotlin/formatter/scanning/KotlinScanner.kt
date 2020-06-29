@@ -3,7 +3,6 @@ package org.kotlin.formatter.scanning
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.LeafPsiElement
 import org.jetbrains.kotlin.lexer.KtTokens
-import org.kotlin.formatter.ClosingSynchronizedBreakToken
 import org.kotlin.formatter.ForcedBreakToken
 import org.kotlin.formatter.State
 import org.kotlin.formatter.Token
@@ -137,23 +136,38 @@ private fun NodePatternBuilder.commentWithPossibleWhitespace(ignoreTrailingWhite
         }
     } or {
         possibleWhitespaceOutputToToken()
-        nodeOfOneOfTypes(KtTokens.BLOCK_COMMENT) thenMapToTokens { nodes ->
-            inBeginEndBlock(
-                LeafScanner().scanCommentNode(nodes.first())
-                    .plus(ClosingSynchronizedBreakToken(whitespaceLength = 1)),
-                State.CODE
-            )
+        nodeOfType(KtTokens.BLOCK_COMMENT) thenMapToTokens { nodes ->
+            inBeginEndBlock(LeafScanner().scanCommentNode(nodes.first()), State.CODE)
         }
-        possibleWhitespace()
+        possibleWhitespaceOutputToToken()
     }
 }
 
-private fun NodePatternBuilder.possibleWhitespaceOutputToToken() {
+fun NodePatternBuilder.possibleWhitespaceOutputToToken() {
     possibleWhitespace() thenMapToTokens { nodes ->
         if (nodes.isNotEmpty()) {
-            listOf(WhitespaceToken(nodes.first().text))
+            if (nodes.first().textContains('\n')) {
+                listOf(ForcedBreakToken(count = 1))
+            } else {
+                listOf(WhitespaceToken(nodes.first().text))
+            }
         } else {
             listOf()
+        }
+    }
+}
+
+fun NodePatternBuilder.comment() {
+    either {
+        oneOrMore {
+            nodeOfType(KtTokens.EOL_COMMENT) thenMapToTokens { nodes ->
+                LeafScanner().scanCommentNode(nodes.first())
+            }
+            possibleWhitespaceOutputToToken()
+        }
+    } or {
+        nodeOfType(KtTokens.BLOCK_COMMENT) thenMapToTokens { nodes ->
+            inBeginEndBlock(LeafScanner().scanCommentNode(nodes.first()), State.CODE)
         }
     }
 }
