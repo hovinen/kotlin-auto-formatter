@@ -2294,6 +2294,36 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `does not indent init block`() {
+        val subject = KotlinFormatter()
+
+        val result =
+            subject.format(
+                """
+                    class MyClass {
+                        private val aField: String
+                        
+                        init {
+                            aFunction()
+                        }
+                    }
+                """.trimIndent()
+            )
+
+        assertThat(result).isEqualTo(
+            """
+                class MyClass {
+                    private val aField: String
+
+                    init {
+                        aFunction()
+                    }
+                }
+            """.trimIndent()
+        )
+    }
+
+    @Test
     fun `maintains a line break between KDoc and class declaration`() {
         val subject = KotlinFormatter(maxLineLength = 40)
 
