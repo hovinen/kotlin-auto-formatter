@@ -50,9 +50,7 @@ internal class ModifierListScanner(
                     }
                     nodeOfOneOfTypes(KtTokens.EOL_COMMENT, KtTokens.BLOCK_COMMENT) thenMapToTokens
                         { nodes -> LeafScanner().scanCommentNode(nodes.first()) }
-                } thenMapTokens { tokens ->
-                    tokens.plus(breakMode.breakToken).plus(List(markerCount) { MarkerToken })
-                }
+                } thenMapTokens { tokens -> tokens.plus(breakMode.breakToken) }
                 possibleWhitespace()
             }
             zeroOrMore {
@@ -60,7 +58,7 @@ internal class ModifierListScanner(
                     kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
                         .plus(WhitespaceToken(" "))
                 }
-            }
+            } thenMapTokens { tokens -> List(markerCount) { MarkerToken }.plus(tokens) }
             end()
         }
 

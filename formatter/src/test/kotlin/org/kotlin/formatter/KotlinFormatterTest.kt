@@ -263,6 +263,30 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `breaks constructor parameters consistently`() {
+        val result =
+            KotlinFormatter(maxLineLength = 60).format(
+                """
+                    class AClass(
+                        private val aParameter: String,
+                        private val anotherParameter: String
+                    ) {
+                    }
+                """.trimIndent()
+            )
+
+        assertThat(result).isEqualTo(
+            """
+                class AClass(
+                    private val aParameter: String,
+                    private val anotherParameter: String
+                ) {
+                }
+            """.trimIndent()
+        )
+    }
+
+    @Test
     fun `breaks before a return type exceeds the column limit`() {
         val result =
             KotlinFormatter(maxLineLength = 45).format(
