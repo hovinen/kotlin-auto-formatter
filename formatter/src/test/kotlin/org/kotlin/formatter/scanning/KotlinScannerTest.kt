@@ -788,22 +788,6 @@ internal class KotlinScannerTest {
     }
 
     @Test
-    fun `does not output BeginToken, EndToken pair for class constructor`() {
-        val subject = subject()
-        val node = kotlinLoader.parseKotlin("class MyClass(param1: Int, param2: Int)")
-
-        val result = subject.scan(node)
-
-        assertThat(result).doesNotContainSubsequence(
-            LeafNodeToken("MyClass"),
-            BeginToken(State.CODE),
-            LeafNodeToken("("),
-            LeafNodeToken(")"),
-            EndToken
-        )
-    }
-
-    @Test
     fun `does not output a ClosingSynchronizedBreakToken in an expression`() {
         val subject = subject()
         val node = kotlinLoader.parseKotlin("(b + c) + d")

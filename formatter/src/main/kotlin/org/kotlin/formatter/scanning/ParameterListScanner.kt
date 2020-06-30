@@ -29,7 +29,7 @@ internal class ParameterListScanner(private val kotlinScanner: KotlinScanner) : 
             either {
                 zeroOrOne {
                     nodeOfType(KtTokens.LPAR) thenMapToTokens {
-                        listOf(LeafNodeToken("("), BeginToken(State.CODE))
+                        listOf(BeginToken(State.CODE), LeafNodeToken("("))
                     }
                 }
                 possibleWhitespaceWithComment()
@@ -91,8 +91,8 @@ internal class ParameterListScanner(private val kotlinScanner: KotlinScanner) : 
                     nodeOfType(KtTokens.RPAR) thenMapToTokens {
                         listOf(
                             ClosingSynchronizedBreakToken(whitespaceLength = 0),
-                            EndToken,
-                            LeafNodeToken(")")
+                            LeafNodeToken(")"),
+                            EndToken
                         )
                     }
                 }

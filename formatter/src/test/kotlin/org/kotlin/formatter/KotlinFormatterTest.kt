@@ -2314,7 +2314,7 @@ class KotlinFormatterTest {
             """
                 class MyClass {
                     private val aField: String
-
+                
                     init {
                         aFunction()
                     }
@@ -3005,6 +3005,31 @@ class KotlinFormatterTest {
         val result = KotlinFormatter().format("fun aFunction(@AnAnnotation aParameter: String)")
 
         assertThat(result).isEqualTo("fun aFunction(@AnAnnotation aParameter: String)")
+    }
+
+    @Test
+    fun `breaks at correct location in function calls`() {
+        val result =
+            KotlinFormatter(maxLineLength = 49).format(
+                """
+                    aFunction(
+                        anotherFunction(aParameter, anotherParameter),
+                        aThirdFunction()
+                    )
+                """.trimIndent()
+            )
+
+        assertThat(result).isEqualTo(
+            """
+                aFunction(
+                    anotherFunction(
+                        aParameter,
+                        anotherParameter
+                    ),
+                    aThirdFunction()
+                )
+            """.trimIndent()
+        )
     }
 
     @Test

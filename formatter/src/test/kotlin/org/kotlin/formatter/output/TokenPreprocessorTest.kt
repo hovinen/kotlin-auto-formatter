@@ -371,6 +371,43 @@ internal class TokenPreprocessorTest {
         )
     }
 
+    @Test
+    fun `moves an EndToken coming from a BlockFromMarkerToken to after a LeafNodeToken`() {
+        val subject = TokenPreprocessor()
+        val input = listOf(MarkerToken, BlockFromMarkerToken, LeafNodeToken("token"))
+
+        val result = subject.preprocess(input)
+
+        assertThat(result).isEqualTo(
+            listOf(BeginToken(length = 5, state = State.CODE), LeafNodeToken("token"), EndToken)
+        )
+    }
+
+    @Test
+    fun `moves an inner EndToken followed by a BlockFromMarkerToken to after a LeafNodeToken`() {
+        val subject = TokenPreprocessor()
+        val input =
+            listOf(
+                MarkerToken,
+                BeginToken(state = State.CODE),
+                EndToken,
+                BlockFromMarkerToken,
+                LeafNodeToken("token")
+            )
+
+        val result = subject.preprocess(input)
+
+        assertThat(result).isEqualTo(
+            listOf(
+                BeginToken(length = 5, state = State.CODE),
+                BeginToken(length = 5, state = State.CODE),
+                LeafNodeToken("token"),
+                EndToken,
+                EndToken
+            )
+        )
+    }
+
     @ParameterizedTest
     @MethodSource("synchronizedBreakTokenCases")
     fun `converts synchronized break into forced break when KDoc token with newline the same block`(

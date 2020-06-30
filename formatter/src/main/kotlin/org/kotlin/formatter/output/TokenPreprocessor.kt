@@ -63,16 +63,12 @@ class TokenPreprocessor {
      * ignored by this process.
      */
     fun preprocess(input: List<Token>): List<Token> {
-        var foundEndTokens = 0
+        val deferredTokens = mutableListOf<Token>()
         resultStack.push(BlockStackElement(State.CODE))
         for (token in input) {
-            if ((token !is LeafNodeToken && token !is EndToken) ||
-                resultStack.peek().inStringLiteral
-            ) {
-                while (foundEndTokens > 0) {
-                    handleEndToken()
-                    foundEndTokens--
-                }
+            if (token.allowsBlockToEnd || resultStack.peek().inStringLiteral) {
+                handleDeferredTokens(deferredTokens)
+                deferredTokens.clear()
             }
 
             when (token) {
@@ -89,18 +85,11 @@ class TokenPreprocessor {
                 is BeginToken -> {
                     resultStack.push(BlockStackElement(token.state))
                 }
-                is EndToken -> {
-                    ++foundEndTokens
+                is EndToken, is BlockFromMarkerToken -> {
+                    deferredTokens.add(token)
                 }
                 is MarkerToken -> {
                     resultStack.push(MarkerElement())
-                }
-                is BlockFromMarkerToken -> {
-                    val poppedElement = popBlockToMarker()
-                    if (poppedElement is BlockStackElement) {
-                        resultStack.push(BlockStackElement(State.CODE))
-                    }
-                    appendTokensInElement(poppedElement, State.CODE)
                 }
                 is SynchronizedBreakToken, is ClosingSynchronizedBreakToken -> {
                     val lastToken = resultStack.peek().tokens.lastOrNull()
@@ -111,11 +100,33 @@ class TokenPreprocessor {
                 else -> resultStack.peek().tokens.add(token)
             }
         }
-        while (foundEndTokens-- > 0) {
-            handleEndToken()
-        }
+        handleDeferredTokens(deferredTokens)
         return popBlock().tokens
     }
+
+    private fun handleDeferredTokens(deferredTokens: List<Token>) {
+        for (deferredToken in deferredTokens) {
+            when (deferredToken) {
+                is EndToken -> handleEndToken()
+                is BlockFromMarkerToken -> {
+                    val poppedElement = popBlockToMarker()
+                    if (poppedElement is BlockStackElement) {
+                        resultStack.push(BlockStackElement(State.CODE))
+                    }
+                    appendTokensInElement(poppedElement, State.CODE)
+                }
+            }
+        }
+    }
+
+    private val Token.allowsBlockToEnd
+        get() =
+            when (this) {
+                is LeafNodeToken -> false
+                is EndToken -> false
+                is BlockFromMarkerToken -> false
+                else -> true
+            }
 
     private fun lastTokenWasWhitespace() =
         resultStack.peek() is WhitespaceStackElement && resultStack.peek().tokens.isEmpty()
