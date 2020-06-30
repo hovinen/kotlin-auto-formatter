@@ -521,6 +521,26 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `strips trailing newline whitespace from array initializers in annotations`() {
+        val result =
+            KotlinFormatter(maxLineLength = 80).format(
+                """
+                    @AnAnnotation(value = [
+                        "An argument", "Another argument", "A third argument"
+                    ])
+                    fun myFunction()
+                """.trimIndent()
+            )
+
+        assertThat(result).isEqualTo(
+            """
+                @AnAnnotation(value = ["An argument", "Another argument", "A third argument"])
+                fun myFunction()
+            """.trimIndent()
+        )
+    }
+
+    @Test
     fun `adds spaces between array elements in an annotation`() {
         val result =
             KotlinFormatter(maxLineLength = 50).format(

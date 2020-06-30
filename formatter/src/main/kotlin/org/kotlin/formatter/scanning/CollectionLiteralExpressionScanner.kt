@@ -38,7 +38,7 @@ internal class CollectionLiteralExpressionScanner(private val kotlinScanner: Kot
                     nodeOfType(KtTokens.COMMA) thenMapToTokens { listOf(LeafNodeToken(",")) }
                     possibleWhitespace()
                 }
-                oneOrMore { anyNode() } thenMapToTokens { nodes ->
+                oneOrMoreFrugal { anyNode() } thenMapToTokens { nodes ->
                     listOf(SynchronizedBreakToken(whitespaceLength = 1)).plus(
                         kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
                     )
