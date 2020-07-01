@@ -149,13 +149,15 @@ private fun NodePatternBuilder.commentWithPossibleWhitespace(ignoreTrailingWhite
  * The comments are output as closely as possible to the original formatting.
  */
 fun NodePatternBuilder.comment() {
+    zeroOrMore {
+        singleComment()
+        possibleWhitespaceOutputToToken()
+    }
+    singleComment()
+}
+
+private fun NodePatternBuilder.singleComment() {
     either {
-        zeroOrMore {
-            nodeOfType(KtTokens.EOL_COMMENT) thenMapToTokens { nodes ->
-                LeafScanner().scanCommentNode(nodes.first())
-            }
-            possibleWhitespaceOutputToToken()
-        }
         nodeOfType(KtTokens.EOL_COMMENT) thenMapToTokens { nodes ->
             LeafScanner().scanCommentNode(nodes.first())
         }
