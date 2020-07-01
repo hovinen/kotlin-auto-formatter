@@ -1661,6 +1661,26 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `does not insert whitespace between return and label`() {
+        val result =
+            KotlinFormatter(maxLineLength = 50).format(
+                """
+                    fun myFunction() {
+                        return@label
+                    }
+                """.trimIndent()
+            )
+
+        assertThat(result).isEqualTo(
+            """
+                fun myFunction() {
+                    return@label
+                }
+            """.trimIndent()
+        )
+    }
+
+    @Test
     fun `does not output whitespace around the range operator`() {
         val result = KotlinFormatter().format("0..100".trimIndent())
 

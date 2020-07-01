@@ -1,5 +1,6 @@
 package org.kotlin.formatter.scanning
 
+import org.jetbrains.kotlin.KtNodeTypes
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.psi.psiUtil.children
@@ -15,6 +16,11 @@ internal class ReturnScanner(private val kotlinScanner: KotlinScanner) : NodeSca
     private val nodePattern =
         nodePattern {
             nodeOfType(KtTokens.RETURN_KEYWORD) thenMapToTokens { listOf(LeafNodeToken("return")) }
+            zeroOrOne {
+                nodeOfType(KtNodeTypes.LABEL_QUALIFIER) thenMapToTokens { nodes ->
+                    kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
+                }
+            }
             possibleWhitespace()
             zeroOrMore { anyNode() } thenMapToTokens { nodes ->
                 if (nodes.isNotEmpty()) {
