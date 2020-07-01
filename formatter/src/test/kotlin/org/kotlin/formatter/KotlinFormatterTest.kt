@@ -2336,6 +2336,32 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `preserves sequences of EOL comments among annotations`() {
+        val subject = KotlinFormatter()
+
+        val result =
+            subject.format(
+                """
+                    @AnAnnotation
+                    // A comment
+                    // Another comment
+                    @AnotherAnnotation
+                    class MyClass
+                """.trimIndent()
+            )
+
+        assertThat(result).isEqualTo(
+            """
+                @AnAnnotation
+                // A comment
+                // Another comment
+                @AnotherAnnotation
+                class MyClass
+            """.trimIndent()
+        )
+    }
+
+    @Test
     fun `does not indent init block`() {
         val subject = KotlinFormatter()
 

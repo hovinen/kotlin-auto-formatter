@@ -48,8 +48,7 @@ internal class ModifierListScanner(
                             listOf(WhitespaceToken(" "))
                         }
                     }
-                    nodeOfOneOfTypes(KtTokens.EOL_COMMENT, KtTokens.BLOCK_COMMENT) thenMapToTokens
-                        { nodes -> LeafScanner().scanCommentNode(nodes.first()) }
+                    comment()
                 } thenMapTokens { tokens -> tokens.plus(breakMode.breakToken) }
                 possibleWhitespace()
             }

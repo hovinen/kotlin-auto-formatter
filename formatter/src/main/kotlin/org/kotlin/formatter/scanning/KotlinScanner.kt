@@ -150,11 +150,14 @@ private fun NodePatternBuilder.commentWithPossibleWhitespace(ignoreTrailingWhite
  */
 fun NodePatternBuilder.comment() {
     either {
-        oneOrMore {
+        zeroOrMore {
             nodeOfType(KtTokens.EOL_COMMENT) thenMapToTokens { nodes ->
                 LeafScanner().scanCommentNode(nodes.first())
             }
             possibleWhitespaceOutputToToken()
+        }
+        nodeOfType(KtTokens.EOL_COMMENT) thenMapToTokens { nodes ->
+            LeafScanner().scanCommentNode(nodes.first())
         }
     } or {
         nodeOfType(KtTokens.BLOCK_COMMENT) thenMapToTokens { nodes ->
