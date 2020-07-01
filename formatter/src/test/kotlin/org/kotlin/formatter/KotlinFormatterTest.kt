@@ -3226,6 +3226,15 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `preserves whitespace preceding an EOL comment on a statement`() {
+        val subject = KotlinFormatter(maxLineLength = 80)
+
+        val result = subject.format("""val aProperty: String // An EOL comment""".trimIndent())
+
+        assertThat(result).isEqualTo("""val aProperty: String // An EOL comment""".trimIndent())
+    }
+
+    @Test
     fun `puts simple annotations on the same line as function parameters`() {
         val result = KotlinFormatter().format("fun aFunction(@AnAnnotation aParameter: String)")
 

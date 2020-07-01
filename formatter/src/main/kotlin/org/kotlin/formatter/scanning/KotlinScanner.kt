@@ -122,8 +122,12 @@ private fun NodePatternBuilder.commentWithPossibleWhitespace(ignoreTrailingWhite
         possibleWhitespaceOutputToToken()
     } or {
         possibleWhitespace() thenMapToTokens { nodes ->
-            if (nodes.isNotEmpty() && nodes.first().textContains('\n')) {
-                toForcedBreak(nodes.first())
+            if (nodes.isNotEmpty()) {
+                if (nodes.first().textContains('\n')) {
+                    toForcedBreak(nodes.first())
+                } else {
+                    listOf(WhitespaceToken(" "))
+                }
             } else {
                 listOf()
             }
