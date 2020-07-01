@@ -10,6 +10,9 @@ package org.kotlin.formatter.output
  *
  * KDoc tags have a continuation indent of +4, as specified in the
  * [Google Kotlin style guide](https://developer.android.com/kotlin/style-guide#block_tags).
+ *
+ * Markdown tables, as detected by the presence of the pipe `|` in a line, are left untouched by the
+ * formatter.
  */
 class KDocFormatter(private val maxLineLength: Int) {
     /**
@@ -94,6 +97,13 @@ class KDocFormatter(private val maxLineLength: Int) {
                     pushBlock(0)
                     continuationIndent = 3
                     linesInBlock.add(line.replace(orderedListMatch.groups[1]?.value ?: "", " * "))
+                }
+                line.contains('|') -> {
+                    pushBlock(0)
+                    state = State.EXITING_RAW_BLOCK
+                    linesInBlock.add(line)
+                    pushBlock(0)
+                    state = State.PARAGRAPH
                 }
                 else -> {
                     linesInBlock.add(line)

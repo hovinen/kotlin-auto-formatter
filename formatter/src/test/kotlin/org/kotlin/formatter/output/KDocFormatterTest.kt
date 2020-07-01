@@ -70,6 +70,25 @@ internal class KDocFormatterTest {
     }
 
     @Test
+    fun `leaves tables untouched`() {
+        val subject = KDocFormatter(maxLineLength = 10)
+
+        val result = subject.format(
+            """
+                A | Table
+                Another | Row
+            """.trimIndent()
+        )
+
+        assertThat(result).isEqualTo(
+            """
+                A | Table
+                Another | Row
+            """.trimIndent()
+        )
+    }
+
+    @Test
     fun `does not break inside a link`() {
         val subject = KDocFormatter(maxLineLength = 10)
 
