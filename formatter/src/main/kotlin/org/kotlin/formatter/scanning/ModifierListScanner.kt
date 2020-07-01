@@ -23,7 +23,7 @@ import org.kotlin.formatter.scanning.nodepattern.nodePattern
 internal class ModifierListScanner(
     private val kotlinScanner: KotlinScanner,
     private val markerCount: Int = 1,
-    private val breakMode: BreakMode = BreakMode.TYPE
+    private val breakMode: BreakMode = BreakMode.PARAMETER
 ) : NodeScanner {
     /** Governs the [Token] which should appear immediately after each annotation. */
     internal enum class BreakMode(internal val breakToken: Token) {

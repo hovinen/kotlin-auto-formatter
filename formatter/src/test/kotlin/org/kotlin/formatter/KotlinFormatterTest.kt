@@ -741,6 +741,26 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `properly formats annotated type parameters`() {
+        val result =
+            KotlinFormatter(maxLineLength = 50).format(
+                """
+                    val value: Map<@AnAnnotation("A value") Key, @AnotherAnnotation("Another value") Value>
+                """.trimIndent()
+            )
+
+        assertThat(result).isEqualTo(
+            """
+                val value:
+                    Map<
+                        @AnAnnotation("A value") Key,
+                        @AnotherAnnotation("Another value") Value
+                    >
+            """.trimIndent()
+        )
+    }
+
+    @Test
     fun `breaks between annotations and multiline declarations`() {
         val result =
             KotlinFormatter(maxLineLength = 50).format(

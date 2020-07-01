@@ -11,9 +11,11 @@ import org.kotlin.formatter.scanning.nodepattern.nodePattern
 
 /** A [NodeScanner] for `typealias` declarations. */
 internal class TypealiasScanner(private val kotlinScanner: KotlinScanner) : NodeScanner {
+    private val modifierListScanner =
+        ModifierListScanner(kotlinScanner, breakMode = ModifierListScanner.BreakMode.TYPE)
     private val nodePattern =
         nodePattern {
-            optionalKDoc(kotlinScanner)
+            optionalKDoc(kotlinScanner, modifierListScanner)
             possibleWhitespace()
             zeroOrOne {
                 nodeOfType(KtNodeTypes.MODIFIER_LIST) thenMapToTokens { nodes ->

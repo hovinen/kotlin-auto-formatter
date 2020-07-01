@@ -22,13 +22,21 @@ import org.kotlin.formatter.scanning.nodepattern.nodePattern
 
 /** A [NodeScanner] for class and interface definitions. */
 internal class ClassScanner(private val kotlinScanner: KotlinScanner) : NodeScanner {
+    private val modifierListScanner =
+        ModifierListScanner(
+            kotlinScanner = kotlinScanner,
+            markerCount = 1,
+            breakMode = ModifierListScanner.BreakMode.TYPE
+        )
     private val nodePattern =
         nodePattern {
-            optionalKDoc(kotlinScanner)
+            optionalKDoc(kotlinScanner, modifierListScanner)
             possibleWhitespaceWithComment()
-            zeroOrOne { nodeOfType(KtNodeTypes.MODIFIER_LIST) } thenMapToTokens { nodes ->
-                listOf(MarkerToken).plus(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT))
-            }
+            zeroOrOne {
+                nodeOfType(KtNodeTypes.MODIFIER_LIST) thenMapToTokens { nodes ->
+                    modifierListScanner.scan(nodes.first(), ScannerState.STATEMENT)
+                }
+            } thenMapTokens { tokens -> listOf(MarkerToken).plus(tokens) }
             possibleWhitespace()
             exactlyOne {
                 nodeOfOneOfTypes(

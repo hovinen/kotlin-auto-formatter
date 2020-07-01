@@ -53,7 +53,7 @@ internal fun NodePatternBuilder.declarationWithOptionalModifierList(
         ),
     markerCount: Int = 1
 ) {
-    optionalKDoc(kotlinScanner)
+    optionalKDoc(kotlinScanner, modifierListScanner)
     possibleWhitespaceWithComment()
     either {
         nodeOfType(KtNodeTypes.MODIFIER_LIST) thenMapToTokens { nodes ->
@@ -85,7 +85,10 @@ internal fun NodePatternBuilder.declarationWithOptionalModifierList(
  *
  * The KDoc may be preceded by a modifier list, in which case it is relocated to after the list.
  */
-internal fun NodePatternBuilder.optionalKDoc(kotlinScanner: KotlinScanner) {
+internal fun NodePatternBuilder.optionalKDoc(
+    kotlinScanner: KotlinScanner,
+    modifierListScanner: ModifierListScanner
+) {
     zeroOrOne {
         exactlyOne {
             zeroOrOne { nodeOfType(KtNodeTypes.MODIFIER_LIST) }
@@ -95,7 +98,7 @@ internal fun NodePatternBuilder.optionalKDoc(kotlinScanner: KotlinScanner) {
             if (nodes.first().elementType == KtNodeTypes.MODIFIER_LIST) {
                 kotlinScanner.scanNodes(listOf(nodes.last()), ScannerState.STATEMENT)
                     .plus(ForcedBreakToken(count = 1))
-                    .plus(kotlinScanner.scanNodes(listOf(nodes.first()), ScannerState.STATEMENT))
+                    .plus(modifierListScanner.scan(nodes.first(), ScannerState.STATEMENT))
             } else {
                 kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
                     .plus(ForcedBreakToken(count = 1))

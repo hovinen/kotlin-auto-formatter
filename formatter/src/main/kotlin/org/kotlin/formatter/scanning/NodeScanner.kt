@@ -48,6 +48,9 @@ internal fun nodeScannerForElementType(kotlinScanner: KotlinScanner, elementType
             KtNodeTypes.VALUE_PARAMETER_LIST, KtNodeTypes.VALUE_ARGUMENT_LIST -> {
                 ParameterListScanner(kotlinScanner)
             }
+            KtNodeTypes.TYPE_ARGUMENT_LIST -> {
+                TypeArgumentListScanner(kotlinScanner)
+            }
             KtNodeTypes.COLLECTION_LITERAL_EXPRESSION -> {
                 CollectionLiteralExpressionScanner(kotlinScanner)
             }
@@ -110,17 +113,14 @@ internal fun nodeScannerForElementType(kotlinScanner: KotlinScanner, elementType
             KtNodeTypes.PRIMARY_CONSTRUCTOR -> {
                 PrimaryConstructorScanner(kotlinScanner)
             }
-            KtNodeTypes.PROPERTY_ACCESSOR -> {
-                SimpleBlockScanner(kotlinScanner, ScannerState.STATEMENT, State.CODE)
-            }
             KtFileElementType.INSTANCE, is KtScriptElementType,
                 KtNodeTypes.LITERAL_STRING_TEMPLATE_ENTRY -> {
                     SimpleScanner(kotlinScanner, ScannerState.BLOCK)
                 }
             KtNodeTypes.WHEN_ENTRY, KtNodeTypes.ANNOTATION_ENTRY, KtNodeTypes.PREFIX_EXPRESSION,
                 KtNodeTypes.PARENTHESIZED, KtNodeTypes.VALUE_PARAMETER,
-                KtNodeTypes.SUPER_TYPE_ENTRY, KtNodeTypes.SUPER_TYPE_CALL_ENTRY,
-                KtNodeTypes.TYPE_REFERENCE, KtNodeTypes.TRY -> {
+                KtNodeTypes.SUPER_TYPE_ENTRY, KtNodeTypes.SUPER_TYPE_CALL_ENTRY, KtNodeTypes.TRY,
+                KtNodeTypes.USER_TYPE, KtNodeTypes.PROPERTY_ACCESSOR -> {
                     SimpleBlockScanner(kotlinScanner, ScannerState.STATEMENT, State.CODE)
                 }
             KtNodeTypes.SHORT_STRING_TEMPLATE_ENTRY -> {
