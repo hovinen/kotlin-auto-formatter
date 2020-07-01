@@ -32,13 +32,24 @@ internal class LeafScanner {
                     .plus(LeafScanner().tokenizeString(node.text))
                     .plus(EndToken)
             KtTokens.BLOCK_COMMENT ->
-                listOf(BeginToken(State.LONG_COMMENT)).plus(tokenizeNodeContentInBlockComment(node))
+                listOf(LeafNodeToken("/*"), BeginToken(State.LONG_COMMENT), WhitespaceToken(" "))
+                    .plus(tokenizeNodeContentInBlockComment(node))
                     .plus(EndToken)
+                    .plus(WhitespaceToken(" "))
+                    .plus(LeafNodeToken("*/"))
             else -> throw IllegalArgumentException("Invalid node for comment $node")
         }
 
-    private fun tokenizeNodeContentInBlockComment(node: ASTNode): List<Token> =
-        LeafScanner().tokenizeString(node.text.replace(Regex("\n[ ]+\\* "), "\n "))
+    private fun tokenizeNodeContentInBlockComment(node: ASTNode): List<Token> {
+        val text =
+            node.text
+                .removePrefix("/*")
+                .removeSuffix("*/")
+                .replace(Regex("\n[ ]+\\* "), "\n ")
+                .trim()
+        val tokens = tokenizeString(text)
+        return tokens
+    }
 
     private fun stateBasedOnCommentContent(content: String) =
         if (content.startsWith("// TODO")) State.TODO_COMMENT else State.LINE_COMMENT

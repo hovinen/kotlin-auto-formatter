@@ -3092,6 +3092,30 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `preserves formatting of multi-line comments with initial blank line`() {
+        val subject = KotlinFormatter(maxLineLength = 60)
+
+        val result =
+            subject.format(
+                """
+                    /*
+                     * Some comment text which is too long to fit on line
+                     * Some further text
+                     */
+                    aFunction()
+                """.trimIndent()
+            )
+
+        assertThat(result).isEqualTo(
+            """
+                /* Some comment text which is too long to fit on line
+                 * Some further text */
+                aFunction()
+            """.trimIndent()
+        )
+    }
+
+    @Test
     fun `preserves formatting of one-line comments inside function calls`() {
         val subject = KotlinFormatter(maxLineLength = 60)
 

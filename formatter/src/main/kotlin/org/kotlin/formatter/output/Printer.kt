@@ -238,7 +238,9 @@ class Printer(
 
     private fun appendWhitespaceToken(token: WhitespaceToken) {
         if (!breakingAllowed || whitespacePlusFollowingTokenFitOnLine(token)) {
-            if (inStringLiteral || inComment) {
+            if (inComment && token.content.contains('\n')) {
+                appendWhitespaceForComment(token.content)
+            } else if (inStringLiteral || inComment) {
                 appendTextOnSameLine(token.content)
             } else if (token.content.isNotEmpty()) {
                 appendTextOnSameLine(" ")
@@ -258,6 +260,17 @@ class Printer(
             if (inComment) {
                 appendTextOnSameLine(" ")
             }
+        }
+    }
+
+    private fun appendWhitespaceForComment(content: String) {
+        val parts = content.split(Regex("\n"), 2)
+        if (parts.size == 1) {
+            appendTextOnSameLine(content)
+        } else {
+            appendTextOnSameLine(parts[0])
+            indent(0)
+            appendWhitespaceForComment(parts[1])
         }
     }
 
