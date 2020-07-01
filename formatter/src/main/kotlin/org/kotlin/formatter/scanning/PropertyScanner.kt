@@ -80,17 +80,28 @@ internal fun NodePatternBuilder.declarationWithOptionalModifierList(
     }
 }
 
-/** Adds to the receiver [NodePatternBuilder] a sequence matching optionally present KDoc. */
+/**
+ * Adds to the receiver [NodePatternBuilder] a sequence matching optionally present KDoc.
+ *
+ * The KDoc may be preceded by a modifier list, in which case it is relocated to after the list.
+ */
 internal fun NodePatternBuilder.optionalKDoc(kotlinScanner: KotlinScanner) {
     zeroOrOne {
-        nodeOfType(KDocTokens.KDOC)
-        possibleWhitespace()
-    } thenMapToTokens { nodes ->
-        if (nodes.isNotEmpty()) {
-            kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT).plus(ForcedBreakToken(count = 1))
-        } else {
-            listOf()
+        exactlyOne {
+            zeroOrOne { nodeOfType(KtNodeTypes.MODIFIER_LIST) }
+            possibleWhitespace()
+            nodeOfType(KDocTokens.KDOC)
+        } thenMapToTokens { nodes ->
+            if (nodes.first().elementType == KtNodeTypes.MODIFIER_LIST) {
+                kotlinScanner.scanNodes(listOf(nodes.last()), ScannerState.STATEMENT)
+                    .plus(ForcedBreakToken(count = 1))
+                    .plus(kotlinScanner.scanNodes(listOf(nodes.first()), ScannerState.STATEMENT))
+            } else {
+                kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
+                    .plus(ForcedBreakToken(count = 1))
+            }
         }
+        possibleWhitespace()
     }
 }
 

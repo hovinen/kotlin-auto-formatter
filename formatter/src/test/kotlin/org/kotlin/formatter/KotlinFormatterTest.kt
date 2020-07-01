@@ -2423,6 +2423,27 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `moves modifiers preceding KDoc to after the KDoc`() {
+        val subject = KotlinFormatter(maxLineLength = 40)
+
+        val result = subject.format(
+            """
+                @AnAnnotation
+                /** Some KDoc. */
+                class MyClass
+            """.trimIndent()
+        )
+
+        assertThat(result).isEqualTo(
+            """
+                /** Some KDoc. */
+                @AnAnnotation
+                class MyClass
+            """.trimIndent()
+        )
+    }
+
+    @Test
     fun `supports modifiers on typealias declaration`() {
         val subject = KotlinFormatter(maxLineLength = 40)
 

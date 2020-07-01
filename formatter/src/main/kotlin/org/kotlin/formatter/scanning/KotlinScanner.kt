@@ -143,20 +143,11 @@ private fun NodePatternBuilder.commentWithPossibleWhitespace(ignoreTrailingWhite
     }
 }
 
-fun NodePatternBuilder.possibleWhitespaceOutputToToken() {
-    possibleWhitespace() thenMapToTokens { nodes ->
-        if (nodes.isNotEmpty()) {
-            if (nodes.first().textContains('\n')) {
-                listOf(ForcedBreakToken(count = 1))
-            } else {
-                listOf(WhitespaceToken(nodes.first().text))
-            }
-        } else {
-            listOf()
-        }
-    }
-}
-
+/**
+ * Adds to the receiver [NodePatternBuilder] a sequence matching a sequence of comments.
+ *
+ * The comments are output as closely as possible to the original formatting.
+ */
 fun NodePatternBuilder.comment() {
     either {
         oneOrMore {
@@ -168,6 +159,20 @@ fun NodePatternBuilder.comment() {
     } or {
         nodeOfType(KtTokens.BLOCK_COMMENT) thenMapToTokens { nodes ->
             inBeginEndBlock(LeafScanner().scanCommentNode(nodes.first()), State.CODE)
+        }
+    }
+}
+
+private fun NodePatternBuilder.possibleWhitespaceOutputToToken() {
+    possibleWhitespace() thenMapToTokens { nodes ->
+        if (nodes.isNotEmpty()) {
+            if (nodes.first().textContains('\n')) {
+                listOf(ForcedBreakToken(count = 1))
+            } else {
+                listOf(WhitespaceToken(nodes.first().text))
+            }
+        } else {
+            listOf()
         }
     }
 }
