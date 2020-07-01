@@ -653,6 +653,28 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `accepts empty array initializers`() {
+        val result =
+            KotlinFormatter(maxLineLength = 50).format(
+                """
+                    class MyClass {
+                        @AnAnnotation([])
+                        fun myFunction()
+                    }
+                """.trimIndent()
+            )
+
+        assertThat(result).isEqualTo(
+            """
+                class MyClass {
+                    @AnAnnotation([])
+                    fun myFunction()
+                }
+            """.trimIndent()
+        )
+    }
+
+    @Test
     fun `breaks between annotations and multiline declarations`() {
         val result =
             KotlinFormatter(maxLineLength = 50).format(
