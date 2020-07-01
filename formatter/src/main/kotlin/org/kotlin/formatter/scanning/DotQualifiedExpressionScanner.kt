@@ -56,7 +56,7 @@ internal class DotQualifiedExpressionScanner(private val kotlinScanner: KotlinSc
                         KtNodeTypes.DOT_QUALIFIED_EXPRESSION,
                         KtNodeTypes.SAFE_ACCESS_EXPRESSION
                     ) thenMapToTokens { nodes -> scanInner(nodes.first()) }
-                    possibleWhitespace()
+                    possibleWhitespaceWithComment()
                     nodeOfOneOfTypes(KtTokens.DOT, KtTokens.SAFE_ACCESS) thenMapToTokens { nodes ->
                         listOf(
                             SynchronizedBreakToken(whitespaceLength = 0),
@@ -68,7 +68,7 @@ internal class DotQualifiedExpressionScanner(private val kotlinScanner: KotlinSc
                     anyNode() thenMapToTokens { nodes ->
                         kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
                     }
-                    possibleWhitespace()
+                    possibleWhitespaceWithComment()
                     nodeOfOneOfTypes(KtTokens.DOT, KtTokens.SAFE_ACCESS) thenMapToTokens { nodes ->
                         val tokens =
                             listOf(BeginToken(State.CODE), LeafNodeToken(nodes.first().text))

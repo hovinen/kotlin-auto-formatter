@@ -115,6 +115,12 @@ fun NodePatternBuilder.possibleWhitespaceWithComment(ignoreTrailingWhitespace: B
 
 private fun NodePatternBuilder.commentWithPossibleWhitespace(ignoreTrailingWhitespace: Boolean) {
     either {
+        possibleWhitespaceOutputToToken()
+        nodeOfType(KtTokens.BLOCK_COMMENT) thenMapToTokens { nodes ->
+            inBeginEndBlock(LeafScanner().scanCommentNode(nodes.first()), State.CODE)
+        }
+        possibleWhitespaceOutputToToken()
+    } or {
         possibleWhitespace() thenMapToTokens { nodes ->
             if (nodes.isNotEmpty() && nodes.first().textContains('\n')) {
                 toForcedBreak(nodes.first())
@@ -123,9 +129,7 @@ private fun NodePatternBuilder.commentWithPossibleWhitespace(ignoreTrailingWhite
             }
         }
         oneOrMore {
-            nodeOfType(KtTokens.EOL_COMMENT) thenMapToTokens { nodes ->
-                LeafScanner().scanCommentNode(nodes.first())
-            }
+            singleComment()
             possibleWhitespace() thenMapToTokens { nodes ->
                 if (nodes.isNotEmpty() && !ignoreTrailingWhitespace) {
                     toForcedBreak(nodes.first())
@@ -134,12 +138,6 @@ private fun NodePatternBuilder.commentWithPossibleWhitespace(ignoreTrailingWhite
                 }
             }
         }
-    } or {
-        possibleWhitespaceOutputToToken()
-        nodeOfType(KtTokens.BLOCK_COMMENT) thenMapToTokens { nodes ->
-            inBeginEndBlock(LeafScanner().scanCommentNode(nodes.first()), State.CODE)
-        }
-        possibleWhitespaceOutputToToken()
     }
 }
 

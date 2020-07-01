@@ -320,7 +320,7 @@ class KotlinFormatterTest {
     }
 
     @Test
-    fun `break before a dot when next block does not fit on line`() {
+    fun `breaks before a dot when next block does not fit on line`() {
         val result =
             KotlinFormatter(maxLineLength = 45).format(
                 """
@@ -334,6 +334,72 @@ class KotlinFormatterTest {
                 anObject
                     .aMethod(aParameter, anotherParameter)
                     .anotherMethod()
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun `allows comments inside dot-qualified expressions`() {
+        val result =
+            KotlinFormatter(maxLineLength = 100).format(
+                """
+                    anObject.aMethod()
+                        // A comment
+                        // Another comment
+                        .anotherMethod()
+                """.trimIndent()
+            )
+
+        assertThat(result).isEqualTo(
+            """
+                anObject.aMethod()
+                    // A comment
+                    // Another comment
+                    .anotherMethod()
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun `allows comments inside single dot-qualified expression`() {
+        val result =
+            KotlinFormatter(maxLineLength = 100).format(
+                """
+                    anObject
+                        // A comment
+                        // Another comment
+                        .aMethod()
+                """.trimIndent()
+            )
+
+        assertThat(result).isEqualTo(
+            """
+                anObject
+                    // A comment
+                    // Another comment
+                    .aMethod()
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun `allows mixture of block and EOL comments inside single dot-qualified expression`() {
+        val result =
+            KotlinFormatter(maxLineLength = 100).format(
+                """
+                    anObject
+                        // A comment
+                        /* Another comment */
+                        .aMethod()
+                """.trimIndent()
+            )
+
+        assertThat(result).isEqualTo(
+            """
+                anObject
+                    // A comment
+                    /* Another comment */
+                    .aMethod()
             """.trimIndent()
         )
     }
