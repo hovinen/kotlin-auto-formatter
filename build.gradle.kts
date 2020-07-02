@@ -12,7 +12,7 @@ buildscript {
 }
 
 group = "tech.formatter-kt"
-version = "0.4.3-SNAPSHOT"
+version = "0.4.4-SNAPSHOT"
 
 subprojects {
     apply<KotlinPlatformJvmPlugin>()

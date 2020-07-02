@@ -761,6 +761,21 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `maintains space between comma-separated type arguments`() {
+        val result = KotlinFormatter(maxLineLength = 50).format("val value: Map<Key, Value>")
+
+        assertThat(result).isEqualTo("val value: Map<Key, Value>")
+    }
+
+    @Test
+    fun `fixes space between comma-separated type arguments`() {
+        val result =
+            KotlinFormatter(maxLineLength = 50).format("val value: Map< Key ,Something , Value >")
+
+        assertThat(result).isEqualTo("val value: Map<Key, Something, Value>")
+    }
+
+    @Test
     fun `breaks between annotations and multiline declarations`() {
         val result =
             KotlinFormatter(maxLineLength = 50).format(

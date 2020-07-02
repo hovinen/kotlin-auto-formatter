@@ -37,7 +37,7 @@ To use the plugin, add the following to your `build.gradle.kts`:
 
 ```kotlin
 plugins {
-    id("tech.formatter-kt.formatter") version "0.4.3"
+    id("tech.formatter-kt.formatter") version "0.4.4"
 }
 ```
 
@@ -45,7 +45,7 @@ Or, if you are using the Groovy DSL, in `build.gradle`:
 
 ```groovy
 plugins {
-    id 'tech.formatter-kt.formatter' version '0.4.3'
+    id 'tech.formatter-kt.formatter' version '0.4.4'
 }
 ```
 

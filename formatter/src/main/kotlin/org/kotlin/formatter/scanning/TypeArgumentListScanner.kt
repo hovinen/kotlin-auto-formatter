@@ -17,13 +17,42 @@ internal class TypeArgumentListScanner(private val kotlinScanner: KotlinScanner)
         nodePattern {
             nodeOfType(KtTokens.LT) thenMapToTokens { listOf(LeafNodeToken("<")) }
             possibleWhitespace()
-            zeroOrMore {
-                oneOrMoreFrugal { anyNode() } thenMapToTokens { nodes ->
-                    listOf(SynchronizedBreakToken(whitespaceLength = 0)).plus(
+            either {
+                exactlyOne {
+                    anyNode() thenMapToTokens { nodes ->
+                        listOf(SynchronizedBreakToken(whitespaceLength = 0)).plus(
+                            kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
+                        )
+                    }
+                    possibleWhitespace()
+                    nodeOfType(KtTokens.COMMA) thenMapToTokens { listOf(LeafNodeToken(",")) }
+                }
+                possibleWhitespace()
+                zeroOrMore {
+                    exactlyOne {
+                        anyNode() thenMapToTokens { nodes ->
+                            listOf(SynchronizedBreakToken(whitespaceLength = 1)).plus(
+                                kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
+                            )
+                        }
+                        possibleWhitespace()
+                        nodeOfType(KtTokens.COMMA) thenMapToTokens { listOf(LeafNodeToken(",")) }
+                    }
+                    possibleWhitespace()
+                }
+                exactlyOne { anyNode() } thenMapToTokens { nodes ->
+                    listOf(SynchronizedBreakToken(whitespaceLength = 1)).plus(
                         kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
                     )
                 }
-                possibleWhitespace()
+            } or {
+                zeroOrOne {
+                    exactlyOne { anyNode() } thenMapToTokens { nodes ->
+                        listOf(SynchronizedBreakToken(whitespaceLength = 0)).plus(
+                            kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
+                        )
+                    }
+                }
             }
             possibleWhitespace()
             nodeOfType(KtTokens.GT) thenMapToTokens {
