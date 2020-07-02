@@ -42,9 +42,8 @@ internal class TokenPreprocessorTest {
 
         val result = subject.preprocess(input)
 
-        assertThat(result).isEqualTo(
-            listOf(WhitespaceToken(length = lengthExpected, content = " "), token)
-        )
+        assertThat(result)
+            .isEqualTo(listOf(WhitespaceToken(length = lengthExpected, content = " "), token))
     }
 
     @Test
@@ -75,9 +74,10 @@ internal class TokenPreprocessorTest {
 
         val result = subject.preprocess(input)
 
-        assertThat(result).isEqualTo(
-            listOf(WhitespaceToken(length = 10, content = " "), LeafNodeToken("any token"))
-        )
+        assertThat(result)
+            .isEqualTo(
+                listOf(WhitespaceToken(length = 10, content = " "), LeafNodeToken("any token"))
+            )
     }
 
     @Test
@@ -87,9 +87,10 @@ internal class TokenPreprocessorTest {
 
         val result = subject.preprocess(input)
 
-        assertThat(result).isEqualTo(
-            listOf(WhitespaceToken(length = 9, content = ""), LeafNodeToken("any token"))
-        )
+        assertThat(result)
+            .isEqualTo(
+                listOf(WhitespaceToken(length = 9, content = ""), LeafNodeToken("any token"))
+            )
     }
 
     @Test
@@ -105,14 +106,15 @@ internal class TokenPreprocessorTest {
 
         val result = subject.preprocess(input)
 
-        assertThat(result).isEqualTo(
-            listOf(
-                WhitespaceToken(length = 10, content = " "),
-                LeafNodeToken("any token"),
-                WhitespaceToken(length = 9, content = ""),
-                LeafNodeToken("any token")
+        assertThat(result)
+            .isEqualTo(
+                listOf(
+                    WhitespaceToken(length = 10, content = " "),
+                    LeafNodeToken("any token"),
+                    WhitespaceToken(length = 9, content = ""),
+                    LeafNodeToken("any token")
+                )
             )
-        )
     }
 
     @Test
@@ -227,14 +229,15 @@ internal class TokenPreprocessorTest {
 
         val result = subject.preprocess(input)
 
-        assertThat(result).isEqualTo(
-            listOf(
-                BeginToken(length = 14, state = State.CODE),
-                LeafNodeToken("token 1"),
-                LeafNodeToken("token 2"),
-                EndToken
+        assertThat(result)
+            .isEqualTo(
+                listOf(
+                    BeginToken(length = 14, state = State.CODE),
+                    LeafNodeToken("token 1"),
+                    LeafNodeToken("token 2"),
+                    EndToken
+                )
             )
-        )
     }
 
     @Test
@@ -244,9 +247,10 @@ internal class TokenPreprocessorTest {
 
         val result = subject.preprocess(input)
 
-        assertThat(result).isEqualTo(
-            listOf(BeginToken(length = 5, state = State.CODE), LeafNodeToken("token"), EndToken)
-        )
+        assertThat(result)
+            .isEqualTo(
+                listOf(BeginToken(length = 5, state = State.CODE), LeafNodeToken("token"), EndToken)
+            )
     }
 
     @Test
@@ -257,13 +261,14 @@ internal class TokenPreprocessorTest {
 
         val result = subject.preprocess(input)
 
-        assertThat(result).isEqualTo(
-            listOf(
-                BeginToken(length = 0, state = State.STRING_LITERAL),
-                EndToken,
-                LeafNodeToken("token")
+        assertThat(result)
+            .isEqualTo(
+                listOf(
+                    BeginToken(length = 0, state = State.STRING_LITERAL),
+                    EndToken,
+                    LeafNodeToken("token")
+                )
             )
-        )
     }
 
     @Test
@@ -280,15 +285,16 @@ internal class TokenPreprocessorTest {
 
         val result = subject.preprocess(input)
 
-        assertThat(result).isEqualTo(
-            listOf(
-                BeginToken(length = 5, state = State.CODE),
-                BeginToken(length = 5, state = State.CODE),
-                LeafNodeToken("token"),
-                EndToken,
-                EndToken
+        assertThat(result)
+            .isEqualTo(
+                listOf(
+                    BeginToken(length = 5, state = State.CODE),
+                    BeginToken(length = 5, state = State.CODE),
+                    LeafNodeToken("token"),
+                    EndToken,
+                    EndToken
+                )
             )
-        )
     }
 
     @Test
@@ -309,9 +315,14 @@ internal class TokenPreprocessorTest {
 
         val result = subject.preprocess(input)
 
-        assertThat(result).isEqualTo(
-            listOf(BeginToken(length = 9, state = State.CODE), LeafNodeToken("any token"), EndToken)
-        )
+        assertThat(result)
+            .isEqualTo(
+                listOf(
+                    BeginToken(length = 9, state = State.CODE),
+                    LeafNodeToken("any token"),
+                    EndToken
+                )
+            )
     }
 
     @Test
@@ -321,9 +332,14 @@ internal class TokenPreprocessorTest {
 
         val result = subject.preprocess(input)
 
-        assertThat(result).isEqualTo(
-            listOf(LeafNodeToken("any token"), BeginToken(length = 0, state = State.CODE), EndToken)
-        )
+        assertThat(result)
+            .isEqualTo(
+                listOf(
+                    LeafNodeToken("any token"),
+                    BeginToken(length = 0, state = State.CODE),
+                    EndToken
+                )
+            )
     }
 
     @Test
@@ -360,15 +376,16 @@ internal class TokenPreprocessorTest {
 
         val result = subject.preprocess(input)
 
-        assertThat(result).isEqualTo(
-            listOf(
-                BeginToken(length = 9, state = State.CODE),
-                LeafNodeToken("any token"),
-                BeginToken(state = State.CODE),
-                EndToken,
-                EndToken
+        assertThat(result)
+            .isEqualTo(
+                listOf(
+                    BeginToken(length = 9, state = State.CODE),
+                    LeafNodeToken("any token"),
+                    BeginToken(state = State.CODE),
+                    EndToken,
+                    EndToken
+                )
             )
-        )
     }
 
     @Test
@@ -378,9 +395,10 @@ internal class TokenPreprocessorTest {
 
         val result = subject.preprocess(input)
 
-        assertThat(result).isEqualTo(
-            listOf(BeginToken(length = 5, state = State.CODE), LeafNodeToken("token"), EndToken)
-        )
+        assertThat(result)
+            .isEqualTo(
+                listOf(BeginToken(length = 5, state = State.CODE), LeafNodeToken("token"), EndToken)
+            )
     }
 
     @Test
@@ -397,15 +415,16 @@ internal class TokenPreprocessorTest {
 
         val result = subject.preprocess(input)
 
-        assertThat(result).isEqualTo(
-            listOf(
-                BeginToken(length = 5, state = State.CODE),
-                BeginToken(length = 5, state = State.CODE),
-                LeafNodeToken("token"),
-                EndToken,
-                EndToken
+        assertThat(result)
+            .isEqualTo(
+                listOf(
+                    BeginToken(length = 5, state = State.CODE),
+                    BeginToken(length = 5, state = State.CODE),
+                    LeafNodeToken("token"),
+                    EndToken,
+                    EndToken
+                )
             )
-        )
     }
 
     @ParameterizedTest
@@ -426,14 +445,15 @@ internal class TokenPreprocessorTest {
 
         val result = subject.preprocess(input)
 
-        assertThat(result).isEqualTo(
-            listOf(
-                BeginToken(length = 1, state = State.CODE),
-                expectedBreakToken,
-                KDocContentToken("\n"),
-                EndToken
+        assertThat(result)
+            .isEqualTo(
+                listOf(
+                    BeginToken(length = 1, state = State.CODE),
+                    expectedBreakToken,
+                    KDocContentToken("\n"),
+                    EndToken
+                )
             )
-        )
     }
 
     @ParameterizedTest
@@ -456,16 +476,17 @@ internal class TokenPreprocessorTest {
 
         val result = subject.preprocess(input)
 
-        assertThat(result).isEqualTo(
-            listOf(
-                BeginToken(length = 1, state = State.CODE),
-                BeginToken(length = 0, state = State.CODE),
-                synchronizedBreakToken,
-                EndToken,
-                KDocContentToken("\n"),
-                EndToken
+        assertThat(result)
+            .isEqualTo(
+                listOf(
+                    BeginToken(length = 1, state = State.CODE),
+                    BeginToken(length = 0, state = State.CODE),
+                    synchronizedBreakToken,
+                    EndToken,
+                    KDocContentToken("\n"),
+                    EndToken
+                )
             )
-        )
     }
 
     @ParameterizedTest
@@ -486,14 +507,15 @@ internal class TokenPreprocessorTest {
 
         val result = subject.preprocess(input)
 
-        assertThat(result).isEqualTo(
-            listOf(
-                BeginToken(length = 0, state = State.CODE),
-                expectedBreakToken,
-                forcedBreakToken,
-                EndToken
+        assertThat(result)
+            .isEqualTo(
+                listOf(
+                    BeginToken(length = 0, state = State.CODE),
+                    expectedBreakToken,
+                    forcedBreakToken,
+                    EndToken
+                )
             )
-        )
     }
 
     @ParameterizedTest

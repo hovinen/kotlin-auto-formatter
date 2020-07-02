@@ -21,27 +21,24 @@ internal class CollectionLiteralExpressionScanner(private val kotlinScanner: Kot
             possibleWhitespace()
             either {
                 oneOrMoreFrugal { anyNode() } thenMapToTokens { nodes ->
-                    listOf(SynchronizedBreakToken(whitespaceLength = 0)).plus(
-                        kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
-                    )
+                    listOf(SynchronizedBreakToken(whitespaceLength = 0))
+                        .plus(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT))
                 }
                 possibleWhitespace()
                 nodeOfType(KtTokens.COMMA) thenMapToTokens { listOf(LeafNodeToken(",")) }
                 possibleWhitespace()
                 zeroOrMore {
                     oneOrMoreFrugal { anyNode() } thenMapToTokens { nodes ->
-                        listOf(SynchronizedBreakToken(whitespaceLength = 1)).plus(
-                            kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
-                        )
+                        listOf(SynchronizedBreakToken(whitespaceLength = 1))
+                            .plus(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT))
                     }
                     possibleWhitespace()
                     nodeOfType(KtTokens.COMMA) thenMapToTokens { listOf(LeafNodeToken(",")) }
                     possibleWhitespace()
                 }
                 oneOrMoreFrugal { anyNode() } thenMapToTokens { nodes ->
-                    listOf(SynchronizedBreakToken(whitespaceLength = 1)).plus(
-                        kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
-                    )
+                    listOf(SynchronizedBreakToken(whitespaceLength = 1))
+                        .plus(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT))
                 }
             } or {
                 zeroOrMoreFrugal { anyNode() } thenMapToTokens { nodes ->

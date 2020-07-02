@@ -66,9 +66,8 @@ internal class ClassScanner(private val kotlinScanner: KotlinScanner) : NodeScan
             } or {
                 zeroOrOne { nodeOfType(KtNodeTypes.CLASS_BODY) } thenMapToTokens { nodes ->
                     if (nodes.isNotEmpty()) {
-                        listOf(nonBreakingSpaceToken()).plus(
-                            kotlinScanner.scanNodes(nodes, ScannerState.BLOCK)
-                        )
+                        listOf(nonBreakingSpaceToken())
+                            .plus(kotlinScanner.scanNodes(nodes, ScannerState.BLOCK))
                     } else {
                         listOf(BlockFromMarkerToken)
                     }

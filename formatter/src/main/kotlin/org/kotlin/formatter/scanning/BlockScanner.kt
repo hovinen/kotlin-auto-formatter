@@ -19,9 +19,8 @@ internal class BlockScanner(private val kotlinScanner: KotlinScanner) : NodeScan
             either {
                 nodeOfType(KtTokens.LBRACE)
                 zeroOrMoreFrugal { anyNode() } thenMapToTokens { nodes ->
-                    listOf(LeafNodeToken("{"), BlockFromMarkerToken, BeginToken(State.CODE)).plus(
-                        kotlinScanner.scanNodes(nodes, ScannerState.BLOCK)
-                    )
+                    listOf(LeafNodeToken("{"), BlockFromMarkerToken, BeginToken(State.CODE))
+                        .plus(kotlinScanner.scanNodes(nodes, ScannerState.BLOCK))
                 }
                 zeroOrOne { whitespaceWithNewline() } thenMapToTokens { nodes ->
                     if (nodes.isNotEmpty()) listOf(ClosingForcedBreakToken) else listOf()

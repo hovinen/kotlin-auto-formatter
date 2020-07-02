@@ -15,200 +15,219 @@ class KotlinFormatterTest {
     @Test
     fun `format breaks line at assignment operator in local variable`() {
         val result =
-            KotlinFormatter(maxLineLength = 55).format(
+            KotlinFormatter(maxLineLength = 55)
+                .format(
+                    """
+                        fun main() {
+                            val aValue = ALongMethodCall(aParameter, anotherParameter)
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
                     fun main() {
-                        val aValue = ALongMethodCall(aParameter, anotherParameter)
+                        val aValue =
+                            ALongMethodCall(aParameter, anotherParameter)
                     }
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                fun main() {
-                    val aValue =
-                        ALongMethodCall(aParameter, anotherParameter)
-                }
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `format breaks line at assignment operator in global property`() {
         val result =
-            KotlinFormatter(maxLineLength = 50).format(
-                """val aValue = ALongMethodCall(aParameter, anotherParameter)""".trimIndent()
-            )
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """val aValue = ALongMethodCall(aParameter, anotherParameter)""".trimIndent()
+                )
 
-        assertThat(result).isEqualTo(
-            """
-                val aValue =
-                    ALongMethodCall(aParameter, anotherParameter)
-            """.trimIndent()
-        )
+        assertThat(result)
+            .isEqualTo(
+                """
+                    val aValue =
+                        ALongMethodCall(aParameter, anotherParameter)
+                """.trimIndent()
+            )
     }
 
     @Test
     fun `format breaks line at assignment operator when whitespace after assignment is missing`() {
         val result =
-            KotlinFormatter(maxLineLength = 55).format(
+            KotlinFormatter(maxLineLength = 55)
+                .format(
+                    """
+                        fun main() {
+                            val aValue =ALongMethodCall(aParameter, anotherParameter)
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
                     fun main() {
-                        val aValue =ALongMethodCall(aParameter, anotherParameter)
+                        val aValue =
+                            ALongMethodCall(aParameter, anotherParameter)
                     }
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                fun main() {
-                    val aValue =
-                        ALongMethodCall(aParameter, anotherParameter)
-                }
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `format breaks line at parameters in parameter list`() {
         val result =
-            KotlinFormatter(maxLineLength = 50).format(
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        fun main() {
+                            ALongMethodCall(aParameter, anotherParameter, aThirdParameter)
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
                     fun main() {
-                        ALongMethodCall(aParameter, anotherParameter, aThirdParameter)
+                        ALongMethodCall(
+                            aParameter,
+                            anotherParameter,
+                            aThirdParameter
+                        )
                     }
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                fun main() {
-                    ALongMethodCall(
-                        aParameter,
-                        anotherParameter,
-                        aThirdParameter
-                    )
-                }
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `format removes excess whitespace before closing parentheses`() {
         val result =
-            KotlinFormatter(maxLineLength = 50).format(
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        fun main() {
+                            ALongMethodCall(aParameter, anotherParameter, aThirdParameter )
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
                     fun main() {
-                        ALongMethodCall(aParameter, anotherParameter, aThirdParameter )
+                        ALongMethodCall(
+                            aParameter,
+                            anotherParameter,
+                            aThirdParameter
+                        )
                     }
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                fun main() {
-                    ALongMethodCall(
-                        aParameter,
-                        anotherParameter,
-                        aThirdParameter
-                    )
-                }
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `format breaks line at class constructor parameter list`() {
         val result =
-            KotlinFormatter(maxLineLength = 50).format(
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        class ALongClass(aParameter: String, anotherParameter: String, aThirdParameter: String)
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
-                    class ALongClass(aParameter: String, anotherParameter: String, aThirdParameter: String)
+                    class ALongClass(
+                        aParameter: String,
+                        anotherParameter: String,
+                        aThirdParameter: String
+                    )
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                class ALongClass(
-                    aParameter: String,
-                    anotherParameter: String,
-                    aThirdParameter: String
-                )
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `format does not break before a class declaration based on length of body`() {
         val result =
-            KotlinFormatter(maxLineLength = 50).format(
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        internal class ALongClass(aParameter: String, anotherParameter: String, aThirdParameter: String) {
+                            fun aFunction() {
+                                aFunctionCall()
+                            }
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
-                    internal class ALongClass(aParameter: String, anotherParameter: String, aThirdParameter: String) {
+                    internal class ALongClass(
+                        aParameter: String,
+                        anotherParameter: String,
+                        aThirdParameter: String
+                    ) {
                         fun aFunction() {
                             aFunctionCall()
                         }
                     }
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                internal class ALongClass(
-                    aParameter: String,
-                    anotherParameter: String,
-                    aThirdParameter: String
-                ) {
-                    fun aFunction() {
-                        aFunctionCall()
-                    }
-                }
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `does not break on super constructor parameter list based on full length`() {
         val result =
-            KotlinFormatter(maxLineLength = 50).format(
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        class ALongClass(aParameter: String) : ASuperclass(aParameter, anotherParameter)
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
-                    class ALongClass(aParameter: String) : ASuperclass(aParameter, anotherParameter)
+                    class ALongClass(aParameter: String) :
+                        ASuperclass(aParameter, anotherParameter)
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                class ALongClass(aParameter: String) :
-                    ASuperclass(aParameter, anotherParameter)
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `breaks on multiple super class spec correctly`() {
         val result =
-            KotlinFormatter(maxLineLength = 50).format(
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        class ALongClass(aParameter: String) : ASuperclass(aParameter, anotherParameter), AnInterface, AnotherInterface
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
-                    class ALongClass(aParameter: String) : ASuperclass(aParameter, anotherParameter), AnInterface, AnotherInterface
+                    class ALongClass(aParameter: String) :
+                        ASuperclass(aParameter, anotherParameter),
+                        AnInterface, AnotherInterface
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                class ALongClass(aParameter: String) :
-                    ASuperclass(aParameter, anotherParameter),
-                    AnInterface, AnotherInterface
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `does not break immediately before opening brace of class body`() {
         val result =
-            KotlinFormatter(maxLineLength = 33).format(
-                """
-                    class AClass(aParameter: String) {
-                    }
-                """.trimIndent()
-            )
+            KotlinFormatter(maxLineLength = 33)
+                .format(
+                    """
+                        class AClass(aParameter: String) {
+                        }
+                    """.trimIndent()
+                )
 
         assertThat(result).isEqualTo(
             """
@@ -245,27 +264,41 @@ class KotlinFormatterTest {
     @Test
     fun `prefers to break in parameter list to before constructor`() {
         val result =
-            KotlinFormatter(maxLineLength = 54).format(
+            KotlinFormatter(maxLineLength = 54)
+                .format(
+                    """
+                        class AClass internal constructor(aParameter: String) {
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
-                    class AClass internal constructor(aParameter: String) {
+                    class AClass internal constructor(
+                        aParameter: String
+                    ) {
                     }
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                class AClass internal constructor(
-                    aParameter: String
-                ) {
-                }
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `breaks constructor parameters consistently`() {
         val result =
-            KotlinFormatter(maxLineLength = 60).format(
+            KotlinFormatter(maxLineLength = 60)
+                .format(
+                    """
+                        class AClass(
+                            private val aParameter: String,
+                            private val anotherParameter: String
+                        ) {
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
                     class AClass(
                         private val aParameter: String,
@@ -274,74 +307,83 @@ class KotlinFormatterTest {
                     }
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                class AClass(
-                    private val aParameter: String,
-                    private val anotherParameter: String
-                ) {
-                }
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `breaks before a return type exceeds the column limit`() {
         val result =
-            KotlinFormatter(maxLineLength = 45).format(
+            KotlinFormatter(maxLineLength = 45)
+                .format(
+                    """
+                        fun aFunction(aParameter: String): AClass<Type> =
+                            AClass()
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
-                    fun aFunction(aParameter: String): AClass<Type> =
-                        AClass()
+                    fun aFunction(aParameter: String):
+                        AClass<Type> = AClass()
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                fun aFunction(aParameter: String):
-                    AClass<Type> = AClass()
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `prefers to break before beginning of function literal`() {
         val result =
-            KotlinFormatter(maxLineLength = 37).format(
-                """fun aFunction(aParameter: String) = { aValue -> doSomething() }""".trimIndent()
-            )
+            KotlinFormatter(maxLineLength = 37)
+                .format(
+                    """
+                        fun aFunction(aParameter: String) = { aValue -> doSomething() }
+                    """.trimIndent()
+                )
 
-        assertThat(result).isEqualTo(
-            """
-                fun aFunction(aParameter: String) =
-                    { aValue -> doSomething() }
-            """.trimIndent()
-        )
+        assertThat(result)
+            .isEqualTo(
+                """
+                    fun aFunction(aParameter: String) =
+                        { aValue -> doSomething() }
+                """.trimIndent()
+            )
     }
 
     @Test
     fun `breaks before a dot when next block does not fit on line`() {
         val result =
-            KotlinFormatter(maxLineLength = 45).format(
+            KotlinFormatter(maxLineLength = 45)
+                .format(
+                    """
+                        anObject.aMethod(aParameter, anotherParameter)
+                            .anotherMethod()
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
-                    anObject.aMethod(aParameter, anotherParameter)
+                    anObject
+                        .aMethod(aParameter, anotherParameter)
                         .anotherMethod()
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                anObject
-                    .aMethod(aParameter, anotherParameter)
-                    .anotherMethod()
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `allows comments inside dot-qualified expressions`() {
         val result =
-            KotlinFormatter(maxLineLength = 100).format(
+            KotlinFormatter(maxLineLength = 100)
+                .format(
+                    """
+                        anObject.aMethod()
+                            // A comment
+                            // Another comment
+                            .anotherMethod()
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
                     anObject.aMethod()
                         // A comment
@@ -349,21 +391,23 @@ class KotlinFormatterTest {
                         .anotherMethod()
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                anObject.aMethod()
-                    // A comment
-                    // Another comment
-                    .anotherMethod()
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `allows comments inside single dot-qualified expression`() {
         val result =
-            KotlinFormatter(maxLineLength = 100).format(
+            KotlinFormatter(maxLineLength = 100)
+                .format(
+                    """
+                        anObject
+                            // A comment
+                            // Another comment
+                            .aMethod()
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
                     anObject
                         // A comment
@@ -371,21 +415,23 @@ class KotlinFormatterTest {
                         .aMethod()
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                anObject
-                    // A comment
-                    // Another comment
-                    .aMethod()
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `allows mixture of block and EOL comments inside single dot-qualified expression`() {
         val result =
-            KotlinFormatter(maxLineLength = 100).format(
+            KotlinFormatter(maxLineLength = 100)
+                .format(
+                    """
+                        anObject
+                            // A comment
+                            /* Another comment */
+                            .aMethod()
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
                     anObject
                         // A comment
@@ -393,21 +439,24 @@ class KotlinFormatterTest {
                         .aMethod()
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                anObject
-                    // A comment
-                    /* Another comment */
-                    .aMethod()
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `format does not indent a class after a class after a package declaration`() {
         val result =
-            KotlinFormatter(maxLineLength = 50).format(
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        package apackage
+                        
+                        class AClass
+                        
+                        class AnotherClass
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
                     package apackage
                     
@@ -416,61 +465,66 @@ class KotlinFormatterTest {
                     class AnotherClass
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                package apackage
-                
-                class AClass
-                
-                class AnotherClass
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `format breaks at parameters of function declarations`() {
         val result =
-            KotlinFormatter(maxLineLength = 50).format(
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        fun aFunction(aParameter: String, anotherParameter: String, aThirdParameter: String) {
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
-                    fun aFunction(aParameter: String, anotherParameter: String, aThirdParameter: String) {
+                    fun aFunction(
+                        aParameter: String,
+                        anotherParameter: String,
+                        aThirdParameter: String
+                    ) {
                     }
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                fun aFunction(
-                    aParameter: String,
-                    anotherParameter: String,
-                    aThirdParameter: String
-                ) {
-                }
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `does not break around parameters based on the length of the function initializer`() {
         val result =
-            KotlinFormatter(maxLineLength = 50).format(
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        fun aFunction(aParameter: String) = aFunctionCall().anotherFunctionCall()
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
-                    fun aFunction(aParameter: String) = aFunctionCall().anotherFunctionCall()
+                    fun aFunction(aParameter: String) =
+                        aFunctionCall().anotherFunctionCall()
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                fun aFunction(aParameter: String) =
-                    aFunctionCall().anotherFunctionCall()
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `does not break around parameters based on the length of the KDoc`() {
         val result =
-            KotlinFormatter(maxLineLength = 50).format(
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        /** Some long KDoc which should not wrap */
+                        fun aFunction(aParameter: String) {
+                            aFunctionCall().anotherFunctionCall()
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
                     /** Some long KDoc which should not wrap */
                     fun aFunction(aParameter: String) {
@@ -478,42 +532,46 @@ class KotlinFormatterTest {
                     }
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                /** Some long KDoc which should not wrap */
-                fun aFunction(aParameter: String) {
-                    aFunctionCall().anotherFunctionCall()
-                }
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `format breaks a property before its getter`() {
         val result =
-            KotlinFormatter(maxLineLength = 55).format(
+            KotlinFormatter(maxLineLength = 55)
+                .format(
+                    """
+                        class AClass {
+                            val aProperty: String get() = "This value is too long for one line"
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
                     class AClass {
-                        val aProperty: String get() = "This value is too long for one line"
+                        val aProperty: String
+                            get() = "This value is too long for one line"
                     }
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                class AClass {
-                    val aProperty: String
-                        get() = "This value is too long for one line"
-                }
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `format breaks a property before its setter`() {
         val result =
-            KotlinFormatter(maxLineLength = 80).format(
+            KotlinFormatter(maxLineLength = 80)
+                .format(
+                    """
+                        class AClass {
+                            var aProperty: AType = aValue
+                                private set
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
                     class AClass {
                         var aProperty: AType = aValue
@@ -521,49 +579,53 @@ class KotlinFormatterTest {
                     }
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                class AClass {
-                    var aProperty: AType = aValue
-                        private set
-                }
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `format breaks a parameter list preceded by a blank line`() {
         val result =
-            KotlinFormatter(maxLineLength = 55).format(
+            KotlinFormatter(maxLineLength = 55)
+                .format(
+                    """
+                        class MyClass {
+                        
+                            fun aFunction(aParameter: String, anotherParameter: String, aThirdParameter: String) {
+                            }
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
                     class MyClass {
                     
-                        fun aFunction(aParameter: String, anotherParameter: String, aThirdParameter: String) {
+                        fun aFunction(
+                            aParameter: String,
+                            anotherParameter: String,
+                            aThirdParameter: String
+                        ) {
                         }
                     }
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                class MyClass {
-                
-                    fun aFunction(
-                        aParameter: String,
-                        anotherParameter: String,
-                        aThirdParameter: String
-                    ) {
-                    }
-                }
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `correctly treats annotations with arguments`() {
         val result =
-            KotlinFormatter(maxLineLength = 50).format(
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        class MyClass {
+                            @AnAnnotation("An argument")
+                            fun myFunction()
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
                     class MyClass {
                         @AnAnnotation("An argument")
@@ -571,113 +633,123 @@ class KotlinFormatterTest {
                     }
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                class MyClass {
-                    @AnAnnotation("An argument")
-                    fun myFunction()
-                }
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `treats array initializers in annotations as blocks`() {
         val result =
-            KotlinFormatter(maxLineLength = 50).format(
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        class MyClass {
+                            @AnAnnotation(["An argument", "Another argument", "A third argument"])
+                            fun myFunction()
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
                     class MyClass {
-                        @AnAnnotation(["An argument", "Another argument", "A third argument"])
+                        @AnAnnotation(
+                            [
+                                "An argument",
+                                "Another argument",
+                                "A third argument"
+                            ]
+                        )
                         fun myFunction()
                     }
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                class MyClass {
-                    @AnAnnotation(
-                        [
-                            "An argument",
-                            "Another argument",
-                            "A third argument"
-                        ]
-                    )
-                    fun myFunction()
-                }
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `strips trailing newline whitespace from array initializers in annotations`() {
         val result =
-            KotlinFormatter(maxLineLength = 80).format(
+            KotlinFormatter(maxLineLength = 80)
+                .format(
+                    """
+                        @AnAnnotation(value = [
+                            "An argument", "Another argument", "A third argument"
+                        ])
+                        fun myFunction()
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
-                    @AnAnnotation(value = [
-                        "An argument", "Another argument", "A third argument"
-                    ])
+                    @AnAnnotation(value = ["An argument", "Another argument", "A third argument"])
                     fun myFunction()
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                @AnAnnotation(value = ["An argument", "Another argument", "A third argument"])
-                fun myFunction()
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `adds spaces between array elements in an annotation`() {
         val result =
-            KotlinFormatter(maxLineLength = 50).format(
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        class MyClass {
+                            @AnAnnotation(["1","2","3"])
+                            fun myFunction()
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
                     class MyClass {
-                        @AnAnnotation(["1","2","3"])
+                        @AnAnnotation(["1", "2", "3"])
                         fun myFunction()
                     }
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                class MyClass {
-                    @AnAnnotation(["1", "2", "3"])
-                    fun myFunction()
-                }
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `removes extraneous spaces in array initializer in an annotation`() {
         val result =
-            KotlinFormatter(maxLineLength = 50).format(
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        class MyClass {
+                            @AnAnnotation(["1" ,"2" ,"3"])
+                            fun myFunction()
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
                     class MyClass {
-                        @AnAnnotation(["1" ,"2" ,"3"])
+                        @AnAnnotation(["1", "2", "3"])
                         fun myFunction()
                     }
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                class MyClass {
-                    @AnAnnotation(["1", "2", "3"])
-                    fun myFunction()
-                }
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `does not insert a space before a sole element in an array in an annotation`() {
         val result =
-            KotlinFormatter(maxLineLength = 50).format(
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        class MyClass {
+                            @AnAnnotation(["1"])
+                            fun myFunction()
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
                     class MyClass {
                         @AnAnnotation(["1"])
@@ -685,43 +757,47 @@ class KotlinFormatterTest {
                     }
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                class MyClass {
-                    @AnAnnotation(["1"])
-                    fun myFunction()
-                }
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `strips extraneous spacing from array initializer in annotation`() {
         val result =
-            KotlinFormatter(maxLineLength = 50).format(
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        class MyClass {
+                            @AnAnnotation([ "1" ])
+                            fun myFunction()
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
                     class MyClass {
-                        @AnAnnotation([ "1" ])
+                        @AnAnnotation(["1"])
                         fun myFunction()
                     }
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                class MyClass {
-                    @AnAnnotation(["1"])
-                    fun myFunction()
-                }
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `accepts empty array initializers`() {
         val result =
-            KotlinFormatter(maxLineLength = 50).format(
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        class MyClass {
+                            @AnAnnotation([])
+                            fun myFunction()
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
                     class MyClass {
                         @AnAnnotation([])
@@ -729,35 +805,28 @@ class KotlinFormatterTest {
                     }
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                class MyClass {
-                    @AnAnnotation([])
-                    fun myFunction()
-                }
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `properly formats annotated type parameters`() {
         val result =
-            KotlinFormatter(maxLineLength = 50).format(
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        val value: Map<@AnAnnotation("A value") Key, @AnotherAnnotation("Another value") Value>
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
-                    val value: Map<@AnAnnotation("A value") Key, @AnotherAnnotation("Another value") Value>
+                    val value:
+                        Map<
+                            @AnAnnotation("A value") Key,
+                            @AnotherAnnotation("Another value") Value
+                        >
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                val value:
-                    Map<
-                        @AnAnnotation("A value") Key,
-                        @AnotherAnnotation("Another value") Value
-                    >
-            """.trimIndent()
-        )
     }
 
     @Test
@@ -778,7 +847,18 @@ class KotlinFormatterTest {
     @Test
     fun `breaks between annotations and multiline declarations`() {
         val result =
-            KotlinFormatter(maxLineLength = 50).format(
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        @AnAnnotation
+                        fun myFunction() {
+                            aFunctionCall()
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
                     @AnAnnotation
                     fun myFunction() {
@@ -786,15 +866,6 @@ class KotlinFormatterTest {
                     }
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                @AnAnnotation
-                fun myFunction() {
-                    aFunctionCall()
-                }
-            """.trimIndent()
-        )
     }
 
     @Test
@@ -819,47 +890,62 @@ class KotlinFormatterTest {
     @Test
     fun `breaks between different annotations`() {
         val result =
-            KotlinFormatter(maxLineLength = 50).format(
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        @AnAnnotation
+                        @AnotherAnnotation
+                        val aProperty: String
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
                     @AnAnnotation
                     @AnotherAnnotation
                     val aProperty: String
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                @AnAnnotation
-                @AnotherAnnotation
-                val aProperty: String
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `does not break before property name in extension property`() {
         val result =
-            KotlinFormatter(maxLineLength = 50).format(
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        val AClass.aProperty: String
+                            get() =
+                                aFunction(aParameter, anotherParameter)
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
                     val AClass.aProperty: String
                         get() =
                             aFunction(aParameter, anotherParameter)
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                val AClass.aProperty: String
-                    get() =
-                        aFunction(aParameter, anotherParameter)
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `allows block comments between annotations`() {
         val result =
-            KotlinFormatter(maxLineLength = 50).format(
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        @AnAnnotation
+                        /* A comment */
+                        @AnotherAnnotation
+                        val aProperty: String
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
                     @AnAnnotation
                     /* A comment */
@@ -867,167 +953,175 @@ class KotlinFormatterTest {
                     val aProperty: String
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                @AnAnnotation
-                /* A comment */
-                @AnotherAnnotation
-                val aProperty: String
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `allows EOL comments after annotations`() {
         val result =
-            KotlinFormatter(maxLineLength = 50).format(
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        @AnAnnotation // A comment
+                        @AnotherAnnotation
+                        val aProperty: String
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
                     @AnAnnotation // A comment
                     @AnotherAnnotation
                     val aProperty: String
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                @AnAnnotation // A comment
-                @AnotherAnnotation
-                val aProperty: String
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `includes space between modifiers and property`() {
         val result =
-            KotlinFormatter(maxLineLength = 50).format(
-                """private val aProperty: String = "A long string which should wrap"""".trimIndent()
-            )
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        private val aProperty: String = "A long string which should wrap"
+                    """.trimIndent()
+                )
 
-        assertThat(result).isEqualTo(
-            """
-                private val aProperty: String =
-                    "A long string which should wrap"
-            """.trimIndent()
-        )
+        assertThat(result)
+            .isEqualTo(
+                """
+                    private val aProperty: String =
+                        "A long string which should wrap"
+                """.trimIndent()
+            )
     }
 
     @Test
     fun `includes space between modifiers and function`() {
         val result =
-            KotlinFormatter(maxLineLength = 50).format(
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        private fun aFunction(): String = "A long string which should wrap"
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
-                    private fun aFunction(): String = "A long string which should wrap"
+                    private fun aFunction(): String =
+                        "A long string which should wrap"
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                private fun aFunction(): String =
-                    "A long string which should wrap"
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `indents property initializer for public function when inside a class`() {
         val result =
-            KotlinFormatter(maxLineLength = 50).format(
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        class MyClass {
+                            fun aFunction(): String = "A long string which should wrap"
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
                     class MyClass {
-                        fun aFunction(): String = "A long string which should wrap"
+                        fun aFunction(): String =
+                            "A long string which should wrap"
                     }
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                class MyClass {
-                    fun aFunction(): String =
-                        "A long string which should wrap"
-                }
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `indents property initializer for private function when inside a class`() {
         val result =
-            KotlinFormatter(maxLineLength = 50).format(
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        class MyClass {
+                            private fun aFunction(): String = "A long string which should wrap"
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
                     class MyClass {
-                        private fun aFunction(): String = "A long string which should wrap"
+                        private fun aFunction(): String =
+                            "A long string which should wrap"
                     }
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                class MyClass {
-                    private fun aFunction(): String =
-                        "A long string which should wrap"
-                }
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `indents property initializer for annotated function when inside a class`() {
         val result =
-            KotlinFormatter(maxLineLength = 50).format(
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        class MyClass {
+                            @AnAnnotation
+                            fun aFunction(): String = "A long string which should wrap"
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
                     class MyClass {
                         @AnAnnotation
-                        fun aFunction(): String = "A long string which should wrap"
+                        fun aFunction(): String =
+                            "A long string which should wrap"
                     }
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                class MyClass {
-                    @AnAnnotation
-                    fun aFunction(): String =
-                        "A long string which should wrap"
-                }
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `format breaks at logical operator in an if statement`() {
         val result =
-            KotlinFormatter(maxLineLength = 50).format(
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        fun myFunction() {
+                            if (aLongCondition && anotherLongCondition && yetAnotherLongCondition) {
+                            }
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
                     fun myFunction() {
-                        if (aLongCondition && anotherLongCondition && yetAnotherLongCondition) {
+                        if (aLongCondition && anotherLongCondition &&
+                            yetAnotherLongCondition
+                        ) {
                         }
                     }
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                fun myFunction() {
-                    if (aLongCondition && anotherLongCondition &&
-                        yetAnotherLongCondition
-                    ) {
-                    }
-                }
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `breaks if condition even if condition would fit on the line`() {
         val result =
-            KotlinFormatter(maxLineLength = 35).format(
-                """
-                    if (aCondition || anotherCondition) {
-                    }
-                """.trimIndent()
-            )
+            KotlinFormatter(maxLineLength = 35)
+                .format(
+                    """
+                        if (aCondition || anotherCondition) {
+                        }
+                    """.trimIndent()
+                )
 
         assertThat(result).isEqualTo(
             """
@@ -1041,295 +1135,336 @@ class KotlinFormatterTest {
     @Test
     fun `breaks if with negated condition at the correct location`() {
         val result =
-            KotlinFormatter(maxLineLength = 37).format(
+            KotlinFormatter(maxLineLength = 37)
+                .format(
+                    """
+                        if (aCondition || !(aNegatedCondition)) {
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
-                    if (aCondition || !(aNegatedCondition)) {
+                    if (aCondition ||
+                        !(aNegatedCondition)
+                    ) {
                     }
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                if (aCondition ||
-                    !(aNegatedCondition)
-                ) {
-                }
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `format breaks at logical operator in a while statement`() {
         val result =
-            KotlinFormatter(maxLineLength = 50).format(
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        fun myFunction() {
+                            while (aLongCondition && anotherLongCondition && yetAnotherLongCondition) {
+                            }
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
                     fun myFunction() {
-                        while (aLongCondition && anotherLongCondition && yetAnotherLongCondition) {
+                        while (aLongCondition && anotherLongCondition &&
+                            yetAnotherLongCondition
+                        ) {
                         }
                     }
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                fun myFunction() {
-                    while (aLongCondition && anotherLongCondition &&
-                        yetAnotherLongCondition
-                    ) {
-                    }
-                }
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `format breaks at an operator within a when statement`() {
         val result =
-            KotlinFormatter(maxLineLength = 50).format(
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        fun myFunction() {
+                            when (aLongExression + anotherLongExpression + yetAnotherLongExpression) {
+                            }
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
                     fun myFunction() {
-                        when (aLongExression + anotherLongExpression + yetAnotherLongExpression) {
+                        when (aLongExression + anotherLongExpression +
+                            yetAnotherLongExpression
+                        ) {
                         }
                     }
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                fun myFunction() {
-                    when (aLongExression + anotherLongExpression +
-                        yetAnotherLongExpression
-                    ) {
-                    }
-                }
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `format breaks at in operator in for statement`() {
         val result =
-            KotlinFormatter(maxLineLength = 50).format(
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        fun myFunction() {
+                            for (aLongVariableName in aCollectionWithALongName) {
+                            }
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
                     fun myFunction() {
-                        for (aLongVariableName in aCollectionWithALongName) {
+                        for (aLongVariableName in
+                            aCollectionWithALongName
+                        ) {
                         }
                     }
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                fun myFunction() {
-                    for (aLongVariableName in
-                        aCollectionWithALongName
-                    ) {
-                    }
-                }
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `format breaks before chained calls`() {
         val result =
-            KotlinFormatter(maxLineLength = 50).format(
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        fun myFunction() {
+                            aVariable.aMethod().anotherMethod().aThirdMethod()
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
                     fun myFunction() {
-                        aVariable.aMethod().anotherMethod().aThirdMethod()
+                        aVariable.aMethod()
+                            .anotherMethod()
+                            .aThirdMethod()
                     }
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                fun myFunction() {
-                    aVariable.aMethod()
-                        .anotherMethod()
-                        .aThirdMethod()
-                }
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `format breaks before chained calls with null check`() {
         val result =
-            KotlinFormatter(maxLineLength = 50).format(
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        fun myFunction() {
+                            aVariable.aMethod()?.anotherMethod()?.aThirdMethod()
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
                     fun myFunction() {
-                        aVariable.aMethod()?.anotherMethod()?.aThirdMethod()
+                        aVariable.aMethod()
+                            ?.anotherMethod()
+                            ?.aThirdMethod()
                     }
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                fun myFunction() {
-                    aVariable.aMethod()
-                        ?.anotherMethod()
-                        ?.aThirdMethod()
-                }
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `format breaks expressions at operators`() {
         val result =
-            KotlinFormatter(maxLineLength = 50).format(
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        fun myFunction() {
+                            aVariable = aValue + anotherValue + yetAnotherValue + andYetAnotherValue
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
                     fun myFunction() {
-                        aVariable = aValue + anotherValue + yetAnotherValue + andYetAnotherValue
+                        aVariable =
+                            aValue + anotherValue + yetAnotherValue +
+                                andYetAnotherValue
                     }
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                fun myFunction() {
-                    aVariable =
-                        aValue + anotherValue + yetAnotherValue +
-                            andYetAnotherValue
-                }
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `prefers to break outside grouping operators`() {
         val result =
-            KotlinFormatter(maxLineLength = 50).format(
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        fun myFunction() {
+                            aVariable = aValue + anotherValue + (yetAnotherValue + andYetAnotherValue)
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
                     fun myFunction() {
-                        aVariable = aValue + anotherValue + (yetAnotherValue + andYetAnotherValue)
+                        aVariable =
+                            aValue + anotherValue +
+                                (yetAnotherValue + andYetAnotherValue)
                     }
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                fun myFunction() {
-                    aVariable =
-                        aValue + anotherValue +
-                            (yetAnotherValue + andYetAnotherValue)
-                }
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `format breaks expressions at operators inside if statements`() {
         val result =
-            KotlinFormatter(maxLineLength = 50).format(
-                """
-                    fun myFunction() {
-                        if (aCondition) {
-                            aVariable = aValue + anotherValue + yetAnotherValue
-                        }
-                    }
-                """.trimIndent()
-            )
-
-        assertThat(result).isEqualTo(
-            """
-                fun myFunction() {
-                    if (aCondition) {
-                        aVariable =
-                            aValue + anotherValue +
-                                yetAnotherValue
-                    }
-                }
-            """.trimIndent()
-        )
-    }
-
-    @Test
-    fun `format breaks expressions at operators inside while statements`() {
-        val result =
-            KotlinFormatter(maxLineLength = 50).format(
-                """
-                    fun myFunction() {
-                        while (aCondition) {
-                            aVariable = aValue + anotherValue + yetAnotherValue
-                        }
-                    }
-                """.trimIndent()
-            )
-
-        assertThat(result).isEqualTo(
-            """
-                fun myFunction() {
-                    while (aCondition) {
-                        aVariable =
-                            aValue + anotherValue +
-                                yetAnotherValue
-                    }
-                }
-            """.trimIndent()
-        )
-    }
-
-    @Test
-    fun `format breaks expressions at operators inside for loops`() {
-        val result =
-            KotlinFormatter(maxLineLength = 50).format(
-                """
-                    fun myFunction() {
-                        for (anEntry in aCollection) {
-                            aVariable = aValue + anotherValue + yetAnotherValue
-                        }
-                    }
-                """.trimIndent()
-            )
-
-        assertThat(result).isEqualTo(
-            """
-                fun myFunction() {
-                    for (anEntry in aCollection) {
-                        aVariable =
-                            aValue + anotherValue +
-                                yetAnotherValue
-                    }
-                }
-            """.trimIndent()
-        )
-    }
-
-    @Test
-    fun `format breaks expressions at operators inside first when entry`() {
-        val result =
-            KotlinFormatter(maxLineLength = 50).format(
-                """
-                    fun myFunction() {
-                        when (aCondition) {
-                            1 -> {
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        fun myFunction() {
+                            if (aCondition) {
                                 aVariable = aValue + anotherValue + yetAnotherValue
                             }
                         }
-                    }
-                """.trimIndent()
-            )
+                    """.trimIndent()
+                )
 
-        assertThat(result).isEqualTo(
-            """
-                fun myFunction() {
-                    when (aCondition) {
-                        1 -> {
+        assertThat(result)
+            .isEqualTo(
+                """
+                    fun myFunction() {
+                        if (aCondition) {
                             aVariable =
                                 aValue + anotherValue +
                                     yetAnotherValue
                         }
                     }
-                }
-            """.trimIndent()
-        )
+                """.trimIndent()
+            )
+    }
+
+    @Test
+    fun `format breaks expressions at operators inside while statements`() {
+        val result =
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        fun myFunction() {
+                            while (aCondition) {
+                                aVariable = aValue + anotherValue + yetAnotherValue
+                            }
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    fun myFunction() {
+                        while (aCondition) {
+                            aVariable =
+                                aValue + anotherValue +
+                                    yetAnotherValue
+                        }
+                    }
+                """.trimIndent()
+            )
+    }
+
+    @Test
+    fun `format breaks expressions at operators inside for loops`() {
+        val result =
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        fun myFunction() {
+                            for (anEntry in aCollection) {
+                                aVariable = aValue + anotherValue + yetAnotherValue
+                            }
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    fun myFunction() {
+                        for (anEntry in aCollection) {
+                            aVariable =
+                                aValue + anotherValue +
+                                    yetAnotherValue
+                        }
+                    }
+                """.trimIndent()
+            )
+    }
+
+    @Test
+    fun `format breaks expressions at operators inside first when entry`() {
+        val result =
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        fun myFunction() {
+                            when (aCondition) {
+                                1 -> {
+                                    aVariable = aValue + anotherValue + yetAnotherValue
+                                }
+                            }
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    fun myFunction() {
+                        when (aCondition) {
+                            1 -> {
+                                aVariable =
+                                    aValue + anotherValue +
+                                        yetAnotherValue
+                            }
+                        }
+                    }
+                """.trimIndent()
+            )
     }
 
     @Test
     fun `format breaks expressions at operators inside a second when entry`() {
         val result =
-            KotlinFormatter(maxLineLength = 50).format(
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        fun myFunction() {
+                            when (aCondition) {
+                                1 -> {
+                                    aVariable = aValue
+                                }
+                                2 -> {
+                                    aVariable = aValue + anotherValue + yetAnotherValue
+                                }
+                            }
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
                     fun myFunction() {
                         when (aCondition) {
@@ -1337,35 +1472,33 @@ class KotlinFormatterTest {
                                 aVariable = aValue
                             }
                             2 -> {
-                                aVariable = aValue + anotherValue + yetAnotherValue
+                                aVariable =
+                                    aValue + anotherValue +
+                                        yetAnotherValue
                             }
                         }
                     }
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                fun myFunction() {
-                    when (aCondition) {
-                        1 -> {
-                            aVariable = aValue
-                        }
-                        2 -> {
-                            aVariable =
-                                aValue + anotherValue +
-                                    yetAnotherValue
-                        }
-                    }
-                }
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `preserves comment inside when expression`() {
         val result =
-            KotlinFormatter(maxLineLength = 50).format(
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        when (aCondition) {
+                            // A comment
+                            1 -> {
+                                aVariable = aValue
+                            }
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
                     when (aCondition) {
                         // A comment
@@ -1375,23 +1508,25 @@ class KotlinFormatterTest {
                     }
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                when (aCondition) {
-                    // A comment
-                    1 -> {
-                        aVariable = aValue
-                    }
-                }
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `preserves comment at the end of a when expression`() {
         val result =
-            KotlinFormatter(maxLineLength = 50).format(
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        when (aCondition) {
+                            1 -> {
+                                aVariable = aValue
+                            }
+                            // A comment
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
                     when (aCondition) {
                         1 -> {
@@ -1401,236 +1536,257 @@ class KotlinFormatterTest {
                     }
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                when (aCondition) {
-                    1 -> {
-                        aVariable = aValue
-                    }
-                    // A comment
-                }
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `format breaks expressions at operators leaving operations at the end`() {
         val result =
-            KotlinFormatter(maxLineLength = 50).format(
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        fun myFunction() {
+                            aVariable = aValue + anotherValue + yetAnotherValue + andYetAnotherValue + moreStuff
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
                     fun myFunction() {
-                        aVariable = aValue + anotherValue + yetAnotherValue + andYetAnotherValue + moreStuff
+                        aVariable =
+                            aValue + anotherValue + yetAnotherValue +
+                                andYetAnotherValue + moreStuff
                     }
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                fun myFunction() {
-                    aVariable =
-                        aValue + anotherValue + yetAnotherValue +
-                            andYetAnotherValue + moreStuff
-                }
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `breaks before the elvis operator`() {
         val result =
-            KotlinFormatter(maxLineLength = 34).format(
+            KotlinFormatter(maxLineLength = 34)
+                .format(
+                    """
+                        aVariable =
+                            aNullableValue ?: anAlternative
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
                     aVariable =
-                        aNullableValue ?: anAlternative
+                        aNullableValue
+                            ?: anAlternative
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                aVariable =
-                    aNullableValue
-                        ?: anAlternative
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `format breaks function literal after arguments`() {
         val result =
-            KotlinFormatter(maxLineLength = 50).format(
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        val aFunction = { aParameter, anotherParameter ->
+                            anotherFunction()
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
                     val aFunction = { aParameter, anotherParameter ->
                         anotherFunction()
                     }
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                val aFunction = { aParameter, anotherParameter ->
-                    anotherFunction()
-                }
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `prefers not to break before a function name`() {
         val result =
-            KotlinFormatter(maxLineLength = 50).format(
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        fun `an extremely long function name which does not fit`() {
+                            aFunction()
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
                     fun `an extremely long function name which does not fit`() {
                         aFunction()
                     }
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                fun `an extremely long function name which does not fit`() {
-                    aFunction()
-                }
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `prefers not to break before a function name after modifier`() {
         val result =
-            KotlinFormatter(maxLineLength = 50).format(
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        internal fun `an extremely long function name which does not fit`() {
+                            aFunction()
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
                     internal fun `an extremely long function name which does not fit`() {
                         aFunction()
                     }
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                internal fun `an extremely long function name which does not fit`() {
-                    aFunction()
-                }
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `format breaks strings at a single word boundary when possible`() {
         val result =
-            KotlinFormatter(maxLineLength = 50).format(
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        fun myFunction() {
+                            val aNewVariable = "ALongStringInitializerWhichShould wrapToANewLine"
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
                     fun myFunction() {
-                        val aNewVariable = "ALongStringInitializerWhichShould wrapToANewLine"
+                        val aNewVariable =
+                            "ALongStringInitializerWhichShould " +
+                                "wrapToANewLine"
                     }
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                fun myFunction() {
-                    val aNewVariable =
-                        "ALongStringInitializerWhichShould " +
-                            "wrapToANewLine"
-                }
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `indents the right hand side of an initializer one step beyond the type`() {
         val result =
-            KotlinFormatter(maxLineLength = 66).format(
+            KotlinFormatter(maxLineLength = 66)
+                .format(
+                    """
+                        class AClass {
+                            fun myFunction(aParameter: String, anotherParameter: String): String =
+                                "A string initializer which should move to the next"
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
                     class AClass {
-                        fun myFunction(aParameter: String, anotherParameter: String): String =
-                            "A string initializer which should move to the next"
+                        fun myFunction(aParameter: String, anotherParameter: String):
+                            String =
+                                "A string initializer which should move to the next"
                     }
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                class AClass {
-                    fun myFunction(aParameter: String, anotherParameter: String):
-                        String =
-                            "A string initializer which should move to the next"
-                }
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `format breaks strings at multiple word boundaries when possible`() {
         val result =
-            KotlinFormatter(maxLineLength = 50).format(
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        fun myFunction() {
+                            val aNewVariable = "ALongStringInitializerWhichShould wrapToANewLineAndWrappedAgain whereNecessary"
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
                     fun myFunction() {
-                        val aNewVariable = "ALongStringInitializerWhichShould wrapToANewLineAndWrappedAgain whereNecessary"
+                        val aNewVariable =
+                            "ALongStringInitializerWhichShould " +
+                                "wrapToANewLineAndWrappedAgain " +
+                                "whereNecessary"
                     }
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                fun myFunction() {
-                    val aNewVariable =
-                        "ALongStringInitializerWhichShould " +
-                            "wrapToANewLineAndWrappedAgain " +
-                            "whereNecessary"
-                }
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `format breaks strings only at a suitable word boundary`() {
         val result =
-            KotlinFormatter(maxLineLength = 50).format(
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        fun myFunction() {
+                            val aNewVariable = "A long string initializer which should wrap to a new line"
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
                     fun myFunction() {
-                        val aNewVariable = "A long string initializer which should wrap to a new line"
+                        val aNewVariable =
+                            "A long string initializer which should" +
+                                " wrap to a new line"
                     }
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                fun myFunction() {
-                    val aNewVariable =
-                        "A long string initializer which should" +
-                            " wrap to a new line"
-                }
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `format breaks strings at multiple lines only at a suitable word boundary`() {
         val result =
-            KotlinFormatter(maxLineLength = 50).format(
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        fun myFunction() {
+                            val aNewVariable = "A long string initializer which should wrap to a new line and wrap again"
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
                     fun myFunction() {
-                        val aNewVariable = "A long string initializer which should wrap to a new line and wrap again"
+                        val aNewVariable =
+                            "A long string initializer which should" +
+                                " wrap to a new line and wrap again"
                     }
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                fun myFunction() {
-                    val aNewVariable =
-                        "A long string initializer which should" +
-                            " wrap to a new line and wrap again"
-                }
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `treats breaking string literals as idempotent when first part exactly hits end`() {
         val result =
-            KotlinFormatter(maxLineLength = 51).format(
+            KotlinFormatter(maxLineLength = 51)
+                .format(
+                    """
+                        fun myFunction() {
+                            val aNewVariable =
+                                "A long string initializer which should " +
+                                    "wrap to a new line and wrap again"
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
                     fun myFunction() {
                         val aNewVariable =
@@ -1639,138 +1795,139 @@ class KotlinFormatterTest {
                     }
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                fun myFunction() {
-                    val aNewVariable =
-                        "A long string initializer which should " +
-                            "wrap to a new line and wrap again"
-                }
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `format does not break a string template inside an expression`() {
         val result =
-            KotlinFormatter(maxLineLength = 50).format(
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        fun myFunction() {
+                            val aNewVariable = "ALongStringInitializerWhichShouldWrap${'$'}{someExpression}"
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
                     fun myFunction() {
-                        val aNewVariable = "ALongStringInitializerWhichShouldWrap${'$'}{someExpression}"
+                        val aNewVariable =
+                            "ALongStringInitializerWhichShouldWrap" +
+                                "${'$'}{someExpression}"
                     }
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                fun myFunction() {
-                    val aNewVariable =
-                        "ALongStringInitializerWhichShouldWrap" +
-                            "${'$'}{someExpression}"
-                }
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `format breaks strings which include template variables`() {
         val result =
-            KotlinFormatter(maxLineLength = 50).format(
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        fun myFunction() {
+                            val aNewVariable = "A long string initializer with ${'$'}variable should wrap"
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
                     fun myFunction() {
-                        val aNewVariable = "A long string initializer with ${'$'}variable should wrap"
+                        val aNewVariable =
+                            "A long string initializer with " +
+                                "${'$'}variable should wrap"
                     }
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                fun myFunction() {
-                    val aNewVariable =
-                        "A long string initializer with " +
-                            "${'$'}variable should wrap"
-                }
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `does not break a string if the rest fits on the line`() {
         val result =
-            KotlinFormatter(maxLineLength = 52).format(
+            KotlinFormatter(maxLineLength = 52)
+                .format(
+                    """
+                        fun myFunction() {
+                            val aNewVariable = "A string initializer which should not wrap"
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
                     fun myFunction() {
-                        val aNewVariable = "A string initializer which should not wrap"
+                        val aNewVariable =
+                            "A string initializer which should not wrap"
                     }
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                fun myFunction() {
-                    val aNewVariable =
-                        "A string initializer which should not wrap"
-                }
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `format breaks expressions recursively when required`() {
         val result =
-            KotlinFormatter(maxLineLength = 50).format(
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        fun myFunction() {
+                            val aNewVariable = aVariable.aMethod()?.anotherMethod()?.aThirdMethod()
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
                     fun myFunction() {
-                        val aNewVariable = aVariable.aMethod()?.anotherMethod()?.aThirdMethod()
+                        val aNewVariable =
+                            aVariable.aMethod()
+                                ?.anotherMethod()
+                                ?.aThirdMethod()
                     }
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                fun myFunction() {
-                    val aNewVariable =
-                        aVariable.aMethod()
-                            ?.anotherMethod()
-                            ?.aThirdMethod()
-                }
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `does not break between return and return value`() {
         val result =
-            KotlinFormatter(maxLineLength = 50).format(
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        fun myFunction() {
+                            return aVariable.aMethod().anotherMethod().aThirdMethod()
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
                     fun myFunction() {
-                        return aVariable.aMethod().anotherMethod().aThirdMethod()
+                        return aVariable.aMethod()
+                            .anotherMethod()
+                            .aThirdMethod()
                     }
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                fun myFunction() {
-                    return aVariable.aMethod()
-                        .anotherMethod()
-                        .aThirdMethod()
-                }
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `does not insert whitespace between return and label`() {
         val result =
-            KotlinFormatter(maxLineLength = 50).format(
-                """
-                    fun myFunction() {
-                        return@label
-                    }
-                """.trimIndent()
-            )
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        fun myFunction() {
+                            return@label
+                        }
+                    """.trimIndent()
+                )
 
         assertThat(result).isEqualTo(
             """
@@ -1791,13 +1948,14 @@ class KotlinFormatterTest {
     @Test
     fun `does not include trailing whitespace on naked return`() {
         val result =
-            KotlinFormatter(maxLineLength = 50).format(
-                """
-                    fun myFunction() {
-                        return
-                    }
-                """.trimIndent()
-            )
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        fun myFunction() {
+                            return
+                        }
+                    """.trimIndent()
+                )
 
         assertThat(result).isEqualTo(
             """
@@ -1811,125 +1969,135 @@ class KotlinFormatterTest {
     @Test
     fun `indents multiline string literal with trimIndent call`() {
         val result =
-            KotlinFormatter(maxLineLength = 30).format(
+            KotlinFormatter(maxLineLength = 30)
+                .format(
+                    """
+                        val aString = aFunction(${'"'}""
+                            Some content
+                        ${'"'}"".trimIndent())
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
-                    val aString = aFunction(${'"'}""
-                        Some content
-                    ${'"'}"".trimIndent())
+                    val aString =
+                        aFunction(
+                            ${'"'}""
+                                Some content
+                            ${'"'}"".trimIndent()
+                        )
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                val aString =
-                    aFunction(
-                        ${'"'}""
-                            Some content
-                        ${'"'}"".trimIndent()
-                    )
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `does not break between else and opening brace of block`() {
         val result =
-            KotlinFormatter(maxLineLength = 50).format(
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        fun myFunction() {
+                            if (aCondition) {
+                                doSomething()
+                            } else {
+                                doSomethingElse().andThenSomethingElse().andThenSomethingElse()
+                            }
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
                     fun myFunction() {
                         if (aCondition) {
                             doSomething()
                         } else {
-                            doSomethingElse().andThenSomethingElse().andThenSomethingElse()
+                            doSomethingElse().andThenSomethingElse()
+                                .andThenSomethingElse()
                         }
                     }
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                fun myFunction() {
-                    if (aCondition) {
-                        doSomething()
-                    } else {
-                        doSomethingElse().andThenSomethingElse()
-                            .andThenSomethingElse()
-                    }
-                }
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `does not break between function and closure parameter`() {
         val result =
-            KotlinFormatter(maxLineLength = 50).format(
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        fun myFunction() {
+                            aMethodWithLambda { doSomething().doSomethingElse() }
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
                     fun myFunction() {
-                        aMethodWithLambda { doSomething().doSomethingElse() }
+                        aMethodWithLambda {
+                            doSomething().doSomethingElse()
+                        }
                     }
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                fun myFunction() {
-                    aMethodWithLambda {
-                        doSomething().doSomethingElse()
-                    }
-                }
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `does not insert a newline between throw and exception`() {
         val result =
-            KotlinFormatter(maxLineLength = 50).format(
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        fun myFunction() {
+                            throw AnException("A long exception message which wraps")
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
                     fun myFunction() {
-                        throw AnException("A long exception message which wraps")
+                        throw AnException(
+                            "A long exception message which wraps"
+                        )
                     }
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                fun myFunction() {
-                    throw AnException(
-                        "A long exception message which wraps"
-                    )
-                }
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `indents inside when entry`() {
         val result =
-            KotlinFormatter(maxLineLength = 50).format(
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        fun myFunction() {
+                            when (anExpression) {
+                                else ->
+                                    throw AnException("A long exception message")
+                            }
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
                     fun myFunction() {
                         when (anExpression) {
                             else ->
-                                throw AnException("A long exception message")
+                                throw AnException(
+                                    "A long exception message"
+                                )
                         }
                     }
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                fun myFunction() {
-                    when (anExpression) {
-                        else ->
-                            throw AnException(
-                                "A long exception message"
-                            )
-                    }
-                }
-            """.trimIndent()
-        )
     }
 
     @Test
@@ -1943,33 +2111,72 @@ class KotlinFormatterTest {
     @ValueSource(strings = [".", "?."])
     fun `does not break on a single dot expression`(operator: String) {
         val result =
-            KotlinFormatter(maxLineLength = 50).format(
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        fun myFunction() {
+                            anObject${operator}aMethod(aParameter, anotherParameter, aThirdParameter)
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
                     fun myFunction() {
-                        anObject${operator}aMethod(aParameter, anotherParameter, aThirdParameter)
+                        anObject${operator}aMethod(
+                            aParameter,
+                            anotherParameter,
+                            aThirdParameter
+                        )
                     }
                 """.trimIndent()
             )
+    }
 
-        assertThat(result).isEqualTo(
-            """
-                fun myFunction() {
-                    anObject${operator}aMethod(
-                        aParameter,
-                        anotherParameter,
-                        aThirdParameter
-                    )
-                }
-            """.trimIndent()
-        )
+    @Test
+    fun `breaks at first dot operator in dot expression when necessary`() {
+        val result =
+            KotlinFormatter(maxLineLength = 30)
+                .format(
+                    """
+                        fun myFunction() {
+                            aMethod(aParameter).aProperty
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    fun myFunction() {
+                        aMethod(aParameter)
+                            .aProperty
+                    }
+                """.trimIndent()
+            )
     }
 
     @Test
     fun `indents a try-catch expression correctly`() {
         val result =
-            KotlinFormatter(maxLineLength = 40).format(
+            KotlinFormatter(maxLineLength = 40)
+                .format(
+                    """
+                        fun aFunction() { 
+                            try {
+                                aFunction()
+                            } catch (e: Exception) {
+                                anotherFunction()
+                            }
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
-                    fun aFunction() { 
+                    fun aFunction() {
                         try {
                             aFunction()
                         } catch (e: Exception) {
@@ -1978,24 +2185,26 @@ class KotlinFormatterTest {
                     }
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                fun aFunction() {
-                    try {
-                        aFunction()
-                    } catch (e: Exception) {
-                        anotherFunction()
-                    }
-                }
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `breaks before try expression inside function literal`() {
         val result =
-            KotlinFormatter().format(
+            KotlinFormatter()
+                .format(
+                    """
+                        aFunctionAcceptingALambda {
+                            try {
+                                aFunction()
+                            } catch (e: Exception) {
+                                anotherFunction()
+                            }
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
                     aFunctionAcceptingALambda {
                         try {
@@ -2006,91 +2215,89 @@ class KotlinFormatterTest {
                     }
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                aFunctionAcceptingALambda {
-                    try {
-                        aFunction()
-                    } catch (e: Exception) {
-                        anotherFunction()
-                    }
-                }
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `format breaks the short form of the summary fragment`() {
         val result =
-            KotlinFormatter(maxLineLength = 69).format(
+            KotlinFormatter(maxLineLength = 69)
+                .format(
+                    """
+                        /** An extra long summary fragment which should wrap to a new line. */
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
-                    /** An extra long summary fragment which should wrap to a new line. */
+                    /**
+                     * An extra long summary fragment which should wrap to a new line.
+                     */
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                /**
-                 * An extra long summary fragment which should wrap to a new line.
-                 */
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `format does not break if there is no word boundary`() {
         val result =
-            KotlinFormatter(maxLineLength = 60).format(
+            KotlinFormatter(maxLineLength = 60)
+                .format(
+                    """
+                        /**
+                         * http://www.example.com/an-extra-long-url-which-should-not-break
+                         */
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
                     /**
                      * http://www.example.com/an-extra-long-url-which-should-not-break
                      */
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                /**
-                 * http://www.example.com/an-extra-long-url-which-should-not-break
-                 */
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `format preserves newlines between tags`() {
         val result =
-            KotlinFormatter(maxLineLength = 60).format(
+            KotlinFormatter(maxLineLength = 60)
+                .format(
+                    """
+                        /**
+                         * @param parameter an input parameter with a particularly long description
+                         * @param anotherParameter another input parameter
+                         */
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
                     /**
-                     * @param parameter an input parameter with a particularly long description
+                     * @param parameter an input parameter with a particularly
+                     *     long description
                      * @param anotherParameter another input parameter
                      */
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                /**
-                 * @param parameter an input parameter with a particularly
-                 *     long description
-                 * @param anotherParameter another input parameter
-                 */
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `does not insert line breaks in the package statement`() {
         val result =
-            KotlinFormatter(maxLineLength = 20).format(
+            KotlinFormatter(maxLineLength = 20)
+                .format(
+                    """
+                        package org.kotlin.a.very.long.package.name.which.should.not.wrap
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """package org.kotlin.a.very.long.package.name.which.should.not.wrap""".trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """package org.kotlin.a.very.long.package.name.which.should.not.wrap""".trimIndent()
-        )
     }
 
     @Test
@@ -2104,11 +2311,12 @@ class KotlinFormatterTest {
                 """.trimIndent()
             )
 
-        assertThat(result).isEqualTo(
-            """
-                import org.kotlin.a.very.long.package.name.which.should.not.wrap.AClass
-            """.trimIndent()
-        )
+        assertThat(result)
+            .isEqualTo(
+                """
+                    import org.kotlin.a.very.long.package.name.which.should.not.wrap.AClass
+                """.trimIndent()
+            )
     }
 
     @Test
@@ -2122,11 +2330,12 @@ class KotlinFormatterTest {
                 """.trimIndent()
             )
 
-        assertThat(result).isEqualTo(
-            """
-                import org.kotlin.a.very.long.package.name.which.should.not.wrap.AClass as AnAlias
-            """.trimIndent()
-        )
+        assertThat(result)
+            .isEqualTo(
+                """
+                    import org.kotlin.a.very.long.package.name.which.should.not.wrap.AClass as AnAlias
+                """.trimIndent()
+            )
     }
 
     @Test
@@ -2141,12 +2350,13 @@ class KotlinFormatterTest {
                 """.trimIndent()
             )
 
-        assertThat(result).isEqualTo(
-            """
-                import org.kotlin.formatter.AClass
-                import org.kotlin.formatter.AnotherClass
-            """.trimIndent()
-        )
+        assertThat(result)
+            .isEqualTo(
+                """
+                    import org.kotlin.formatter.AClass
+                    import org.kotlin.formatter.AnotherClass
+                """.trimIndent()
+            )
     }
 
     @Test
@@ -2162,13 +2372,14 @@ class KotlinFormatterTest {
                 """.trimIndent()
             )
 
-        assertThat(result).isEqualTo(
-            """
-                package org.kotlin.formatter
-                
-                import org.kotlin.formatter.package.AClass
-            """.trimIndent()
-        )
+        assertThat(result)
+            .isEqualTo(
+                """
+                    package org.kotlin.formatter
+                    
+                    import org.kotlin.formatter.package.AClass
+                """.trimIndent()
+            )
     }
 
     @Test
@@ -2183,12 +2394,13 @@ class KotlinFormatterTest {
                 """.trimIndent()
             )
 
-        assertThat(result).isEqualTo(
-            """
-                import org.kotlin.formatter.AClass
-                import org.kotlin.formatter.BClass
-            """.trimIndent()
-        )
+        assertThat(result)
+            .isEqualTo(
+                """
+                    import org.kotlin.formatter.AClass
+                    import org.kotlin.formatter.BClass
+                """.trimIndent()
+            )
     }
 
     @Test
@@ -2225,15 +2437,16 @@ class KotlinFormatterTest {
                 """.trimIndent()
             )
 
-        assertThat(result).isEqualTo(
-            """
-                class MyClass(aParameter: String) :
-                    AnInterface {
-                
-                    val aProperty: String = ""
-                }
-            """.trimIndent()
-        )
+        assertThat(result)
+            .isEqualTo(
+                """
+                    class MyClass(aParameter: String) :
+                        AnInterface {
+                    
+                        val aProperty: String = ""
+                    }
+                """.trimIndent()
+            )
     }
 
     @Test
@@ -2251,15 +2464,16 @@ class KotlinFormatterTest {
                 """.trimIndent()
             )
 
-        assertThat(result).isEqualTo(
-            """
-                class MyClass(aParameter: String) :
-                    AnInterface {
-                
-                    val aProperty: String = ""
-                }
-            """.trimIndent()
-        )
+        assertThat(result)
+            .isEqualTo(
+                """
+                    class MyClass(aParameter: String) :
+                        AnInterface {
+                    
+                        val aProperty: String = ""
+                    }
+                """.trimIndent()
+            )
     }
 
     @Test
@@ -2278,16 +2492,17 @@ class KotlinFormatterTest {
                 """.trimIndent()
             )
 
-        assertThat(result).isEqualTo(
-            """
-                fun aFunction() {
-                    val pomModel: PomModel = object : UserDataHolderBase(), PomModel {
-                        val aProperty: String = ""
-                        val anotherProperty: String = ""
+        assertThat(result)
+            .isEqualTo(
+                """
+                    fun aFunction() {
+                        val pomModel: PomModel = object : UserDataHolderBase(), PomModel {
+                            val aProperty: String = ""
+                            val anotherProperty: String = ""
+                        }
                     }
-                }
-            """.trimIndent()
-        )
+                """.trimIndent()
+            )
     }
 
     @Test
@@ -2320,12 +2535,13 @@ class KotlinFormatterTest {
             """.trimIndent()
         )
 
-        assertThat(result).isEqualTo(
-            """
-                class MyClass @AnAnnotation constructor() {
-                }
-            """.trimIndent()
-        )
+        assertThat(result)
+            .isEqualTo(
+                """
+                    class MyClass @AnAnnotation constructor() {
+                    }
+                """.trimIndent()
+            )
     }
 
     @Test
@@ -2344,16 +2560,17 @@ class KotlinFormatterTest {
                 """.trimIndent()
             )
 
-        assertThat(result).isEqualTo(
-            """
-                class MyClass @AnAnnotation private constructor(
-                    aParameter: String,
-                    anotherParameter: String,
-                    aThirdParameter: String
-                ) {
-                }
-            """.trimIndent()
-        )
+        assertThat(result)
+            .isEqualTo(
+                """
+                    class MyClass @AnAnnotation private constructor(
+                        aParameter: String,
+                        anotherParameter: String,
+                        aThirdParameter: String
+                    ) {
+                    }
+                """.trimIndent()
+            )
     }
 
     @Test
@@ -2368,12 +2585,13 @@ class KotlinFormatterTest {
                 """.trimIndent()
             )
 
-        assertThat(result).isEqualTo(
-            """
-                class MyClass @AnAnnotation @AnotherAnnotation constructor() {
-                }
-            """.trimIndent()
-        )
+        assertThat(result)
+            .isEqualTo(
+                """
+                    class MyClass @AnAnnotation @AnotherAnnotation constructor() {
+                    }
+                """.trimIndent()
+            )
     }
 
     @Test
@@ -2388,12 +2606,13 @@ class KotlinFormatterTest {
                 """.trimIndent()
             )
 
-        assertThat(result).isEqualTo(
-            """
-                class MyClass @AnAnnotation constructor() {
-                }
-            """.trimIndent()
-        )
+        assertThat(result)
+            .isEqualTo(
+                """
+                    class MyClass @AnAnnotation constructor() {
+                    }
+                """.trimIndent()
+            )
     }
 
     @Test
@@ -2408,12 +2627,13 @@ class KotlinFormatterTest {
                 """.trimIndent()
             )
 
-        assertThat(result).isEqualTo(
-            """
-                class MyClass @AnAnnotation /* A comment */ constructor() {
-                }
-            """.trimIndent()
-        )
+        assertThat(result)
+            .isEqualTo(
+                """
+                    class MyClass @AnAnnotation /* A comment */ constructor() {
+                    }
+                """.trimIndent()
+            )
     }
 
     @Test
@@ -2428,12 +2648,13 @@ class KotlinFormatterTest {
                 """.trimIndent()
             )
 
-        assertThat(result).isEqualTo(
-            """
-                class MyClass /* A comment */ @AnAnnotation constructor() {
-                }
-            """.trimIndent()
-        )
+        assertThat(result)
+            .isEqualTo(
+                """
+                    class MyClass /* A comment */ @AnAnnotation constructor() {
+                    }
+                """.trimIndent()
+            )
     }
 
     @Test
@@ -2451,15 +2672,16 @@ class KotlinFormatterTest {
                 """.trimIndent()
             )
 
-        assertThat(result).isEqualTo(
-            """
-                @AnAnnotation
-                // A comment
-                // Another comment
-                @AnotherAnnotation
-                class MyClass
-            """.trimIndent()
-        )
+        assertThat(result)
+            .isEqualTo(
+                """
+                    @AnAnnotation
+                    // A comment
+                    // Another comment
+                    @AnotherAnnotation
+                    class MyClass
+                """.trimIndent()
+            )
     }
 
     @Test
@@ -2479,17 +2701,18 @@ class KotlinFormatterTest {
                 """.trimIndent()
             )
 
-        assertThat(result).isEqualTo(
-            """
-                class MyClass {
-                    private val aField: String
-                
-                    init {
-                        aFunction()
+        assertThat(result)
+            .isEqualTo(
+                """
+                    class MyClass {
+                        private val aField: String
+                    
+                        init {
+                            aFunction()
+                        }
                     }
-                }
-            """.trimIndent()
-        )
+                """.trimIndent()
+            )
     }
 
     @Test
@@ -2613,15 +2836,16 @@ class KotlinFormatterTest {
                 """.trimIndent()
             )
 
-        assertThat(result).isEqualTo(
-            """
-                class MyClass {
-                    /** Some KDoc. */
-                    fun aFunction() {
+        assertThat(result)
+            .isEqualTo(
+                """
+                    class MyClass {
+                        /** Some KDoc. */
+                        fun aFunction() {
+                        }
                     }
-                }
-            """.trimIndent()
-        )
+                """.trimIndent()
+            )
     }
 
     @Test
@@ -2657,14 +2881,15 @@ class KotlinFormatterTest {
                 """.trimIndent()
             )
 
-        assertThat(result).isEqualTo(
-            """
-                enum class AnEnum {
-                    /** Some KDoc. */
-                    A_VALUE
-                }
-            """.trimIndent()
-        )
+        assertThat(result)
+            .isEqualTo(
+                """
+                    enum class AnEnum {
+                        /** Some KDoc. */
+                        A_VALUE
+                    }
+                """.trimIndent()
+            )
     }
 
     @Test
@@ -2681,14 +2906,15 @@ class KotlinFormatterTest {
                 """.trimIndent()
             )
 
-        assertThat(result).isEqualTo(
-            """
-                /** Some KDoc. */
-                enum class AnEnum {
-                    A_VALUE
-                }
-            """.trimIndent()
-        )
+        assertThat(result)
+            .isEqualTo(
+                """
+                    /** Some KDoc. */
+                    enum class AnEnum {
+                        A_VALUE
+                    }
+                """.trimIndent()
+            )
     }
 
     @Test
@@ -2707,16 +2933,17 @@ class KotlinFormatterTest {
                 """.trimIndent()
             )
 
-        assertThat(result).isEqualTo(
-            """
-                /**
-                 * Some KDoc.
-                 *
-                 * Some further explanation.
-                 */
-                class AClass
-            """.trimIndent()
-        )
+        assertThat(result)
+            .isEqualTo(
+                """
+                    /**
+                     * Some KDoc.
+                     *
+                     * Some further explanation.
+                     */
+                    class AClass
+                """.trimIndent()
+            )
     }
 
     @Test
@@ -2735,16 +2962,17 @@ class KotlinFormatterTest {
                 """.trimIndent()
             )
 
-        assertThat(result).isEqualTo(
-            """
-                /**
-                 * ```
-                 * val aVariable
-                 * val anotherVariable
-                 * ```
-                 */
-            """.trimIndent()
-        )
+        assertThat(result)
+            .isEqualTo(
+                """
+                    /**
+                     * ```
+                     * val aVariable
+                     * val anotherVariable
+                     * ```
+                     */
+                """.trimIndent()
+            )
     }
 
     @Test
@@ -2823,14 +3051,15 @@ class KotlinFormatterTest {
                 """.trimIndent()
             )
 
-        assertThat(result).isEqualTo(
-            """
-                /**
-                 * @property aProperty A property with
-                 *     some KDoc
-                 */
-            """.trimIndent()
-        )
+        assertThat(result)
+            .isEqualTo(
+                """
+                    /**
+                     * @property aProperty A property with
+                     *     some KDoc
+                     */
+                """.trimIndent()
+            )
     }
 
     @Test
@@ -2847,15 +3076,16 @@ class KotlinFormatterTest {
                 """.trimIndent()
             )
 
-        assertThat(result).isEqualTo(
-            """
-                /**
-                 * @property aProperty Some KDoc
-                 * @property anotherProperty Some other
-                 *     KDoc
-                 */
-            """.trimIndent()
-        )
+        assertThat(result)
+            .isEqualTo(
+                """
+                    /**
+                     * @property aProperty Some KDoc
+                     * @property anotherProperty Some other
+                     *     KDoc
+                     */
+                """.trimIndent()
+            )
     }
 
     @Test
@@ -2916,12 +3146,13 @@ class KotlinFormatterTest {
                 """.trimIndent()
             )
 
-        assertThat(result).isEqualTo(
-            """
-                /** Some KDoc with an [element] and more text. */
-                class AClass
-            """.trimIndent()
-        )
+        assertThat(result)
+            .isEqualTo(
+                """
+                    /** Some KDoc with an [element] and more text. */
+                    class AClass
+                """.trimIndent()
+            )
     }
 
     @Test
@@ -2978,13 +3209,14 @@ class KotlinFormatterTest {
             """.trimIndent()
         )
 
-        assertThat(result).isEqualTo(
-            """
-                /** Some KDoc. */
-                // A comment
-                fun aFunction()
-            """.trimIndent()
-        )
+        assertThat(result)
+            .isEqualTo(
+                """
+                    /** Some KDoc. */
+                    // A comment
+                    fun aFunction()
+                """.trimIndent()
+            )
     }
 
     @Test
@@ -2999,12 +3231,13 @@ class KotlinFormatterTest {
                 """.trimIndent()
             )
 
-        assertThat(result).isEqualTo(
-            """
-                // TODO(ticket): Some item
-                //  with some more information
-            """.trimIndent()
-        )
+        assertThat(result)
+            .isEqualTo(
+                """
+                    // TODO(ticket): Some item
+                    //  with some more information
+                """.trimIndent()
+            )
     }
 
     @Test
@@ -3020,13 +3253,14 @@ class KotlinFormatterTest {
                 """.trimIndent()
             )
 
-        assertThat(result).isEqualTo(
-            """
-                // TODO(ticket): Some item
-                //  with something
-                fun aFunction()
-            """.trimIndent()
-        )
+        assertThat(result)
+            .isEqualTo(
+                """
+                    // TODO(ticket): Some item
+                    //  with something
+                    fun aFunction()
+                """.trimIndent()
+            )
     }
 
     @Test
@@ -3044,15 +3278,16 @@ class KotlinFormatterTest {
                 """.trimIndent()
             )
 
-        assertThat(result).isEqualTo(
-            """
-                /**
-                 * A summary fragment with some content.
-                 *
-                 * @property property A property
-                 */
-            """.trimIndent()
-        )
+        assertThat(result)
+            .isEqualTo(
+                """
+                    /**
+                     * A summary fragment with some content.
+                     *
+                     * @property property A property
+                     */
+                """.trimIndent()
+            )
     }
 
     @Test
@@ -3070,15 +3305,16 @@ class KotlinFormatterTest {
                 """.trimIndent()
             )
 
-        assertThat(result).isEqualTo(
-            """
-                aVariable =
-                
-                    // Some comment text
-                    // Some further text
-                    anotherVariable + aThirdVariable
-            """.trimIndent()
-        )
+        assertThat(result)
+            .isEqualTo(
+                """
+                    aVariable =
+                    
+                        // Some comment text
+                        // Some further text
+                        anotherVariable + aThirdVariable
+                """.trimIndent()
+            )
     }
 
     @Test
@@ -3096,14 +3332,15 @@ class KotlinFormatterTest {
                 """.trimIndent()
             )
 
-        assertThat(result).isEqualTo(
-            """
-                aVariable =
-                    /* Some comment text which is too long to fit on line
-                     * Some further text */
-                    anotherVariable + aThirdVariable
-            """.trimIndent()
-        )
+        assertThat(result)
+            .isEqualTo(
+                """
+                    aVariable =
+                        /* Some comment text which is too long to fit on line
+                         * Some further text */
+                        anotherVariable + aThirdVariable
+                """.trimIndent()
+            )
     }
 
     @Test
@@ -3121,13 +3358,14 @@ class KotlinFormatterTest {
                 """.trimIndent()
             )
 
-        assertThat(result).isEqualTo(
-            """
-                /* Some comment text which is too long to fit on line
-                 * Some further text */
-                aFunction()
-            """.trimIndent()
-        )
+        assertThat(result)
+            .isEqualTo(
+                """
+                    /* Some comment text which is too long to fit on line
+                     * Some further text */
+                    aFunction()
+                """.trimIndent()
+            )
     }
 
     @Test
@@ -3147,17 +3385,18 @@ class KotlinFormatterTest {
                 """.trimIndent()
             )
 
-        assertThat(result).isEqualTo(
-            """
-                aFunctionCall(
-                    aParameter,
-                
-                    // Some comment text
-                    // Some further text
-                    anotherParameter
-                )
-            """.trimIndent()
-        )
+        assertThat(result)
+            .isEqualTo(
+                """
+                    aFunctionCall(
+                        aParameter,
+                    
+                        // Some comment text
+                        // Some further text
+                        anotherParameter
+                    )
+                """.trimIndent()
+            )
     }
 
     @Test
@@ -3174,14 +3413,15 @@ class KotlinFormatterTest {
                 """.trimIndent()
             )
 
-        assertThat(result).isEqualTo(
-            """
-                val aProperty
-                
-                // Some comment text
-                // Some further text
-            """.trimIndent()
-        )
+        assertThat(result)
+            .isEqualTo(
+                """
+                    val aProperty
+                    
+                    // Some comment text
+                    // Some further text
+                """.trimIndent()
+            )
     }
 
     @Test
@@ -3201,17 +3441,18 @@ class KotlinFormatterTest {
                 """.trimIndent()
             )
 
-        assertThat(result).isEqualTo(
-            """
-                aFunction(
-                    0,
-                    /* A comment */ 1,
-                    2 /* A comment */,
-                    3, /* A comment */
-                    4
-                )
-            """.trimIndent()
-        )
+        assertThat(result)
+            .isEqualTo(
+                """
+                    aFunction(
+                        0,
+                        /* A comment */ 1,
+                        2 /* A comment */,
+                        3, /* A comment */
+                        4
+                    )
+                """.trimIndent()
+            )
     }
 
     @Test
@@ -3229,15 +3470,16 @@ class KotlinFormatterTest {
                 """.trimIndent()
             )
 
-        assertThat(result).isEqualTo(
-            """
-                aFunction(
-                    0,
-                    // An EOL comment
-                    /* A comment */ 1
-                )
-            """.trimIndent()
-        )
+        assertThat(result)
+            .isEqualTo(
+                """
+                    aFunction(
+                        0,
+                        // An EOL comment
+                        /* A comment */ 1
+                    )
+                """.trimIndent()
+            )
     }
 
     @Test
@@ -3259,77 +3501,81 @@ class KotlinFormatterTest {
     @Test
     fun `breaks at correct location in function calls`() {
         val result =
-            KotlinFormatter(maxLineLength = 49).format(
+            KotlinFormatter(maxLineLength = 49)
+                .format(
+                    """
+                        aFunction(
+                            anotherFunction(aParameter, anotherParameter),
+                            aThirdFunction()
+                        )
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
                     aFunction(
-                        anotherFunction(aParameter, anotherParameter),
+                        anotherFunction(
+                            aParameter,
+                            anotherParameter
+                        ),
                         aThirdFunction()
                     )
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                aFunction(
-                    anotherFunction(
-                        aParameter,
-                        anotherParameter
-                    ),
-                    aThirdFunction()
-                )
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `indents parameters at the same level as their annotations`() {
         val result =
-            KotlinFormatter(maxLineLength = 40).format(
-                """fun aFunction(@AnAnnotation("Some value") aParameter: String)"""
-            )
+            KotlinFormatter(maxLineLength = 40)
+                .format("""fun aFunction(@AnAnnotation("Some value") aParameter: String)""")
 
-        assertThat(result).isEqualTo(
-            """
-                fun aFunction(
-                    @AnAnnotation("Some value")
-                    aParameter: String
-                )
-            """.trimIndent()
-        )
+        assertThat(result)
+            .isEqualTo(
+                """
+                    fun aFunction(
+                        @AnAnnotation("Some value")
+                        aParameter: String
+                    )
+                """.trimIndent()
+            )
     }
 
     @Test
     fun `does not break after modifier list when an annotation is present`() {
         val result =
-            KotlinFormatter(maxLineLength = 40).format(
-                """class AClass(@AnAnnotation("Some value") private val aParameter: String)"""
-            )
-
-        assertThat(result).isEqualTo(
-            """
-                class AClass(
-                    @AnAnnotation("Some value")
-                    private val aParameter: String
+            KotlinFormatter(maxLineLength = 40)
+                .format(
+                    """class AClass(@AnAnnotation("Some value") private val aParameter: String)"""
                 )
-            """.trimIndent()
-        )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    class AClass(
+                        @AnAnnotation("Some value")
+                        private val aParameter: String
+                    )
+                """.trimIndent()
+            )
     }
 
     @Test
     fun `indents named parameters with continuation indent`() {
         val result =
-            KotlinFormatter(maxLineLength = 42).format(
-                """aFunction(aParameter = "A long value which should wrap")"""
-            )
+            KotlinFormatter(maxLineLength = 42)
+                .format("""aFunction(aParameter = "A long value which should wrap")""")
 
-        assertThat(result).isEqualTo(
-            """
-                aFunction(
-                    aParameter =
-                        "A long value which should wrap"
-                )
-            """.trimIndent()
-        )
+        assertThat(result)
+            .isEqualTo(
+                """
+                    aFunction(
+                        aParameter =
+                            "A long value which should wrap"
+                    )
+                """.trimIndent()
+            )
     }
 
     @Test
@@ -3353,40 +3599,44 @@ class KotlinFormatterTest {
     @Test
     fun `sorts modifier keywords on declarations`() {
         val result =
-            KotlinFormatter(maxLineLength = 88).format(
+            KotlinFormatter(maxLineLength = 88)
+                .format(
+                    """
+                        data operator infix inline companion enum annotation inner suspend vararg tailrec
+                            lateinit override external final open abstract sealed const expect actual public
+                            protected private internal fun myFunction()
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
-                    data operator infix inline companion enum annotation inner suspend vararg tailrec
-                        lateinit override external final open abstract sealed const expect actual public
-                        protected private internal fun myFunction()
+                    public protected private internal expect actual final open abstract sealed const
+                        external override lateinit tailrec vararg suspend inner enum annotation companion
+                        inline infix operator data fun myFunction()
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                public protected private internal expect actual final open abstract sealed const
-                    external override lateinit tailrec vararg suspend inner enum annotation companion
-                    inline infix operator data fun myFunction()
-            """.trimIndent()
-        )
     }
 
     @Test
     fun `removes whitespace between imports`() {
         val result =
-            KotlinFormatter().format(
+            KotlinFormatter()
+                .format(
+                    """
+                        import apackage.AClass
+                        
+                        import apackage.BClass
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
                 """
                     import apackage.AClass
-                    
                     import apackage.BClass
                 """.trimIndent()
             )
-
-        assertThat(result).isEqualTo(
-            """
-                import apackage.AClass
-                import apackage.BClass
-            """.trimIndent()
-        )
     }
 
     @Test
@@ -3401,12 +3651,13 @@ class KotlinFormatterTest {
                 """.trimIndent()
             )
 
-        assertThat(result).isEqualTo(
-            """
-                ""${'"'}Before whitespace  
-                After whitespace""${'"'}
-            """.trimIndent()
-        )
+        assertThat(result)
+            .isEqualTo(
+                """
+                    ""${'"'}Before whitespace  
+                    After whitespace""${'"'}
+                """.trimIndent()
+            )
     }
 
     @Test
@@ -3436,13 +3687,14 @@ class KotlinFormatterTest {
 
             subject.formatFile(filePath)
 
-            assertThat(filePath.toFile().readText(Charsets.UTF_8)).isEqualTo(
-                """
-                    class MyClass {
-                        val aProperty: String
-                    }
-                """.trimIndent()
-            )
+            assertThat(filePath.toFile().readText(Charsets.UTF_8))
+                .isEqualTo(
+                    """
+                        class MyClass {
+                            val aProperty: String
+                        }
+                    """.trimIndent()
+                )
         }
 
         @Test

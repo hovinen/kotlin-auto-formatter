@@ -24,9 +24,8 @@ internal class ReturnScanner(private val kotlinScanner: KotlinScanner) : NodeSca
             possibleWhitespace()
             zeroOrMore { anyNode() } thenMapToTokens { nodes ->
                 if (nodes.isNotEmpty()) {
-                    listOf(nonBreakingSpaceToken()).plus(
-                        kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
-                    )
+                    listOf(nonBreakingSpaceToken())
+                        .plus(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT))
                 } else {
                     listOf()
                 }

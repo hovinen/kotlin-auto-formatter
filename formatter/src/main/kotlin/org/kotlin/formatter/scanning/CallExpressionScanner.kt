@@ -19,9 +19,8 @@ internal class CallExpressionScanner(private val kotlinScanner: KotlinScanner) :
             zeroOrOne {
                 possibleWhitespace()
                 nodeOfType(KtNodeTypes.LAMBDA_ARGUMENT) thenMapToTokens { nodes ->
-                    listOf(nonBreakingSpaceToken()).plus(
-                        kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
-                    )
+                    listOf(nonBreakingSpaceToken())
+                        .plus(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT))
                 }
             }
             end()

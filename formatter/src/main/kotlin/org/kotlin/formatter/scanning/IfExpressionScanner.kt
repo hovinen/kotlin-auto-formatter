@@ -30,9 +30,8 @@ internal class IfExpressionScanner(private val kotlinScanner: KotlinScanner) : N
                 nodeOfType(KtTokens.RPAR)
                 possibleWhitespace()
                 nodeOfType(KtNodeTypes.THEN) thenMapToTokens { nodes ->
-                    listOf(LeafNodeToken(") ")).plus(
-                        kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
-                    )
+                    listOf(LeafNodeToken(") "))
+                        .plus(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT))
                 }
             }
             zeroOrOne {
@@ -40,9 +39,8 @@ internal class IfExpressionScanner(private val kotlinScanner: KotlinScanner) : N
                 nodeOfType(KtTokens.ELSE_KEYWORD)
                 possibleWhitespace()
                 nodeOfType(KtNodeTypes.ELSE) thenMapToTokens { nodes ->
-                    listOf(WhitespaceToken(" "), LeafNodeToken("else ")).plus(
-                        kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
-                    )
+                    listOf(WhitespaceToken(" "), LeafNodeToken("else "))
+                        .plus(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT))
                 }
             }
             end()

@@ -24,9 +24,8 @@ internal class PropertyScanner(private val kotlinScanner: KotlinScanner) : NodeS
                 zeroOrOne { propertyInitializer(kotlinScanner) }
                 zeroOrMore {
                     nodeOfType(KtNodeTypes.PROPERTY_ACCESSOR) thenMapToTokens { nodes ->
-                        listOf(ForcedBreakToken(count = 1)).plus(
-                            kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
-                        )
+                        listOf(ForcedBreakToken(count = 1))
+                            .plus(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT))
                     }
                 }
             } thenMapTokens { it.plus(BlockFromMarkerToken) }

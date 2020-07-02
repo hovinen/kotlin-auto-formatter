@@ -37,9 +37,8 @@ internal class ParameterListScanner(private val kotlinScanner: KotlinScanner) : 
                     KtNodeTypes.VALUE_PARAMETER,
                     KtNodeTypes.VALUE_ARGUMENT
                 ) thenMapToTokens { nodes ->
-                    listOf(SynchronizedBreakToken(whitespaceLength = 0)).plus(
-                        parameterPattern.matchSequence(nodes.first().children().asIterable())
-                    )
+                    listOf(SynchronizedBreakToken(whitespaceLength = 0))
+                        .plus(parameterPattern.matchSequence(nodes.first().children().asIterable()))
                 }
                 zeroOrMore {
                     possibleWhitespaceWithComment()

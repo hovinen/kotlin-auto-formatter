@@ -28,9 +28,8 @@ internal class FunctionDeclarationScanner(private val kotlinScanner: KotlinScann
                 declarationWithOptionalModifierList(kotlinScanner)
                 possibleWhitespace()
                 nodeOfType(KtNodeTypes.BLOCK) thenMapToTokens { nodes ->
-                    listOf(nonBreakingSpaceToken()).plus(
-                        kotlinScanner.scanNodes(nodes, ScannerState.BLOCK)
-                    )
+                    listOf(nonBreakingSpaceToken())
+                        .plus(kotlinScanner.scanNodes(nodes, ScannerState.BLOCK))
                 }
             } or {
                 declarationWithOptionalModifierList(

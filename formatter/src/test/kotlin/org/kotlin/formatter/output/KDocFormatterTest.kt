@@ -143,12 +143,13 @@ internal class KDocFormatterTest {
                 """.trimIndent()
             )
 
-        assertThat(result).isEqualTo(
-            """
-                @param aParameter A parameter.
-                $tag anotherTag
-            """.trimIndent()
-        )
+        assertThat(result)
+            .isEqualTo(
+                """
+                    @param aParameter A parameter.
+                    $tag anotherTag
+                """.trimIndent()
+            )
     }
 
     @Test
@@ -162,12 +163,13 @@ internal class KDocFormatterTest {
                 """.trimIndent()
             )
 
-        assertThat(result).isEqualTo(
-            """
-                @param aParameter A parameter with some additional
-                    text which wraps.
-            """.trimIndent()
-        )
+        assertThat(result)
+            .isEqualTo(
+                """
+                    @param aParameter A parameter with some additional
+                        text which wraps.
+                """.trimIndent()
+            )
     }
 
     @Test
@@ -182,13 +184,14 @@ internal class KDocFormatterTest {
                 """.trimIndent()
             )
 
-        assertThat(result).isEqualTo(
-            """
-                @param aParameter A parameter with some additional
-                    text which wraps and some more text which also
-                    w
-            """.trimIndent()
-        )
+        assertThat(result)
+            .isEqualTo(
+                """
+                    @param aParameter A parameter with some additional
+                        text which wraps and some more text which also
+                        w
+                """.trimIndent()
+            )
     }
 
     @Test
@@ -204,14 +207,15 @@ internal class KDocFormatterTest {
                 """.trimIndent()
             )
 
-        assertThat(result).isEqualTo(
-            """
-                A paragraph.
-                
-                 * A list item which should wrap because it is so
-                   long.
-            """.trimIndent()
-        )
+        assertThat(result)
+            .isEqualTo(
+                """
+                    A paragraph.
+                    
+                     * A list item which should wrap because it is so
+                       long.
+                """.trimIndent()
+            )
     }
 
     @Test
@@ -227,14 +231,15 @@ internal class KDocFormatterTest {
                 """.trimIndent()
             )
 
-        assertThat(result).isEqualTo(
-            """
-                A paragraph.
-                
-                 * A list item which should wrap because it is so
-                   long.
-            """.trimIndent()
-        )
+        assertThat(result)
+            .isEqualTo(
+                """
+                    A paragraph.
+                    
+                     * A list item which should wrap because it is so
+                       long.
+                """.trimIndent()
+            )
     }
 
     @Test
@@ -250,14 +255,15 @@ internal class KDocFormatterTest {
                 """.trimIndent()
             )
 
-        assertThat(result).isEqualTo(
-            """
-                 * A list item
-                
-                A paragraph which should wrap because the line is
-                too long.
-            """.trimIndent()
-        )
+        assertThat(result)
+            .isEqualTo(
+                """
+                     * A list item
+                    
+                    A paragraph which should wrap because the line is
+                    too long.
+                """.trimIndent()
+            )
     }
 
     @Test
@@ -273,14 +279,15 @@ internal class KDocFormatterTest {
                 """.trimIndent()
             )
 
-        assertThat(result).isEqualTo(
-            """
-                A paragraph.
-                
-                 1. A list item which should wrap because it is so
-                    long.
-            """.trimIndent()
-        )
+        assertThat(result)
+            .isEqualTo(
+                """
+                    A paragraph.
+                    
+                     1. A list item which should wrap because it is so
+                        long.
+                """.trimIndent()
+            )
     }
 
     @Test
@@ -296,14 +303,15 @@ internal class KDocFormatterTest {
                 """.trimIndent()
             )
 
-        assertThat(result).isEqualTo(
-            """
-                A paragraph.
-                
-                 1. A list item which should wrap because it is so
-                    long.
-            """.trimIndent()
-        )
+        assertThat(result)
+            .isEqualTo(
+                """
+                    A paragraph.
+                    
+                     1. A list item which should wrap because it is so
+                        long.
+                """.trimIndent()
+            )
     }
 
     @Test
@@ -319,14 +327,15 @@ internal class KDocFormatterTest {
                 """.trimIndent()
             )
 
-        assertThat(result).isEqualTo(
-            """
-                A paragraph.
-                
-                 10. A list item which should wrap because it is
-                     so long.
-            """.trimIndent()
-        )
+        assertThat(result)
+            .isEqualTo(
+                """
+                    A paragraph.
+                    
+                     10. A list item which should wrap because it is
+                         so long.
+                """.trimIndent()
+            )
     }
 
     @Test
@@ -391,15 +400,16 @@ internal class KDocFormatterTest {
                 """.trimIndent()
             )
 
-        assertThat(result).isEqualTo(
-            """
-                A paragraph which is long enough that the text
-                should wrap.
-                ```
-                    Some code
-                ```
-            """.trimIndent()
-        )
+        assertThat(result)
+            .isEqualTo(
+                """
+                    A paragraph which is long enough that the text
+                    should wrap.
+                    ```
+                        Some code
+                    ```
+                """.trimIndent()
+            )
     }
 
     @Test
@@ -416,15 +426,16 @@ internal class KDocFormatterTest {
                 """.trimIndent()
             )
 
-        assertThat(result).isEqualTo(
-            """
-                ```
-                    Some code
-                ```
-                A paragraph which is long enough that the text
-                should wrap.
-            """.trimIndent()
-        )
+        assertThat(result)
+            .isEqualTo(
+                """
+                    ```
+                        Some code
+                    ```
+                    A paragraph which is long enough that the text
+                    should wrap.
+                """.trimIndent()
+            )
     }
 
     @Test
@@ -466,15 +477,16 @@ internal class KDocFormatterTest {
                 """.trimIndent()
             )
 
-        assertThat(result).isEqualTo(
-            """
-                A paragraph which is long enough that the text
-                should wrap.
-                ```language
-                    Some code
-                ```
-            """.trimIndent()
-        )
+        assertThat(result)
+            .isEqualTo(
+                """
+                    A paragraph which is long enough that the text
+                    should wrap.
+                    ```language
+                        Some code
+                    ```
+                """.trimIndent()
+            )
     }
 
     @Test

@@ -40,9 +40,8 @@ internal class WhenExpressionScanner(private val kotlinScanner: KotlinScanner) :
             zeroOrMore {
                 possibleWhitespaceWithComment(ignoreTrailingWhitespace = true)
                 nodeOfType(KtNodeTypes.WHEN_ENTRY) thenMapToTokens { nodes ->
-                    listOf(ForcedBreakToken(count = 1)).plus(
-                        kotlinScanner.scanNodes(nodes, ScannerState.BLOCK)
-                    )
+                    listOf(ForcedBreakToken(count = 1))
+                        .plus(kotlinScanner.scanNodes(nodes, ScannerState.BLOCK))
                 }
             }
             possibleWhitespaceWithComment(ignoreTrailingWhitespace = true)

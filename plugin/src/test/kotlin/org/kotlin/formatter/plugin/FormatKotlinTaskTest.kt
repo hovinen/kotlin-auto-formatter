@@ -60,15 +60,16 @@ class FormatKotlinTaskTest {
 
         runFormatter()
 
-        assertThat(Files.readString(sourceFile)).isEqualTo(
-            """
-                package somepackage
-                
-                class AClass {
-                    val aProperty: String = "Hello"
-                }
-            """.trimIndent()
-        )
+        assertThat(Files.readString(sourceFile))
+            .isEqualTo(
+                """
+                    package somepackage
+                    
+                    class AClass {
+                        val aProperty: String = "Hello"
+                    }
+                """.trimIndent()
+            )
     }
 
     @Test
@@ -89,13 +90,14 @@ class FormatKotlinTaskTest {
         val result = runFormatter()
 
         assertThat(result.task(":formatKotlin")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
-        assertThat(Files.readString(sourceFile)).isEqualTo(
-            """
-                package somepackage;
-                public class  AClass { String aProperty =
-                "Hello"; }
-            """.trimIndent()
-        )
+        assertThat(Files.readString(sourceFile))
+            .isEqualTo(
+                """
+                    package somepackage;
+                    public class  AClass { String aProperty =
+                    "Hello"; }
+                """.trimIndent()
+            )
     }
 
     private fun writeKotlinSourceFile(className: String, sourceDirectory: Path) {

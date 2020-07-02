@@ -42,9 +42,8 @@ internal class BinaryExpressionScanner(private val kotlinScanner: KotlinScanner)
                         }
                     }
                     elvisOperator() thenMapToTokens { operator ->
-                        listOf(BeginToken(State.CODE)).plus(
-                            kotlinScanner.scanNodes(operator, ScannerState.STATEMENT)
-                        )
+                        listOf(BeginToken(State.CODE))
+                            .plus(kotlinScanner.scanNodes(operator, ScannerState.STATEMENT))
                     }
                     possibleWhitespace()
                     oneOrMore { anyNode() } thenMapToTokens { nodes ->

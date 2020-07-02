@@ -488,10 +488,9 @@ internal class PrinterTest {
                 )
             )
 
-        assertThat(result).isEqualTo(
-            "outside block\n        \n        ${commentPrefix}Comment\n        " +
-                "${commentPrefix}Comment"
-        )
+        assertThat(result)
+            .isEqualTo("outside block\n        \n        ${commentPrefix}Comment\n        " +
+                "${commentPrefix}Comment")
     }
 
     @Test

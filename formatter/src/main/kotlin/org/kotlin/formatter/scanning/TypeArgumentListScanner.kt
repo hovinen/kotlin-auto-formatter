@@ -20,9 +20,8 @@ internal class TypeArgumentListScanner(private val kotlinScanner: KotlinScanner)
             either {
                 exactlyOne {
                     anyNode() thenMapToTokens { nodes ->
-                        listOf(SynchronizedBreakToken(whitespaceLength = 0)).plus(
-                            kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
-                        )
+                        listOf(SynchronizedBreakToken(whitespaceLength = 0))
+                            .plus(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT))
                     }
                     possibleWhitespace()
                     nodeOfType(KtTokens.COMMA) thenMapToTokens { listOf(LeafNodeToken(",")) }
@@ -31,9 +30,8 @@ internal class TypeArgumentListScanner(private val kotlinScanner: KotlinScanner)
                 zeroOrMore {
                     exactlyOne {
                         anyNode() thenMapToTokens { nodes ->
-                            listOf(SynchronizedBreakToken(whitespaceLength = 1)).plus(
-                                kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
-                            )
+                            listOf(SynchronizedBreakToken(whitespaceLength = 1))
+                                .plus(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT))
                         }
                         possibleWhitespace()
                         nodeOfType(KtTokens.COMMA) thenMapToTokens { listOf(LeafNodeToken(",")) }
@@ -41,16 +39,14 @@ internal class TypeArgumentListScanner(private val kotlinScanner: KotlinScanner)
                     possibleWhitespace()
                 }
                 exactlyOne { anyNode() } thenMapToTokens { nodes ->
-                    listOf(SynchronizedBreakToken(whitespaceLength = 1)).plus(
-                        kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
-                    )
+                    listOf(SynchronizedBreakToken(whitespaceLength = 1))
+                        .plus(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT))
                 }
             } or {
                 zeroOrOne {
                     exactlyOne { anyNode() } thenMapToTokens { nodes ->
-                        listOf(SynchronizedBreakToken(whitespaceLength = 0)).plus(
-                            kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
-                        )
+                        listOf(SynchronizedBreakToken(whitespaceLength = 0))
+                            .plus(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT))
                     }
                 }
             }

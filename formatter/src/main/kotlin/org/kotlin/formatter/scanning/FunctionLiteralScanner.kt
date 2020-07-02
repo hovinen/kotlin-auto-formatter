@@ -25,12 +25,13 @@ internal class FunctionLiteralScanner(private val kotlinScanner: KotlinScanner) 
             possibleWhitespace()
             zeroOrOne {
                 nodeOfType(KtNodeTypes.VALUE_PARAMETER_LIST) thenMapToTokens { nodes ->
-                    listOf(nonBreakingSpaceToken()).plus(
-                        inBeginEndBlock(
-                            kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT),
-                            State.CODE
+                    listOf(nonBreakingSpaceToken())
+                        .plus(
+                            inBeginEndBlock(
+                                kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT),
+                                State.CODE
+                            )
                         )
-                    )
                 }
                 possibleWhitespace()
                 nodeOfType(KtTokens.ARROW) thenMapToTokens {
