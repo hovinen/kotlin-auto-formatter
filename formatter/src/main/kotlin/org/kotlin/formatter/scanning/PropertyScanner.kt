@@ -107,7 +107,13 @@ internal fun NodePatternBuilder.optionalKDoc(
     }
 }
 
-private fun NodePatternBuilder.propertyInitializer(kotlinScanner: KotlinScanner) {
+/**
+ * Adds to the receiver [NodePatternBuilder] a sequence matching a property initializer.
+ *
+ * The spacing and breaking rules around the assignment operator are then adjusted according to the
+ * Kotlin coding conventions and Google Kotlin Style Guide.
+ */
+internal fun NodePatternBuilder.propertyInitializer(kotlinScanner: KotlinScanner) {
     possibleWhitespace() thenMapToTokens { listOf(nonBreakingSpaceToken()) }
     nodeOfType(KtTokens.EQ) thenMapToTokens { listOf(LeafNodeToken("=")) }
     possibleWhitespace() thenMapToTokens { listOf(WhitespaceToken(" ")) }
