@@ -1276,8 +1276,9 @@ internal class KotlinScannerTest {
                 BeginToken(State.CODE),
                 LeafNodeToken("/**"),
                 ClosingSynchronizedBreakToken(whitespaceLength = 1),
-                KDocContentToken(content = "@param parameter A parameter\n    with some more " +
-                    "content"),
+                KDocContentToken(
+                    content = "@param parameter A parameter\n    with some more content"
+                ),
                 ClosingSynchronizedBreakToken(whitespaceLength = 0),
                 LeafNodeToken(" */"),
                 EndToken
