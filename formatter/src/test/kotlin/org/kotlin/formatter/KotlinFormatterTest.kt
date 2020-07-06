@@ -3267,6 +3267,27 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `maintains line break between comment and function after annotation`() {
+        val subject = KotlinFormatter(maxLineLength = 40)
+
+        val result = subject.format(
+            """
+                @AnAnnotation
+                // A comment
+                fun aFunction()
+            """.trimIndent()
+        )
+
+        assertThat(result).isEqualTo(
+            """
+                @AnAnnotation
+                // A comment
+                fun aFunction()
+            """.trimIndent()
+        )
+    }
+
+    @Test
     fun `maintains spacing in follow-up lines of TODO comment`() {
         val subject = KotlinFormatter()
 

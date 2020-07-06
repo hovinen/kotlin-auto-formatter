@@ -47,8 +47,7 @@ internal class LeafScanner {
                 .removeSuffix("*/")
                 .replace(Regex("\n[ ]+\\* "), "\n ")
                 .trim()
-        val tokens = tokenizeString(text)
-        return tokens
+        return tokenizeString(text)
     }
 
     private fun stateBasedOnCommentContent(content: String) =

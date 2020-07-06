@@ -150,12 +150,13 @@ private fun NodePatternBuilder.commentWithPossibleWhitespace(ignoreTrailingWhite
  *
  * The comments are output as closely as possible to the original formatting.
  */
-fun NodePatternBuilder.comment() {
+fun NodePatternBuilder.comment(): NodePatternBuilder {
     zeroOrMore {
         singleComment()
         possibleWhitespaceOutputToToken()
     }
     singleComment()
+    return this
 }
 
 private fun NodePatternBuilder.singleComment() {
