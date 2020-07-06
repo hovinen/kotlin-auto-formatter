@@ -36,20 +36,36 @@ internal class DotQualifiedExpressionScanner(private val kotlinScanner: KotlinSc
     private fun dotQualifiedExpressionPattern(isOutermost: Boolean) =
         nodePattern {
             either {
-                multilineStringTemplate() thenMapToTokens { nodes ->
-                    listOf(
-                        LeafNodeToken("\"\"\""),
-                        BeginToken(State.CODE),
-                        SynchronizedBreakToken(whitespaceLength = 0)
-                    ).plus(stringTemplateToTokens(nodes.first()))
-                        .plus(ClosingSynchronizedBreakToken(whitespaceLength = 0))
-                        .plus(EndToken)
-                        .plus(LeafNodeToken("\"\"\".trimIndent()"))
+                either {
+                    multilineStringTemplate() thenMapToTokens { nodes ->
+                        listOf(
+                            LeafNodeToken("\"\"\""),
+                            BeginToken(State.CODE),
+                            SynchronizedBreakToken(whitespaceLength = 0)
+                        ).plus(stringTemplateToTokens(nodes.first()))
+                            .plus(ClosingSynchronizedBreakToken(whitespaceLength = 0))
+                            .plus(EndToken)
+                            .plus(LeafNodeToken("\"\"\".trimIndent()"))
+                    }
+                    possibleWhitespace()
+                    nodeOfType(KtTokens.DOT)
+                    possibleWhitespace()
+                    trimIndentCall()
+                } or {
+                    singleLineStringTemplate() thenMapToTokens { nodes ->
+                        listOf(BeginToken(State.MULTILINE_STRING_LITERAL))
+                            .plus(stringTemplateToTokens(nodes.first()))
+                            .plus(EndToken)
+                            .plus(emptyBreakPoint())
+                            .plus(LeafNodeToken("."))
+                    }
+                    possibleWhitespace()
+                    nodeOfType(KtTokens.DOT)
+                    possibleWhitespace()
+                    anyNode() thenMapToTokens { nodes ->
+                        kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
+                    }
                 }
-                possibleWhitespace()
-                nodeOfType(KtTokens.DOT)
-                possibleWhitespace()
-                trimIndentCall()
             } or {
                 either {
                     nodeOfOneOfTypes(
@@ -101,6 +117,11 @@ internal class DotQualifiedExpressionScanner(private val kotlinScanner: KotlinSc
     private fun NodePatternBuilder.multilineStringTemplate(): NodePatternBuilder =
         nodeMatching {
             it.elementType == KtNodeTypes.STRING_TEMPLATE && it.firstChildNode.text == "\"\"\""
+        }
+
+    private fun NodePatternBuilder.singleLineStringTemplate(): NodePatternBuilder =
+        nodeMatching {
+            it.elementType == KtNodeTypes.STRING_TEMPLATE && it.firstChildNode.text == "\""
         }
 
     private fun NodePatternBuilder.trimIndentCall(): NodePatternBuilder =

@@ -1892,6 +1892,30 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `does not break a string if a method is called on it`() {
+        val result =
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        fun myFunction() {
+                            val aNewVariable = "A long string initializer which should not wrap to a new line".aMethod()
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    fun myFunction() {
+                        val aNewVariable =
+                            "A long string initializer which should not wrap to a new line"
+                                .aMethod()
+                    }
+                """.trimIndent()
+            )
+    }
+
+    @Test
     fun `format breaks expressions recursively when required`() {
         val result =
             KotlinFormatter(maxLineLength = 50)
