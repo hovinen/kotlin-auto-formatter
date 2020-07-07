@@ -3,6 +3,7 @@ package org.kotlin.formatter.scanning
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.psi.psiUtil.children
+import org.kotlin.formatter.LiteralWhitespaceToken
 import org.kotlin.formatter.State
 import org.kotlin.formatter.Token
 import org.kotlin.formatter.emptyBreakPoint
@@ -19,7 +20,7 @@ internal class StringLiteralScanner(private val kotlinScanner: KotlinScanner) : 
                 child.elementType != KtTokens.CLOSING_QUOTE &&
                 lastChild?.elementType != KtTokens.OPEN_QUOTE
             ) {
-                tokens.add(emptyBreakPoint())
+                tokens.add(if (node.isMultiline) emptyBreakPoint() else LiteralWhitespaceToken(""))
             }
             tokens.addAll(childTokens)
             lastChild = child
@@ -28,9 +29,12 @@ internal class StringLiteralScanner(private val kotlinScanner: KotlinScanner) : 
     }
 
     private fun stateForStringLiteral(node: ASTNode): State =
-        if (node.text.startsWith("\"\"\"")) {
+        if (node.isMultiline) {
             State.MULTILINE_STRING_LITERAL
         } else {
             State.STRING_LITERAL
         }
+
+    private val ASTNode.isMultiline
+        get() = text.startsWith("\"\"\"")
 }

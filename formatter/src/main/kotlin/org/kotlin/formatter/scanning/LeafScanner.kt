@@ -7,6 +7,7 @@ import org.jetbrains.kotlin.lexer.KtTokens
 import org.kotlin.formatter.BeginToken
 import org.kotlin.formatter.EndToken
 import org.kotlin.formatter.LeafNodeToken
+import org.kotlin.formatter.LiteralWhitespaceToken
 import org.kotlin.formatter.State
 import org.kotlin.formatter.Token
 import org.kotlin.formatter.WhitespaceToken
@@ -17,7 +18,7 @@ internal class LeafScanner {
     internal fun scanLeaf(node: LeafPsiElement): List<Token> =
         when (node.elementType) {
             KDocTokens.END -> listOf(LeafNodeToken(node.text))
-            KtTokens.REGULAR_STRING_PART -> tokenizeString(node.text)
+            KtTokens.REGULAR_STRING_PART -> tokenizeString(node.text) { LiteralWhitespaceToken(it) }
             else -> listOf(LeafNodeToken(node.text))
         }
 
@@ -29,7 +30,7 @@ internal class LeafScanner {
         when (node.elementType) {
             KtTokens.EOL_COMMENT ->
                 listOf(BeginToken(stateBasedOnCommentContent(node.text)))
-                    .plus(LeafScanner().tokenizeString(node.text))
+                    .plus(LeafScanner().tokenizeString(node.text) { WhitespaceToken(it) })
                     .plus(EndToken)
             KtTokens.BLOCK_COMMENT ->
                 listOf(LeafNodeToken("/*"), BeginToken(State.LONG_COMMENT), WhitespaceToken(" "))
@@ -47,26 +48,27 @@ internal class LeafScanner {
                 .removeSuffix("*/")
                 .replace(Regex("\n[ ]+\\* "), "\n ")
                 .trim()
-        return tokenizeString(text)
+        return tokenizeString(text) { WhitespaceToken(it) }
     }
 
     private fun stateBasedOnCommentContent(content: String) =
         if (content.startsWith("// TODO")) State.TODO_COMMENT else State.LINE_COMMENT
 
-    private fun tokenizeString(text: String): List<Token> {
-        val whitespaceRegex = Regex("\\s+")
-        var match = whitespaceRegex.find(text)
-        val result = mutableListOf<Token>()
-        var start = 0
-        while (match != null) {
-            result.add(LeafNodeToken(text.substring(start, match.range.first)))
-            result.add(WhitespaceToken(match.value))
-            start = match.range.last + 1
-            match = match.next()
+    private fun tokenizeString(text: String, whitespaceTokenSupplier: (String) -> Token):
+        List<Token> {
+            val whitespaceRegex = Regex("\\s+")
+            var match = whitespaceRegex.find(text)
+            val result = mutableListOf<Token>()
+            var start = 0
+            while (match != null) {
+                result.add(LeafNodeToken(text.substring(start, match.range.first)))
+                result.add(whitespaceTokenSupplier(match.value))
+                start = match.range.last + 1
+                match = match.next()
+            }
+            if (start < text.length) {
+                result.add(LeafNodeToken(text.substring(start)))
+            }
+            return result
         }
-        if (start < text.length) {
-            result.add(LeafNodeToken(text.substring(start)))
-        }
-        return result
-    }
 }

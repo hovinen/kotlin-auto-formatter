@@ -68,6 +68,20 @@ data class KDocContentToken(internal val content: String) : Token() {
 data class WhitespaceToken(internal val content: String, internal val length: Int = 0) : Token()
 
 /**
+ * A directive to output whitespace exactly as given, inserting a line break if needed.
+ *
+ * The behaviour of this token is similar to that of [WhitespaceToken], except that the original
+ * whitespace content is always output. It is not shortened to a single space, nor is it replaced by
+ * a line break.
+ *
+ * @property content the original literal whitespace content behind the token
+ * @property length the printing length of the token if no line break is made. This is the length of
+ *     [content] plus the length of the following [LeafNodeToken].
+ */
+data class LiteralWhitespaceToken(internal val content: String, internal val length: Int = 0) :
+    Token()
+
+/**
  * Returns a [Token] which inserts a point where a line break may be introduced but produces no
  * output if no line break occurs.
  */

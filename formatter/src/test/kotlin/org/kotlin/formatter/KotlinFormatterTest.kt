@@ -1892,6 +1892,27 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `maintains formatting of a function call with a string literal argument`() {
+        val result =
+            KotlinFormatter(maxLineLength = 37)
+                .format(
+                    """
+                        AClass(
+                            content = "A\n    more content"
+                        )
+                    """.trimIndent()
+                )
+
+        assertThat(result).isEqualTo(
+            """
+                AClass(
+                    content = "A\n    more content"
+                )
+            """.trimIndent()
+        )
+    }
+
+    @Test
     fun `does not break a string if a method is called on it`() {
         val result =
             KotlinFormatter(maxLineLength = 50)

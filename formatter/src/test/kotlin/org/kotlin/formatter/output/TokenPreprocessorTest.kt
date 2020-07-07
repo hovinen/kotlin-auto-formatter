@@ -13,6 +13,7 @@ import org.kotlin.formatter.EndToken
 import org.kotlin.formatter.ForcedBreakToken
 import org.kotlin.formatter.KDocContentToken
 import org.kotlin.formatter.LeafNodeToken
+import org.kotlin.formatter.LiteralWhitespaceToken
 import org.kotlin.formatter.MarkerToken
 import org.kotlin.formatter.State
 import org.kotlin.formatter.SynchronizedBreakToken
@@ -60,6 +61,73 @@ internal class TokenPreprocessorTest {
         val result = subject.preprocess(input)
 
         assertThat(result).contains(WhitespaceToken(length = 10, content = " "))
+    }
+
+    @ParameterizedTest
+    @MethodSource("whitespaceTokenLengthCases")
+    fun `outputs a LiteralWhitespaceToken with the length of the following token`(
+        token: Token,
+        lengthExpected: Int
+    ) {
+        val subject = TokenPreprocessor()
+        val input = listOf(LiteralWhitespaceToken(content = " "), token)
+
+        val result = subject.preprocess(input)
+
+        assertThat(result)
+            .isEqualTo(
+                listOf(LiteralWhitespaceToken(length = lengthExpected, content = " "), token)
+            )
+    }
+
+    @Test
+    fun `outputs a LiteralWhitespaceToken with the length of the following block`() {
+        val subject = TokenPreprocessor()
+        val input =
+            listOf(
+                LiteralWhitespaceToken(content = " "),
+                BeginToken(state = State.CODE),
+                LeafNodeToken("any token"),
+                EndToken
+            )
+
+        val result = subject.preprocess(input)
+
+        assertThat(result).contains(LiteralWhitespaceToken(length = 10, content = " "))
+    }
+
+    @Test
+    fun `correctly considers whitespace length in a string literal`() {
+        val subject = TokenPreprocessor()
+        val input =
+            listOf(
+                BeginToken(state = State.STRING_LITERAL),
+                LiteralWhitespaceToken(content = "  "),
+                LeafNodeToken("any token"),
+                EndToken
+            )
+
+        val result = subject.preprocess(input)
+
+        assertThat(result).contains(BeginToken(length = 11, state = State.STRING_LITERAL))
+    }
+
+    @Test
+    fun `correctly considers whitespace length in a nested string literal`() {
+        val subject = TokenPreprocessor()
+        val input =
+            listOf(
+                BeginToken(state = State.CODE),
+                BeginToken(state = State.STRING_LITERAL),
+                LiteralWhitespaceToken(content = "  "),
+                LeafNodeToken("any token"),
+                EndToken,
+                EndToken
+            )
+
+        val result = subject.preprocess(input)
+
+        assertThat(result).contains(BeginToken(length = 11, state = State.CODE))
     }
 
     @Test
@@ -134,50 +202,50 @@ internal class TokenPreprocessorTest {
     }
 
     @Test
-    fun `adds length of string wrapping tokens to WhitespaceToken when in string literal`() {
+    fun `adds length of string wrapping tokens to LiteralWhitespaceToken when in string literal`() {
         val subject = TokenPreprocessor()
         val input =
             listOf(
                 BeginToken(State.STRING_LITERAL),
-                WhitespaceToken(content = " "),
+                LiteralWhitespaceToken(content = " "),
                 LeafNodeToken("a token"),
-                WhitespaceToken(content = " "),
+                LiteralWhitespaceToken(content = " "),
                 LeafNodeToken("\""),
                 EndToken
             )
 
         val result = subject.preprocess(input)
 
-        assertThat(result).contains(WhitespaceToken(length = 11, content = " "))
+        assertThat(result).contains(LiteralWhitespaceToken(length = 11, content = " "))
     }
 
     @Test
-    fun `adds length of string wrapping tokens to non-initial WhitespaceToken in string literal`() {
+    fun `adds len of string wrapping tokens to non-initial LiteralWT in string literal`() {
         val subject = TokenPreprocessor()
         val input =
             listOf(
                 BeginToken(State.STRING_LITERAL),
-                WhitespaceToken(content = " "),
+                LiteralWhitespaceToken(content = " "),
                 LeafNodeToken("a token"),
-                WhitespaceToken(content = " "),
+                LiteralWhitespaceToken(content = " "),
                 LeafNodeToken("another token"),
-                WhitespaceToken(content = " "),
+                LiteralWhitespaceToken(content = " "),
                 LeafNodeToken("\""),
                 EndToken
             )
 
         val result = subject.preprocess(input)
 
-        assertThat(result).contains(WhitespaceToken(length = 17, content = " "))
+        assertThat(result).contains(LiteralWhitespaceToken(length = 17, content = " "))
     }
 
     @Test
-    fun `adds length of string termination token to WhitespaceToken at end of string literal`() {
+    fun `adds len of str termination token to LiteralWhitespaceToken at end of string literal`() {
         val subject = TokenPreprocessor()
         val input =
             listOf(
                 BeginToken(State.STRING_LITERAL),
-                WhitespaceToken(content = " "),
+                LiteralWhitespaceToken(content = " "),
                 LeafNodeToken("a token"),
                 LeafNodeToken("\""),
                 EndToken
@@ -185,7 +253,7 @@ internal class TokenPreprocessorTest {
 
         val result = subject.preprocess(input)
 
-        assertThat(result).contains(WhitespaceToken(length = 9, content = " "))
+        assertThat(result).contains(LiteralWhitespaceToken(length = 9, content = " "))
     }
 
     @Test
@@ -194,7 +262,7 @@ internal class TokenPreprocessorTest {
         val input =
             listOf(
                 BeginToken(State.STRING_LITERAL),
-                WhitespaceToken(content = " "),
+                LiteralWhitespaceToken(content = " "),
                 LeafNodeToken("a token"),
                 LeafNodeToken("\""),
                 EndToken
@@ -202,7 +270,7 @@ internal class TokenPreprocessorTest {
 
         val result = subject.preprocess(input)
 
-        assertThat(result).contains(WhitespaceToken(length = 9, content = " "))
+        assertThat(result).contains(LiteralWhitespaceToken(length = 9, content = " "))
     }
 
     @ParameterizedTest

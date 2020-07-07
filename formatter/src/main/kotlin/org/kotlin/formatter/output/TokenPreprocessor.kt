@@ -10,6 +10,7 @@ import org.kotlin.formatter.EndToken
 import org.kotlin.formatter.ForcedBreakToken
 import org.kotlin.formatter.KDocContentToken
 import org.kotlin.formatter.LeafNodeToken
+import org.kotlin.formatter.LiteralWhitespaceToken
 import org.kotlin.formatter.MarkerToken
 import org.kotlin.formatter.State
 import org.kotlin.formatter.SynchronizedBreakToken
@@ -82,6 +83,14 @@ class TokenPreprocessor {
                         )
                     }
                 }
+                is LiteralWhitespaceToken -> {
+                    resultStack.push(
+                        LiteralWhitespaceStackElement(
+                            token.content,
+                            resultStack.peek().inStringLiteral
+                        )
+                    )
+                }
                 is BeginToken -> {
                     resultStack.push(BlockStackElement(token.state))
                 }
@@ -143,6 +152,10 @@ class TokenPreprocessor {
                 appendTokensInWhitespaceElement(topElement)
                 popBlock()
             }
+            is LiteralWhitespaceStackElement -> {
+                appendTokensInLiteralWhitespaceElement(topElement)
+                popBlock()
+            }
             is MarkerElement -> {
                 resultStack.peek().tokens.addAll(topElement.tokens)
                 popBlock()
@@ -156,6 +169,9 @@ class TokenPreprocessor {
                 appendTokensInWhitespaceElement(topElement)
                 popBlockToMarker()
             }
+            is LiteralWhitespaceStackElement -> {
+                popBlockToMarker()
+            }
         }
 
     private fun appendTokensInElement(stackElement: StackElement, state: State) {
@@ -167,17 +183,21 @@ class TokenPreprocessor {
 
     private fun appendTokensInWhitespaceElement(element: WhitespaceStackElement) {
         val firstToken = element.tokens.firstOrNull()
+        val tokens = resultStack.peek().tokens
         if (followingBlockIsCommentWithNewlines(firstToken, element)) {
-            resultStack.peek()
-                .tokens
-                .add(ForcedBreakToken(count = min(element.content.countNewlines(), 2)))
+            tokens.add(ForcedBreakToken(count = min(element.content.countNewlines(), 2)))
         } else {
-            val length = adjustTotalLengthForStringLiteral(element)
-            resultStack.peek()
-                .tokens
-                .add(WhitespaceToken(length = length, content = element.content))
+            val length = element.totalLength
+            tokens.add(WhitespaceToken(length = length, content = element.content))
         }
-        resultStack.peek().tokens.addAll(element.tokens)
+        tokens.addAll(element.tokens)
+    }
+
+    private fun appendTokensInLiteralWhitespaceElement(element: LiteralWhitespaceStackElement) {
+        val length = adjustTotalLengthForStringLiteral(element)
+        val tokens = resultStack.peek().tokens
+        tokens.add(LiteralWhitespaceToken(length = length, content = element.content))
+        tokens.addAll(element.tokens)
     }
 
     private fun followingBlockIsCommentWithNewlines(
@@ -187,7 +207,7 @@ class TokenPreprocessor {
 
     private fun String.countNewlines(): Int = count { it == '\n' }
 
-    private fun adjustTotalLengthForStringLiteral(element: WhitespaceStackElement): Int {
+    private fun adjustTotalLengthForStringLiteral(element: LiteralWhitespaceStackElement): Int {
         return if (!resultStack.peek().inStringLiteral) {
             element.totalLength
         } else if (precedingEndOfStringLiteral(element)) {
@@ -197,7 +217,7 @@ class TokenPreprocessor {
         }
     }
 
-    private fun precedingEndOfStringLiteral(element: WhitespaceStackElement): Boolean =
+    private fun precedingEndOfStringLiteral(element: LiteralWhitespaceStackElement): Boolean =
         if (element.tokens.size < 2) {
             true
         } else if (element.tokens.size == 2) {
@@ -214,7 +234,8 @@ private sealed class StackElement(internal val tokens: MutableList<Token> = muta
             tokens
                 .map {
                     when (it) {
-                        is WhitespaceToken -> if (it.content.isEmpty()) 0 else 1
+                        is WhitespaceToken -> whitespaceLength(it)
+                        is LiteralWhitespaceToken -> it.content.length
                         is SynchronizedBreakToken -> it.whitespaceLength
                         is ClosingSynchronizedBreakToken -> it.whitespaceLength
                         is LeafNodeToken -> it.textLength
@@ -223,6 +244,13 @@ private sealed class StackElement(internal val tokens: MutableList<Token> = muta
                     }
                 }
                 .sum()
+
+    private fun whitespaceLength(token: WhitespaceToken) =
+        if (inStringLiteral) {
+            token.content.length
+        } else {
+            if (token.content.isEmpty()) 0 else 1
+        }
 
     internal open val inStringLiteral = false
 }
@@ -270,6 +298,17 @@ private class WhitespaceStackElement(
 
     internal val totalLength: Int
         get() = contentLength + initialTextLength
+
+    private val initialTextLength: Int
+        get() = tokens.firstOrNull()?.textLength ?: 0
+}
+
+private class LiteralWhitespaceStackElement(
+    internal val content: String,
+    override val inStringLiteral: Boolean
+) : StackElement() {
+    internal val totalLength: Int
+        get() = content.length + initialTextLength
 
     private val initialTextLength: Int
         get() = tokens.firstOrNull()?.textLength ?: 0

@@ -8,6 +8,7 @@ import org.kotlin.formatter.EndToken
 import org.kotlin.formatter.ForcedBreakToken
 import org.kotlin.formatter.KDocContentToken
 import org.kotlin.formatter.LeafNodeToken
+import org.kotlin.formatter.LiteralWhitespaceToken
 import org.kotlin.formatter.State
 import org.kotlin.formatter.SynchronizedBreakToken
 import org.kotlin.formatter.Token
@@ -166,6 +167,9 @@ class Printer(
             is WhitespaceToken -> {
                 appendWhitespaceToken(token)
             }
+            is LiteralWhitespaceToken -> {
+                appendLiteralWhitespaceToken(token)
+            }
             is ForcedBreakToken -> {
                 if (inComment) {
                     for (i in 0 until token.count - 1) {
@@ -263,6 +267,22 @@ class Printer(
         }
     }
 
+    private fun appendLiteralWhitespaceToken(token: LiteralWhitespaceToken) {
+        if (!breakingAllowed || token.length <= spaceRemaining) {
+            appendTextOnSameLine(token.content)
+        } else {
+            val whitespaceFitsOnFirstLine =
+                spaceRemaining >= "${token.content}$STRING_BREAK_TERMINATOR".length
+            if (inStringLiteral && whitespaceFitsOnFirstLine) {
+                appendTextOnSameLine(token.content)
+            }
+            indent(continuationIndent)
+            if (inStringLiteral && !whitespaceFitsOnFirstLine) {
+                appendTextOnSameLine(token.content)
+            }
+        }
+    }
+
     private fun appendWhitespaceForComment(content: String) {
         val parts = content.split(Regex("\n"), 2)
         if (parts.size == 1) {
@@ -280,7 +300,7 @@ class Printer(
     }
 
     private val breakingAllowed: Boolean
-        get() = blockStack.peek().state != State.PACKAGE_IMPORT
+        get() = !LINE_BREAK_SUPPRESSING_STATES.contains(blockStack.peek().state)
 
     private fun whitespacePlusFollowingTokenFitOnLine(token: WhitespaceToken) =
         when (blockStack.peek().state) {
@@ -353,5 +373,7 @@ class Printer(
             setOf(State.STRING_LITERAL, State.MULTILINE_STRING_LITERAL)
         private val COMMENT_STATES =
             setOf(State.LONG_COMMENT, State.KDOC_TAG, State.LINE_COMMENT, State.TODO_COMMENT)
+        private val LINE_BREAK_SUPPRESSING_STATES =
+            setOf(State.PACKAGE_IMPORT, State.MULTILINE_STRING_LITERAL)
     }
 }

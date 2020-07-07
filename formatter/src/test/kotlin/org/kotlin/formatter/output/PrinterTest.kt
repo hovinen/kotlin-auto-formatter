@@ -12,6 +12,7 @@ import org.kotlin.formatter.EndToken
 import org.kotlin.formatter.ForcedBreakToken
 import org.kotlin.formatter.KDocContentToken
 import org.kotlin.formatter.LeafNodeToken
+import org.kotlin.formatter.LiteralWhitespaceToken
 import org.kotlin.formatter.State
 import org.kotlin.formatter.SynchronizedBreakToken
 import org.kotlin.formatter.Token
@@ -489,8 +490,10 @@ internal class PrinterTest {
             )
 
         assertThat(result)
-            .isEqualTo("outside block\n        \n        ${commentPrefix}Comment\n        " +
-                "${commentPrefix}Comment")
+            .isEqualTo(
+                "outside block\n        \n        ${commentPrefix}Comment\n        " +
+                    "${commentPrefix}Comment"
+            )
     }
 
     @Test
@@ -593,6 +596,100 @@ internal class PrinterTest {
             )
 
         assertThat(result).isEqualTo(" After whitespace")
+    }
+
+    @Test
+    fun `outputs the content of LiteralWhitespaceToken exactly as given`() {
+        val subject = subject(maxLineLength = 20)
+
+        val result =
+            subject.print(
+                listOf(
+                    LiteralWhitespaceToken(length = 20, content = "  "),
+                    LeafNodeToken("After whitespace")
+                )
+            )
+
+        assertThat(result).isEqualTo("  After whitespace")
+    }
+
+    @Test
+    fun `outputs the content of LiteralWhitespaceToken when there is a line break`() {
+        val subject = subject(maxLineLength = 20)
+
+        val result =
+            subject.print(
+                listOf(
+                    LeafNodeToken("Before whitespace"),
+                    LiteralWhitespaceToken(length = 80, content = "  "),
+                    LeafNodeToken("After whitespace")
+                )
+            )
+
+        assertThat(result).isEqualTo("Before whitespace\n        After whitespace")
+    }
+
+    @Test
+    fun `does not break on LiteralWhitespaceToken in multiline string literal`() {
+        val subject = subject(maxLineLength = 20)
+
+        val result =
+            subject.print(
+                listOf(
+                    BeginToken(State.MULTILINE_STRING_LITERAL),
+                    LeafNodeToken("Before whitespace"),
+                    LiteralWhitespaceToken(length = 80, content = "  "),
+                    LeafNodeToken("After whitespace")
+                )
+            )
+
+        assertThat(result).isEqualTo("Before whitespace  After whitespace")
+    }
+
+    @Test
+    fun `outputs the content of a LiteralWhitespaceToken on the same line when it fits`() {
+        val subject = subject(maxLineLength = 22)
+
+        val result =
+            subject.print(
+                listOf(
+                    BeginToken(state = State.STRING_LITERAL),
+                    LeafNodeToken("Before whitespace"),
+                    LiteralWhitespaceToken(length = 80, content = "  "),
+                    LeafNodeToken("After whitespace")
+                )
+            )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    Before whitespace  " +
+                            "After whitespace
+                """.trimIndent()
+            )
+    }
+
+    @Test
+    fun `outputs the content of a LiteralWhitespaceToken on the next line when it does not fit`() {
+        val subject = subject(maxLineLength = 18)
+
+        val result =
+            subject.print(
+                listOf(
+                    BeginToken(state = State.STRING_LITERAL),
+                    LeafNodeToken("Before whitespace"),
+                    LiteralWhitespaceToken(length = 80, content = "  "),
+                    LeafNodeToken("After whitespace")
+                )
+            )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    Before whitespace" +
+                            "  After whitespace
+                """.trimIndent()
+            )
     }
 
     @Test
