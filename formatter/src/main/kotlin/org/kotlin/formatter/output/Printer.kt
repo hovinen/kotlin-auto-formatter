@@ -251,15 +251,7 @@ class Printer(
             }
         } else {
             if (!atStartOfLine) {
-                val whitespaceFitsOnFirstLine =
-                    spaceRemaining >= "${token.content}$STRING_BREAK_TERMINATOR".length
-                if (inStringLiteral && whitespaceFitsOnFirstLine) {
-                    appendTextOnSameLine(token.content)
-                }
                 indent(continuationIndent)
-                if (inStringLiteral && !whitespaceFitsOnFirstLine) {
-                    appendTextOnSameLine(token.content)
-                }
             }
             if (inComment) {
                 appendTextOnSameLine(" ")

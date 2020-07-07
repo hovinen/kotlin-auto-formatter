@@ -505,7 +505,7 @@ internal class PrinterTest {
                 listOf(
                     BeginToken(length = 0, state = State.STRING_LITERAL),
                     LeafNodeToken("Content"),
-                    WhitespaceToken(length = 74, content = "  "),
+                    LiteralWhitespaceToken(length = 74, content = "  "),
                     LeafNodeToken("Content")
                 )
             )
@@ -521,7 +521,7 @@ internal class PrinterTest {
             subject.print(
                 listOf(
                     BeginToken(length = 0, state = State.STRING_LITERAL),
-                    WhitespaceToken(length = 0, content = "  "),
+                    LiteralWhitespaceToken(length = 0, content = "  "),
                     LeafNodeToken("After whitespace")
                 )
             )
@@ -538,7 +538,7 @@ internal class PrinterTest {
                 listOf(
                     BeginToken(length = 0, state = State.STRING_LITERAL),
                     LeafNodeToken("Content"),
-                    WhitespaceToken(length = 10, content = " "),
+                    LiteralWhitespaceToken(length = 10, content = " "),
                     LeafNodeToken("Content")
                 )
             )
