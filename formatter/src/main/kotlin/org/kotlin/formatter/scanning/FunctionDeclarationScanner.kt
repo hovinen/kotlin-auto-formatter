@@ -54,9 +54,13 @@ private fun NodePatternBuilder.optionalFunctionInitializer(kotlinScanner: Kotlin
     zeroOrOne {
         possibleWhitespace() thenMapToTokens { listOf(nonBreakingSpaceToken()) }
         nodeOfType(KtTokens.EQ) thenMapToTokens { listOf(LeafNodeToken("="), BlockFromMarkerToken) }
-        possibleWhitespace() thenMapToTokens { listOf(WhitespaceToken(" ")) }
+        possibleWhitespace()
         zeroOrMoreFrugal { anyNode() } thenMapToTokens { nodes ->
-            kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
+            inBeginEndBlock(
+                listOf(WhitespaceToken(" "))
+                    .plus(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)),
+                State.CODE
+            )
         }
-    } thenMapTokens { inBeginEndBlock(it, State.CODE).plus(BlockFromMarkerToken) }
+    } thenMapTokens { it.plus(BlockFromMarkerToken) }
 }

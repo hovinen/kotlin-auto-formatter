@@ -2115,6 +2115,25 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `respects column limit when assignment operator would break it`() {
+        val result =
+            KotlinFormatter(maxLineLength = 48)
+                .format(
+                    """
+                        fun myFunction(aParameter: String): AReturnType = anotherFunction()
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    fun myFunction(aParameter: String):
+                        AReturnType = anotherFunction()
+                """.trimIndent()
+            )
+    }
+
+    @Test
     fun `does not insert a newline between throw and exception`() {
         val result =
             KotlinFormatter(maxLineLength = 50)
