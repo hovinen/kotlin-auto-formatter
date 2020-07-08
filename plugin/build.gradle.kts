@@ -2,11 +2,11 @@ plugins {
     groovy
     `java-gradle-plugin`
     id("com.gradle.plugin-publish") version "0.12.0"
-    id("tech.formatter-kt.formatter") version "0.4.5"
+    id("tech.formatter-kt.formatter") version "0.4.6"
 }
 
 group = "tech.formatter-kt"
-version = "0.4.5"
+version = "0.4.6"
 
 repositories {
     mavenCentral()

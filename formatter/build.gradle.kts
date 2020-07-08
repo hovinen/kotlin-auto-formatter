@@ -5,7 +5,7 @@ plugins {
     application
     id("org.jetbrains.dokka") version "0.10.1"
     `maven-publish`
-    id("tech.formatter-kt.formatter") version "0.4.5"
+    id("tech.formatter-kt.formatter") version "0.4.6"
     id("com.github.dawnwords.jacoco.badge") version "0.2.0"
 }
 
@@ -69,7 +69,7 @@ publishing {
         create<MavenPublication>("maven") {
             from(components["kotlin"])
             group = "tech.formatter-kt"
-            version = "0.4-SNAPSHOT"
+            version = "0.4.6-SNAPSHOT"
             artifact(dokkaJar)
             artifact(sourcesJar)
             pom {
