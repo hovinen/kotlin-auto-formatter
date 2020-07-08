@@ -1,4 +1,3 @@
-import java.io.ByteArrayOutputStream
 import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformJvmPlugin
 import org.jlleitschuh.gradle.ktlint.KtlintPlugin
 
@@ -13,7 +12,7 @@ buildscript {
 }
 
 group = "tech.formatter-kt"
-version = "${gitVersion()}-SNAPSHOT"
+version = "0.4.5-SNAPSHOT"
 
 subprojects {
     apply<KotlinPlatformJvmPlugin>()
@@ -28,18 +27,5 @@ project(":plugin") {
 
     dependencies {
         library(project(":formatter"))
-    }
-}
-
-fun gitVersion(default: String = "0.0.0"): String {
-    val versionRegex = Regex("v(\\d+\\.\\d+\\.\\d+)(-\\d+-\\w+)?")
-    ByteArrayOutputStream().use { stream ->
-        exec {
-            commandLine("git", "describe", "--tags")
-            standardOutput = stream
-        }
-        val tagName = stream.toString(Charsets.UTF_8).trim()
-        val match = versionRegex.matchEntire(tagName)
-        return if (match != null) match.groupValues[1] else default
     }
 }
