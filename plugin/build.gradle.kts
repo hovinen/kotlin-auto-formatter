@@ -1,3 +1,5 @@
+import java.io.ByteArrayOutputStream
+
 plugins {
     groovy
     `java-gradle-plugin`
@@ -6,7 +8,7 @@ plugins {
 }
 
 group = "tech.formatter-kt"
-version = "0.4.5"
+version = gitVersion()
 
 repositories {
     mavenCentral()
@@ -65,5 +67,18 @@ pluginBundle {
             displayName = "Kotlin autoformatter"
             tags = listOf("kotlin", "formatting")
         }
+    }
+}
+
+fun gitVersion(default: String = "0.0.0"): String {
+    val versionRegex = Regex("v(\\d+\\.\\d+\\.\\d+)(-\\d+-\\w+)?")
+    ByteArrayOutputStream().use { stream ->
+        exec {
+            commandLine("git", "describe", "--tags")
+            standardOutput = stream
+        }
+        val tagName = stream.toString(Charsets.UTF_8).trim()
+        val match = versionRegex.matchEntire(tagName)
+        return if (match != null) match.groupValues[1] else default
     }
 }
