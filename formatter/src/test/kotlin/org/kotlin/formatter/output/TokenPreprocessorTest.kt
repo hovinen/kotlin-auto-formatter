@@ -63,33 +63,10 @@ internal class TokenPreprocessorTest {
         assertThat(result).contains(WhitespaceToken(length = 10, content = " "))
     }
 
-    @ParameterizedTest
-    @MethodSource("whitespaceTokenLengthCases")
-    fun `outputs a LiteralWhitespaceToken with the length of the following token`(
-        token: Token,
-        lengthExpected: Int
-    ) {
-        val subject = TokenPreprocessor()
-        val input = listOf(LiteralWhitespaceToken(content = " "), token)
-
-        val result = subject.preprocess(input)
-
-        assertThat(result)
-            .isEqualTo(
-                listOf(LiteralWhitespaceToken(length = lengthExpected, content = " "), token)
-            )
-    }
-
     @Test
-    fun `outputs a LiteralWhitespaceToken with the length of the following block`() {
+    fun `outputs a LiteralWhitespaceToken with the length of the following token`() {
         val subject = TokenPreprocessor()
-        val input =
-            listOf(
-                LiteralWhitespaceToken(content = " "),
-                BeginToken(state = State.CODE),
-                LeafNodeToken("any token"),
-                EndToken
-            )
+        val input = listOf(LiteralWhitespaceToken(content = " "), LeafNodeToken("any token"))
 
         val result = subject.preprocess(input)
 
@@ -257,6 +234,24 @@ internal class TokenPreprocessorTest {
     }
 
     @Test
+    fun `includes following leaf tokens in length of whitespace token at end of string literal`() {
+        val subject = TokenPreprocessor()
+        val input =
+            listOf(
+                BeginToken(State.STRING_LITERAL),
+                LiteralWhitespaceToken(content = " "),
+                LeafNodeToken("\""),
+                EndToken,
+                LeafNodeToken(" "),
+                LeafNodeToken("+")
+            )
+
+        val result = subject.preprocess(input)
+
+        assertThat(result).contains(LiteralWhitespaceToken(length = 4, content = " "))
+    }
+
+    @Test
     fun `counts empty trailing LeafNodeToken as end of string`() {
         val subject = TokenPreprocessor()
         val input =
@@ -318,24 +313,6 @@ internal class TokenPreprocessorTest {
         assertThat(result)
             .isEqualTo(
                 listOf(BeginToken(length = 5, state = State.CODE), LeafNodeToken("token"), EndToken)
-            )
-    }
-
-    @Test
-    fun `does not move an EndToken in string literal state`() {
-        val subject = TokenPreprocessor()
-        val input =
-            listOf(BeginToken(state = State.STRING_LITERAL), EndToken, LeafNodeToken("token"))
-
-        val result = subject.preprocess(input)
-
-        assertThat(result)
-            .isEqualTo(
-                listOf(
-                    BeginToken(length = 0, state = State.STRING_LITERAL),
-                    EndToken,
-                    LeafNodeToken("token")
-                )
             )
     }
 

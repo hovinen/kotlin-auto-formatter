@@ -1026,8 +1026,7 @@ internal class KotlinScannerTest {
                 listOf(
                     LeafNodeToken("string"),
                     LiteralWhitespaceToken(""),
-                    LeafNodeToken("${'$'}"),
-                    LeafNodeToken("aVariable")
+                    LeafNodeToken("${'$'}aVariable")
                 )
             )
     }
@@ -1045,8 +1044,7 @@ internal class KotlinScannerTest {
                 listOf(
                     LeafNodeToken("string"),
                     WhitespaceToken(""),
-                    LeafNodeToken("${'$'}"),
-                    LeafNodeToken("aVariable")
+                    LeafNodeToken("${'$'}aVariable")
                 )
             )
     }

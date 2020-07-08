@@ -67,7 +67,7 @@ class TokenPreprocessor {
         val deferredTokens = mutableListOf<Token>()
         resultStack.push(BlockStackElement(State.CODE))
         for (token in input) {
-            if (token.allowsBlockToEnd || resultStack.peek().inStringLiteral) {
+            if (token.allowsBlockToEnd) {
                 handleDeferredTokens(deferredTokens)
                 deferredTokens.clear()
             }
@@ -208,24 +208,17 @@ class TokenPreprocessor {
     private fun String.countNewlines(): Int = count { it == '\n' }
 
     private fun adjustTotalLengthForStringLiteral(element: LiteralWhitespaceStackElement): Int {
-        return if (!resultStack.peek().inStringLiteral) {
+        return if (!resultStack.peek().inStringLiteral || precedingEndOfStringLiteral(element)) {
             element.totalLength
-        } else if (precedingEndOfStringLiteral(element)) {
-            element.totalLength + 1
         } else {
             element.totalLength + Printer.STRING_BREAK_TERMINATOR_LENGTH
         }
     }
 
     private fun precedingEndOfStringLiteral(element: LiteralWhitespaceStackElement): Boolean =
-        if (element.tokens.size < 2) {
-            true
-        } else if (element.tokens.size == 2) {
-            val lastToken = element.tokens.last()
-            lastToken is LeafNodeToken && lastToken.text == "\""
-        } else {
-            false
-        }
+        element.tokens
+            .takeWhile { it is LeafNodeToken }
+            .find { (it as LeafNodeToken).text == "\"" } != null
 }
 
 private sealed class StackElement(internal val tokens: MutableList<Token> = mutableListOf()) {
@@ -308,10 +301,7 @@ private class LiteralWhitespaceStackElement(
     override val inStringLiteral: Boolean
 ) : StackElement() {
     internal val totalLength: Int
-        get() = content.length + initialTextLength
-
-    private val initialTextLength: Int
-        get() = tokens.firstOrNull()?.textLength ?: 0
+        get() = content.length + tokens.takeWhile { it is LeafNodeToken }.sumBy { it.textLength }
 }
 
 private class MarkerElement : StackElement()
@@ -323,5 +313,6 @@ private val Token.textLength: Int
             is KDocContentToken -> textLength
             is BeginToken -> length
             is WhitespaceToken -> length
+            is LiteralWhitespaceToken -> content.length
             else -> 0
         }

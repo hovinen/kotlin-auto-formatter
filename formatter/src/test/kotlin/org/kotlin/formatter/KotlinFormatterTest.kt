@@ -1869,6 +1869,30 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `format correctly calculates line break position for string templates with expressions`() {
+        val result =
+            KotlinFormatter(maxLineLength = 61)
+                .format(
+                    """
+                        aFunction(
+                        "a a a ${'$'}{object.method()} a a ${'$'}{object.method()} a a a " +
+                            "a"
+                        )
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    aFunction(
+                        "a a a ${'$'}{object.method()} a a ${'$'}{object.method()} a a a" +
+                            " " + "a"
+                    )
+                """.trimIndent()
+            )
+    }
+
+    @Test
     fun `does not break a string if the rest fits on the line`() {
         val result =
             KotlinFormatter(maxLineLength = 52)

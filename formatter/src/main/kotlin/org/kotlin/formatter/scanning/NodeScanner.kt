@@ -126,8 +126,8 @@ internal fun nodeScannerForElementType(kotlinScanner: KotlinScanner, elementType
                 KtNodeTypes.USER_TYPE -> {
                     SimpleBlockScanner(kotlinScanner, ScannerState.STATEMENT, State.CODE)
                 }
-            KtNodeTypes.SHORT_STRING_TEMPLATE_ENTRY -> {
-                SimpleBlockScanner(kotlinScanner, ScannerState.STATEMENT, State.STRING_LITERAL)
+            KtNodeTypes.SHORT_STRING_TEMPLATE_ENTRY, KtNodeTypes.LONG_STRING_TEMPLATE_ENTRY -> {
+                StringTemplateEntryScanner()
             }
             else -> {
                 SimpleScanner(kotlinScanner, ScannerState.STATEMENT)
