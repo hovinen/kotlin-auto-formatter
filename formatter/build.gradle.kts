@@ -17,6 +17,7 @@ repositories {
 dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation("org.jetbrains.kotlin:kotlin-compiler-embeddable:1.3.70")
+    runtimeOnly("net.java.dev.jna:jna:5.5.0")
     testImplementation("org.junit.jupiter:junit-jupiter:5.6.0")
     testImplementation("org.assertj:assertj-core:3.11.1")
 }
