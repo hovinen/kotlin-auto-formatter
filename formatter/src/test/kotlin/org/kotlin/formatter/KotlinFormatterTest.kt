@@ -2084,6 +2084,29 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `does not force breaks on method parameters on multiline string literals`() {
+        val result =
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        val aString = ${'"'}""
+                            Some content
+                        ${'"'}"".aFunction(aParameter, anotherParameter)
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    val aString =
+                        ${'"'}""
+                        Some content
+                    ${'"'}"".aFunction(aParameter, anotherParameter)
+                """.trimIndent()
+            )
+    }
+
+    @Test
     fun `does not break between else and opening brace of block`() {
         val result =
             KotlinFormatter(maxLineLength = 50)

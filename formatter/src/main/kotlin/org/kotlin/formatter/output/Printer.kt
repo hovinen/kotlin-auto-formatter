@@ -261,7 +261,7 @@ class Printer(
 
     private fun appendLiteralWhitespaceToken(token: LiteralWhitespaceToken) {
         if (!breakingAllowed || token.length <= spaceRemaining) {
-            appendTextOnSameLine(token.content)
+            appendTextWithPossibleNewlines(token.content)
         } else {
             val whitespaceFitsOnFirstLine =
                 spaceRemaining >= "${token.content}$STRING_BREAK_TERMINATOR".length
@@ -289,6 +289,18 @@ class Printer(
     private fun appendTextOnSameLine(text: String) {
         result.append(text)
         spaceRemaining -= text.length
+    }
+
+    private fun appendTextWithPossibleNewlines(text: String) {
+        val newlineIndex = text.lastIndexOf('\n')
+        if (newlineIndex == -1) {
+            appendTextOnSameLine(text)
+        } else {
+            appendTextOnSameLine(text.substring(0, newlineIndex))
+            result.append("\n")
+            spaceRemaining = maxLineLength
+            appendTextOnSameLine(text.substring(newlineIndex + 1))
+        }
     }
 
     private val breakingAllowed: Boolean

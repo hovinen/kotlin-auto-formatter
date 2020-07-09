@@ -647,6 +647,26 @@ internal class PrinterTest {
     }
 
     @Test
+    fun `correctly calculates space remaining in multiline string literal`() {
+        val subject = subject(maxLineLength = 20)
+
+        val result =
+            subject.print(
+                listOf(
+                    LeafNodeToken("Before string literal"),
+                    BeginToken(State.MULTILINE_STRING_LITERAL),
+                    LiteralWhitespaceToken("\n"),
+                    LeafNodeToken("In string literal"),
+                    EndToken,
+                    WhitespaceToken(length = 3, content = " "),
+                    LeafNodeToken("After whitespace")
+                )
+            )
+
+        assertThat(result).isEqualTo("Before string literal\nIn string literal After whitespace")
+    }
+
+    @Test
     fun `outputs the content of a LiteralWhitespaceToken on the same line when it fits`() {
         val subject = subject(maxLineLength = 22)
 
