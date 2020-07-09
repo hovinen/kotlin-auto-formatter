@@ -107,12 +107,21 @@ internal class KDocFormatterTest {
     }
 
     @Test
-    fun `does not append whitespace around a link`() {
+    fun `does not append whitespace after a link`() {
         val subject = KDocFormatter(maxLineLength = 10)
 
         val result = subject.format("[A link](another-file.md).")
 
         assertThat(result).isEqualTo("[A link](another-file.md).")
+    }
+
+    @Test
+    fun `does not insert whitespace before a link`() {
+        val subject = KDocFormatter(maxLineLength = 50)
+
+        val result = subject.format("something[A link](another-file.md)")
+
+        assertThat(result).isEqualTo("something[A link](another-file.md)")
     }
 
     @ParameterizedTest

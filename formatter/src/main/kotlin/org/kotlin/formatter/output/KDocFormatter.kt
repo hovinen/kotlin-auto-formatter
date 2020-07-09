@@ -223,6 +223,6 @@ class KDocFormatter(private val maxLineLength: Int) {
         private val numberedListElement = Regex("(\\s*(\\d+. )).*")
         private val orderedListElement = Regex("(\\s*\\*\\s+).*")
 
-        private val linkElement = Regex("\\[.+?](\\(.+?\\))?[^\\s]*")
+        private val linkElement = Regex("[^\\s]*\\[.+?](\\(.+?\\))?[^\\s]*")
     }
 }
