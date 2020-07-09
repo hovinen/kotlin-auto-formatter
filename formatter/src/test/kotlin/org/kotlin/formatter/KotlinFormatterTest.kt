@@ -558,6 +558,59 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `format breaks a property before its getter when setter is present`() {
+        val result =
+            KotlinFormatter(maxLineLength = 55)
+                .format(
+                    """
+                        class AClass {
+                            val aProperty: String get() = "Something"
+                                set(value) { aFunction() }
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    class AClass {
+                        val aProperty: String
+                            get() = "Something"
+                            set(value) { aFunction() }
+                    }
+                """.trimIndent()
+            )
+    }
+
+    @Test
+    fun `format handles a comment between property initializers`() {
+        val result =
+            KotlinFormatter(maxLineLength = 55)
+                .format(
+                    """
+                        class AClass {
+                            val aProperty: String
+                                get() = "Something"
+                                // A comment
+                                set(value) { aFunction() }
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    class AClass {
+                        val aProperty: String
+                            get() = "Something"
+                            // A comment
+                            set(value) { aFunction() }
+                    }
+                """.trimIndent()
+            )
+    }
+
+    @Test
     fun `corrects the spacing around an initializer style property accessor`() {
         val result =
             KotlinFormatter(maxLineLength = 40)

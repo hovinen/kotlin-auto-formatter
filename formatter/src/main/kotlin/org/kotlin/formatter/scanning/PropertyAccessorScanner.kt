@@ -11,13 +11,16 @@ import org.kotlin.formatter.scanning.nodepattern.nodePattern
 internal class PropertyAccessorScanner(private val kotlinScanner: KotlinScanner) : NodeScanner {
     private val nodePattern =
         nodePattern {
-            oneOrMoreFrugal { anyNode() } thenMapToTokens { nodes ->
-                kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
-            }
-            zeroOrOne { propertyInitializer(kotlinScanner) }
+            possibleWhitespaceWithComment()
+            exactlyOne {
+                oneOrMoreFrugal { anyNode() } thenMapToTokens { nodes ->
+                    kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
+                }
+                zeroOrOne { propertyInitializer(kotlinScanner) }
+            } thenMapTokens { inBeginEndBlock(it, State.CODE) }
             end()
         }
 
     override fun scan(node: ASTNode, scannerState: ScannerState): List<Token> =
-        inBeginEndBlock(nodePattern.matchSequence(node.children().asIterable()), State.CODE)
+        nodePattern.matchSequence(node.children().asIterable())
 }

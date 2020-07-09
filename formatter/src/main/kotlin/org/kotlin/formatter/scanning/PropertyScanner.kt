@@ -23,6 +23,7 @@ internal class PropertyScanner(private val kotlinScanner: KotlinScanner) : NodeS
                 declarationWithOptionalModifierList(kotlinScanner)
                 zeroOrOne { propertyInitializer(kotlinScanner) }
                 zeroOrMore {
+                    possibleWhitespace()
                     nodeOfType(KtNodeTypes.PROPERTY_ACCESSOR) thenMapToTokens { nodes ->
                         listOf(ForcedBreakToken(count = 1))
                             .plus(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT))
