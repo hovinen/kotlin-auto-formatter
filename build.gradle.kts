@@ -33,13 +33,17 @@ project(":plugin") {
 
 fun gitVersion(default: String = "0.0.0"): String {
     val versionRegex = Regex("v(\\d+\\.\\d+\\.\\d+)(-\\d+-\\w+)?")
+    val tagName: String = System.getenv("TAG_NAME") ?: tagNameFromGit()
+    val match = versionRegex.matchEntire(tagName)
+    return if (match != null) match.groupValues[1] else default
+}
+
+fun tagNameFromGit(): String {
     ByteArrayOutputStream().use { stream ->
         exec {
             commandLine("git", "describe", "--tags")
             standardOutput = stream
         }
-        val tagName = stream.toString(Charsets.UTF_8).trim()
-        val match = versionRegex.matchEntire(tagName)
-        return if (match != null) match.groupValues[1] else default
+        return stream.toString(Charsets.UTF_8).trim()
     }
 }
