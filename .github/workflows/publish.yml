@@ -1,0 +1,32 @@
+name: Publish
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Get tag name
+        id: tag_name
+        run: echo ::set-output name=TAG_NAME::${GITHUB_REF#refs/tags/}
+
+      - name: Set up JDK11
+        uses: actions/setup-java@v1.3.0
+        with:
+          java-version: 11
+
+      - name: Publish library
+        if: github.ref == 'refs/heads/master'
+        env:
+          TAG_NAME: ${{steps.tag_name.outputs.TAG_NAME}}
+          ORG_GRADLE_PROJECT_mavenUser: ${{secrets.MAVENUSER}}
+          ORG_GRADLE_PROJECT_mavenPassword: ${{secrets.MAVENPASSWORD}}
+          ORG_GRADLE_PROJECT_signingKey: ${{secrets.SIGNINGKEY}}
+          ORG_GRADLE_PROJECT_signingPassword: ${{secrets.SIGNINGPASSWORD}}
+        run: ./gradlew publish
