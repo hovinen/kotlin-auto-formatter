@@ -552,7 +552,16 @@ internal class KDocFormatterTest {
 
         val result = subject.format("A paragraph\n# A header\nA paragraph")
 
-        assertThat(result).isEqualTo("A paragraph\n# A header\nA paragraph")
+        assertThat(result).isEqualTo("A paragraph\n\n# A header\n\nA paragraph")
+    }
+
+    @Test
+    fun `preserves blank lines around headers`() {
+        val subject = KDocFormatter(maxLineLength = 20)
+
+        val result = subject.format("A paragraph\n\n# A header\n\nA paragraph")
+
+        assertThat(result).isEqualTo("A paragraph\n\n# A header\n\nA paragraph")
     }
 
     @ParameterizedTest

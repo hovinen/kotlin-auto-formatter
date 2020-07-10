@@ -71,9 +71,9 @@ class KDocFormatter(private val maxLineLength: Int) {
                     state = State.BLOCK_QUOTE
                 }
                 line.startsWith("#") -> {
-                    pushBlock(0)
+                    pushBlock(1)
                     linesInBlock.add(line)
-                    pushBlock(0)
+                    pushBlock(1)
                 }
                 line.startsWith("=") || line.startsWith("-") -> {
                     pushBlock(0)
