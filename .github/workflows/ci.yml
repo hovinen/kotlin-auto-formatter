@@ -30,6 +30,7 @@ jobs:
     - name: Run tests and linter
       run: ./gradlew check
 
+    - uses: srt32/git-actions@v0.0.3
     - name: Publish library
       uses: "srt32/git-actions@v0.0.3"
       if: github.ref == 'refs/heads/master'
