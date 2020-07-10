@@ -31,6 +31,7 @@ jobs:
       run: ./gradlew check
 
     - name: Publish library
+      uses: "srt32/git-actions@v0.0.3"
       if: github.ref == 'refs/heads/master'
       env:
         ORG_GRADLE_PROJECT_mavenUser: ${{secrets.MAVENUSER}}
