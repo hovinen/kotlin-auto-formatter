@@ -34,7 +34,6 @@ project(":plugin") {
 fun gitVersion(default: String = "0.0.0"): String {
     val versionRegex = Regex("v(\\d+\\.\\d+\\.\\d+)(-\\d+-\\w+)?")
     val tagName: String = System.getenv("TAG_NAME") ?: tagNameFromGit()
-    println("tagName = $tagName")
     val match = versionRegex.matchEntire(tagName)
     return if (match != null) match.groupValues[1] else default
 }
