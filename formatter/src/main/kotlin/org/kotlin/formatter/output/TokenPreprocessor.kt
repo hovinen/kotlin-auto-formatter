@@ -74,7 +74,15 @@ class TokenPreprocessor {
 
             when (token) {
                 is WhitespaceToken -> {
-                    if (token.content.isNotEmpty() || !lastTokenWasWhitespace()) {
+                    if (lastToken() is SynchronizedBreakToken) {
+                        val breakToken = lastToken() as SynchronizedBreakToken
+                        if (breakToken.whitespaceLength == 0) {
+                            resultStack.peek().tokens.removeAt(resultStack.peek().tokens.size - 1)
+                            resultStack.peek()
+                                .tokens
+                                .add(SynchronizedBreakToken(whitespaceLength = 1))
+                        }
+                    } else if (token.content.isNotEmpty() || !lastTokenWasWhitespace()) {
                         resultStack.push(
                             WhitespaceStackElement(
                                 token.content,
@@ -101,7 +109,7 @@ class TokenPreprocessor {
                     resultStack.push(MarkerElement())
                 }
                 is SynchronizedBreakToken, is ClosingSynchronizedBreakToken -> {
-                    val lastToken = resultStack.peek().tokens.lastOrNull()
+                    val lastToken = lastToken()
                     if (!(lastToken is ForcedBreakToken || lastToken is ClosingForcedBreakToken)) {
                         resultStack.peek().tokens.add(token)
                     }
@@ -112,6 +120,9 @@ class TokenPreprocessor {
         handleDeferredTokens(deferredTokens)
         return popBlock().tokens
     }
+
+    private fun lastToken() =
+        resultStack.lastOrNull { it.tokens.isNotEmpty() }?.tokens?.lastOrNull()
 
     private fun handleDeferredTokens(deferredTokens: List<Token>) {
         for (deferredToken in deferredTokens) {

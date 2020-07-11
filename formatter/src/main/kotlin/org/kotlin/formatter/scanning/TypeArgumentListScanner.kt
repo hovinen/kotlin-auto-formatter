@@ -21,7 +21,12 @@ internal class TypeArgumentListScanner(private val kotlinScanner: KotlinScanner)
                 exactlyOne {
                     anyNode() thenMapToTokens { nodes ->
                         listOf(SynchronizedBreakToken(whitespaceLength = 0))
-                            .plus(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT))
+                            .plus(
+                                inBeginEndBlock(
+                                    kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT),
+                                    State.CODE
+                                )
+                            )
                     }
                     possibleWhitespace()
                     nodeOfType(KtTokens.COMMA) thenMapToTokens { listOf(LeafNodeToken(",")) }
@@ -40,7 +45,12 @@ internal class TypeArgumentListScanner(private val kotlinScanner: KotlinScanner)
                 }
                 exactlyOne { anyNode() } thenMapToTokens { nodes ->
                     listOf(SynchronizedBreakToken(whitespaceLength = 1))
-                        .plus(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT))
+                        .plus(
+                            inBeginEndBlock(
+                                kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT),
+                                State.CODE
+                            )
+                        )
                 }
             } or {
                 zeroOrOne {

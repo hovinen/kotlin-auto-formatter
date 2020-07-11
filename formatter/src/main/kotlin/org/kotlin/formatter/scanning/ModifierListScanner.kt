@@ -6,6 +6,7 @@ import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.psi.psiUtil.children
 import org.kotlin.formatter.ForcedBreakToken
 import org.kotlin.formatter.MarkerToken
+import org.kotlin.formatter.SynchronizedBreakToken
 import org.kotlin.formatter.Token
 import org.kotlin.formatter.WhitespaceToken
 import org.kotlin.formatter.scanning.nodepattern.nodePattern
@@ -29,7 +30,7 @@ internal class ModifierListScanner(
     internal enum class BreakMode(internal val breakToken: Token) {
         TYPE(ForcedBreakToken(count = 1)),
         FUNCTION_PROPERTY(ForcedBreakToken(count = 1)),
-        PARAMETER(WhitespaceToken(" ")),
+        PARAMETER(SynchronizedBreakToken(whitespaceLength = 1)),
         CONSTRUCTOR(WhitespaceToken(" "))
     }
 

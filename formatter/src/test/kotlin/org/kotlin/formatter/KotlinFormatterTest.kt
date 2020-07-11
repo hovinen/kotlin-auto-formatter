@@ -906,6 +906,28 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `splits annotations on constructor parameters by newlines when they do not fit on line`() {
+        val result =
+            KotlinFormatter(maxLineLength = 53)
+                .format(
+                    """
+                        class AClass(@AnAnnotation(["Some value", "Some other value"]) @AnotherAnnotation private val aProperty)
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    class AClass(
+                        @AnAnnotation(["Some value", "Some other value"])
+                        @AnotherAnnotation
+                        private val aProperty
+                    )
+                """.trimIndent()
+            )
+    }
+
+    @Test
     fun `maintains space between comma-separated type arguments`() {
         val result = KotlinFormatter(maxLineLength = 50).format("val value: Map<Key, Value>")
 
