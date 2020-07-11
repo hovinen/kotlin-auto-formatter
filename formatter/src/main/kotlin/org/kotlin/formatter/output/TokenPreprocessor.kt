@@ -227,7 +227,7 @@ private sealed class StackElement(internal val tokens: MutableList<Token> = muta
             tokens
                 .map {
                     when (it) {
-                        is WhitespaceToken -> whitespaceLength(it)
+                        is WhitespaceToken -> it.whitespaceLength
                         is LiteralWhitespaceToken -> it.content.length
                         is SynchronizedBreakToken -> it.whitespaceLength
                         is ClosingSynchronizedBreakToken -> it.whitespaceLength
@@ -238,12 +238,8 @@ private sealed class StackElement(internal val tokens: MutableList<Token> = muta
                 }
                 .sum()
 
-    private fun whitespaceLength(token: WhitespaceToken) =
-        if (inStringLiteral) {
-            token.content.length
-        } else {
-            if (token.content.isEmpty()) 0 else 1
-        }
+    private val WhitespaceToken.whitespaceLength
+        get() = if (content.isEmpty()) 0 else 1
 
     internal open val inStringLiteral = false
 }

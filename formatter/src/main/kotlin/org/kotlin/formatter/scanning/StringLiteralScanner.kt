@@ -6,7 +6,6 @@ import org.jetbrains.kotlin.psi.psiUtil.children
 import org.kotlin.formatter.LiteralWhitespaceToken
 import org.kotlin.formatter.State
 import org.kotlin.formatter.Token
-import org.kotlin.formatter.emptyBreakPoint
 import org.kotlin.formatter.inBeginEndBlock
 
 /** A [NodeScanner] for string templates. */
@@ -20,7 +19,7 @@ internal class StringLiteralScanner(private val kotlinScanner: KotlinScanner) : 
                 child.elementType != KtTokens.CLOSING_QUOTE &&
                 lastChild?.elementType != KtTokens.OPEN_QUOTE
             ) {
-                tokens.add(if (node.isMultiline) emptyBreakPoint() else LiteralWhitespaceToken(""))
+                tokens.add(LiteralWhitespaceToken(""))
             }
             tokens.addAll(childTokens)
             lastChild = child

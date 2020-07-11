@@ -1,6 +1,8 @@
 package org.kotlin.formatter.scanning
 
+import java.util.function.Predicate
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Condition
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.ElementType
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.LeafPsiElement
 import org.junit.jupiter.api.Disabled
@@ -1032,7 +1034,7 @@ internal class KotlinScannerTest {
     }
 
     @Test
-    fun `outputs an empty WhitespaceToken between parts of a multiline string template`() {
+    fun `outputs an empty LiteralWhitespaceToken between parts of a multiline string template`() {
         val subject = subject()
         val node =
             kotlinLoader.parseKotlin("""""${'"'}A string${'$'}aVariable""${'"'}""".trimIndent())
@@ -1043,7 +1045,7 @@ internal class KotlinScannerTest {
             .containsSubsequence(
                 listOf(
                     LeafNodeToken("string"),
-                    WhitespaceToken(""),
+                    LiteralWhitespaceToken(""),
                     LeafNodeToken("${'$'}aVariable")
                 )
             )
@@ -1134,7 +1136,7 @@ internal class KotlinScannerTest {
     }
 
     @Test
-    fun `applies trimIndent to multline string template content with trimIndent`() {
+    fun `applies trimIndent to multiline string template content with trimIndent`() {
         val subject = subject()
         val node =
             kotlinLoader.parseKotlin(
@@ -1148,6 +1150,35 @@ internal class KotlinScannerTest {
         val result = subject.scan(node)
 
         assertThat(result).contains(LeafNodeToken("A string"))
+    }
+
+    @Test
+    fun `does not output WhitespaceToken in a string literal`() {
+        val subject = subject()
+        val node = kotlinLoader.parseKotlin(""""A string"""")
+
+        val result = subject.scan(node)
+
+        assertThat(result).areNot(Condition(Predicate { it is WhitespaceToken }, ""))
+    }
+
+    @Test
+    fun `does not output WhitespaceToken in a multiline string literal`() {
+        val subject = subject()
+        val node =
+            kotlinLoader.parseKotlin(
+                """
+                    ""${'"'}
+                        A line
+                        Another line
+                    ""${'"'}
+                """.trimIndent()
+            )
+
+        val result = subject.scan(node)
+
+        assertThat(result)
+            .areNot(Condition(Predicate { it is WhitespaceToken }, "A WhitespaceToken"))
     }
 
     @Test
