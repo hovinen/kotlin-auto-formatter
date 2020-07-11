@@ -383,7 +383,7 @@ internal class PrinterTest {
                 listOf(
                     LeafNodeToken("Before whitespace"),
                     BeginToken(length = 0, state = commentState),
-                    WhitespaceToken(length = 81, content = " "),
+                    LiteralWhitespaceToken(length = 81, content = " "),
                     LeafNodeToken("Comment")
                 )
             )
@@ -440,9 +440,9 @@ internal class PrinterTest {
                 listOf(
                     LeafNodeToken("outside block"),
                     BeginToken(length = 0, state = State.CODE),
-                    WhitespaceToken(length = 81, content = ""),
+                    LiteralWhitespaceToken(length = 81, content = ""),
                     BeginToken(length = 0, state = commentState),
-                    WhitespaceToken(length = 81, content = " "),
+                    LiteralWhitespaceToken(length = 81, content = " "),
                     LeafNodeToken("Comment")
                 )
             )
@@ -459,7 +459,7 @@ internal class PrinterTest {
                 listOf(
                     BeginToken(state = State.LONG_COMMENT),
                     LeafNodeToken("Before whitespace"),
-                    WhitespaceToken(content = " ", length = 64),
+                    LiteralWhitespaceToken(content = " ", length = 64),
                     LeafNodeToken("After whitespace")
                 )
             )
@@ -482,9 +482,9 @@ internal class PrinterTest {
                     BeginToken(length = 0, state = State.CODE),
                     WhitespaceToken(length = 81, content = ""),
                     BeginToken(length = 0, state = commentState),
-                    WhitespaceToken(length = 81, content = " "),
+                    LiteralWhitespaceToken(length = 81, content = " "),
                     LeafNodeToken("Comment"),
-                    WhitespaceToken(length = 65, content = " "),
+                    LiteralWhitespaceToken(length = 65, content = " "),
                     LeafNodeToken("Comment")
                 )
             )
@@ -574,7 +574,7 @@ internal class PrinterTest {
             subject.print(
                 listOf(
                     BeginToken(length = 0, state = State.MULTILINE_STRING_LITERAL),
-                    WhitespaceToken(length = 81, content = "  "),
+                    LiteralWhitespaceToken(length = 81, content = "  "),
                     LeafNodeToken("After whitespace")
                 )
             )

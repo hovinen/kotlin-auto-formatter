@@ -10,7 +10,6 @@ import org.kotlin.formatter.LeafNodeToken
 import org.kotlin.formatter.LiteralWhitespaceToken
 import org.kotlin.formatter.State
 import org.kotlin.formatter.Token
-import org.kotlin.formatter.WhitespaceToken
 
 /** Scans leaf nodes in the Kotlin abstract syntax tree. */
 internal class LeafScanner {
@@ -30,13 +29,16 @@ internal class LeafScanner {
         when (node.elementType) {
             KtTokens.EOL_COMMENT ->
                 listOf(BeginToken(stateBasedOnCommentContent(node.text)))
-                    .plus(LeafScanner().tokenizeString(node.text) { WhitespaceToken(it) })
+                    .plus(LeafScanner().tokenizeString(node.text) { LiteralWhitespaceToken(it) })
                     .plus(EndToken)
             KtTokens.BLOCK_COMMENT ->
-                listOf(LeafNodeToken("/*"), BeginToken(State.LONG_COMMENT), WhitespaceToken(" "))
-                    .plus(tokenizeNodeContentInBlockComment(node))
+                listOf(
+                    LeafNodeToken("/*"),
+                    BeginToken(State.LONG_COMMENT),
+                    LiteralWhitespaceToken(" ")
+                ).plus(tokenizeNodeContentInBlockComment(node))
                     .plus(EndToken)
-                    .plus(WhitespaceToken(" "))
+                    .plus(LiteralWhitespaceToken(" "))
                     .plus(LeafNodeToken("*/"))
             else -> throw IllegalArgumentException("Invalid node for comment $node")
         }
@@ -48,7 +50,7 @@ internal class LeafScanner {
                 .removeSuffix("*/")
                 .replace(Regex("\n[ ]+\\* "), "\n ")
                 .trim()
-        return tokenizeString(text) { WhitespaceToken(it) }
+        return tokenizeString(text) { LiteralWhitespaceToken(it) }
     }
 
     private fun stateBasedOnCommentContent(content: String) =

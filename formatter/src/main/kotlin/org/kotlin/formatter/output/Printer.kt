@@ -242,26 +242,21 @@ class Printer(
 
     private fun appendWhitespaceToken(token: WhitespaceToken) {
         if (!breakingAllowed || whitespacePlusFollowingTokenFitOnLine(token)) {
-            if (inComment && token.content.contains('\n')) {
-                appendWhitespaceForComment(token.content)
-            } else if (inStringLiteral || inComment) {
-                appendTextOnSameLine(token.content)
-            } else if (token.content.isNotEmpty()) {
+            if (token.content.isNotEmpty()) {
                 appendTextOnSameLine(" ")
             }
-        } else {
-            if (!atStartOfLine) {
-                indent(continuationIndent)
-            }
-            if (inComment) {
-                appendTextOnSameLine(" ")
-            }
+        } else if (!atStartOfLine) {
+            indent(continuationIndent)
         }
     }
 
     private fun appendLiteralWhitespaceToken(token: LiteralWhitespaceToken) {
         if (!breakingAllowed || token.length <= spaceRemaining) {
-            appendTextWithPossibleNewlines(token.content)
+            if (inComment && token.content.contains('\n')) {
+                appendWhitespaceForComment(token.content)
+            } else {
+                appendTextWithPossibleNewlines(token.content)
+            }
         } else {
             val whitespaceFitsOnFirstLine =
                 spaceRemaining >= "${token.content}$STRING_BREAK_TERMINATOR".length
@@ -271,6 +266,9 @@ class Printer(
             indent(continuationIndent)
             if (inStringLiteral && !whitespaceFitsOnFirstLine) {
                 appendTextOnSameLine(token.content)
+            }
+            if (inComment) {
+                appendTextOnSameLine(" ")
             }
         }
     }
@@ -286,11 +284,6 @@ class Printer(
         }
     }
 
-    private fun appendTextOnSameLine(text: String) {
-        result.append(text)
-        spaceRemaining -= text.length
-    }
-
     private fun appendTextWithPossibleNewlines(text: String) {
         val newlineIndex = text.lastIndexOf('\n')
         if (newlineIndex == -1) {
@@ -301,6 +294,11 @@ class Printer(
             spaceRemaining = maxLineLength
             appendTextOnSameLine(text.substring(newlineIndex + 1))
         }
+    }
+
+    private fun appendTextOnSameLine(text: String) {
+        result.append(text)
+        spaceRemaining -= text.length
     }
 
     private val breakingAllowed: Boolean

@@ -193,19 +193,19 @@ class TokenPreprocessor {
         tokens.addAll(element.tokens)
     }
 
-    private fun appendTokensInLiteralWhitespaceElement(element: LiteralWhitespaceStackElement) {
-        val length = adjustTotalLengthForStringLiteral(element)
-        val tokens = resultStack.peek().tokens
-        tokens.add(LiteralWhitespaceToken(length = length, content = element.content))
-        tokens.addAll(element.tokens)
-    }
-
     private fun followingBlockIsCommentWithNewlines(
         firstToken: Token?,
         element: WhitespaceStackElement
     ) = firstToken is BeginToken && firstToken.state.isComment && element.content.contains('\n')
 
     private fun String.countNewlines(): Int = count { it == '\n' }
+
+    private fun appendTokensInLiteralWhitespaceElement(element: LiteralWhitespaceStackElement) {
+        val length = adjustTotalLengthForStringLiteral(element)
+        val tokens = resultStack.peek().tokens
+        tokens.add(LiteralWhitespaceToken(length = length, content = element.content))
+        tokens.addAll(element.tokens)
+    }
 
     private fun adjustTotalLengthForStringLiteral(element: LiteralWhitespaceStackElement): Int {
         return if (!resultStack.peek().inStringLiteral || precedingEndOfStringLiteral(element)) {

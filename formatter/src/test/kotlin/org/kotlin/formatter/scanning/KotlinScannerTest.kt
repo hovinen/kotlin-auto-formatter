@@ -1202,9 +1202,9 @@ internal class KotlinScannerTest {
             .containsAll(
                 listOf(
                     LeafNodeToken("//"),
-                    WhitespaceToken(" "),
+                    LiteralWhitespaceToken(" "),
                     LeafNodeToken("A"),
-                    WhitespaceToken(" "),
+                    LiteralWhitespaceToken(" "),
                     LeafNodeToken("comment")
                 )
             )
