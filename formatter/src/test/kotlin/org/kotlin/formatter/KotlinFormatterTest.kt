@@ -2872,6 +2872,48 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `preserves formatting within EOL comments`() {
+        val subject = KotlinFormatter()
+
+        val result =
+            subject.format(
+                """
+                    // a b  c   d    e
+                    //   f    g      h
+                """.trimIndent()
+            )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    // a b  c   d    e
+                    //   f    g      h
+                """.trimIndent()
+            )
+    }
+
+    @Test
+    fun `preserves formatting within block comments`() {
+        val subject = KotlinFormatter()
+
+        val result =
+            subject.format(
+                """
+                    /* a b  c   d    e
+                     *   f    g      h */
+                """.trimIndent()
+            )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    /* a b  c   d    e
+                     *   f    g      h */
+                """.trimIndent()
+            )
+    }
+
+    @Test
     fun `does not indent init block`() {
         val subject = KotlinFormatter()
 
