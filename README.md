@@ -101,4 +101,4 @@ It should be fine to use both ktlint and this formatter in the same project.
 
 ## License
 
-[GPL 3.0](LICENSE)
+[LGPL 3.0](LICENSE)
