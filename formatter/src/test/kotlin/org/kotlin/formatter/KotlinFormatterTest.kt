@@ -911,7 +911,7 @@ class KotlinFormatterTest {
             KotlinFormatter(maxLineLength = 53)
                 .format(
                     """
-                        class AClass(@AnAnnotation(["Some value", "Some other value"]) @AnotherAnnotation private val aProperty)
+                        class AClass(@AnAnnotation(["Some value", "Some other value"]) @AnotherAnnotation private val aProperty: String)
                     """.trimIndent()
                 )
 
@@ -921,7 +921,33 @@ class KotlinFormatterTest {
                     class AClass(
                         @AnAnnotation(["Some value", "Some other value"])
                         @AnotherAnnotation
-                        private val aProperty
+                        private val aProperty: String
+                    )
+                """.trimIndent()
+            )
+    }
+
+    @Test
+    fun `preserves vertical whitespace between constructor parameters`() {
+        val result =
+            KotlinFormatter(maxLineLength = 53)
+                .format(
+                    """
+                        class AClass(
+                            private val aProperty: String,
+                        
+                            private val anotherProperty: String
+                        )
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    class AClass(
+                        private val aProperty: String,
+                    
+                        private val anotherProperty: String
                     )
                 """.trimIndent()
             )

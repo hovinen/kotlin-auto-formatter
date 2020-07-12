@@ -45,7 +45,11 @@ internal class ParameterListScanner(private val kotlinScanner: KotlinScanner) : 
                     nodeOfType(KtTokens.COMMA) thenMapToTokens { listOf(LeafNodeToken(",")) }
                     either {
                         possibleWhitespace() thenMapToTokens { nodes ->
-                            listOf(SynchronizedBreakToken(whitespaceLength = 1))
+                            if (nodes.isNotEmpty() && nodes.first().text.countNewlines() > 1) {
+                                listOf(ForcedBreakToken(count = nodes.first().text.countNewlines()))
+                            } else {
+                                listOf(SynchronizedBreakToken(whitespaceLength = 1))
+                            }
                         }
                     } or {
                         either {
@@ -102,6 +106,8 @@ internal class ParameterListScanner(private val kotlinScanner: KotlinScanner) : 
             }
             end()
         }
+
+    private fun String.countNewlines(): Int = count { it == '\n' }
 
     private val parameterPattern =
         nodePattern {
