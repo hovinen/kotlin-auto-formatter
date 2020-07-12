@@ -50,20 +50,15 @@ data class KDocContentToken(internal val content: String) : Token() {
  * determines whether it plus the block or sequence of [LeafNodeToken] immediately following it fit
  * on the current line.
  *
- * If they do fit, then the output depends on the [State]:
- *
- *  * In ordinary Kotlin code and comments, the token is output as a single space character.
- *  * In string literals, the token content is output literally.
+ * If they do fit, then the token is output as a single space character.
  *
  * If they do not fit, then the whitespace content is replaced by a newline followed by a
- * continuation indent from indentation level of the containing block. In the case of a sting
- * literal, the literal content is also output if it fits on the current line.
+ * continuation indent from indentation level of the containing block.
  *
  * @property content the original literal whitespace content behind the token
- * @property length the printing length of the token if no line break is made. In ordinary Kotlin
- *     code, this is one plus the length of the following block or [LeafNodeToken], since the
- *     content is replaced by a single space if no line break is performed. In string literals, this
- *     is the length of [content] plus the length of the following [LeafNodeToken].
+ * @property length the printing length of the token if no line break is made. This is one plus the
+ *     length of the following block or [LeafNodeToken], since the content is replaced by a single
+ *     space if no line break is performed.
  */
 data class WhitespaceToken(internal val content: String, internal val length: Int = 0) : Token()
 

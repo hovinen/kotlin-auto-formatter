@@ -60,6 +60,13 @@ class TokenPreprocessor {
      * [comment type][State.isComment] is converted into a [ForcedBreakToken] with the same number
      * of up to two newlines.
      *
+     * Any [WhitespaceToken] immediately preceded by a [SynchronizedBreakToken] or
+     * [ClosingSynchronizedBreakToken] is consolidated with the prior token. The value of
+     * [SynchronizedBreakToken.whitespaceLength] respectively
+     * [ClosingSynchronizedBreakToken.whitespaceLength] is adjusted according to the amount of
+     * whitespace in the [WhitespaceToken]. This also applies if there is an intervening
+     * [BeginToken] or [MarkerToken].
+     *
      * Any existing values of [WhitespaceToken.length] and [BeginToken.length] in [input] are
      * ignored by this process.
      */
