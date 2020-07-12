@@ -81,13 +81,12 @@ class TokenPreprocessor {
 
             when (token) {
                 is WhitespaceToken -> {
-                    if (lastToken() is SynchronizedBreakToken) {
-                        val breakToken = lastToken() as SynchronizedBreakToken
-                        if (breakToken.whitespaceLength == 0) {
-                            resultStack.peek().tokens.removeAt(resultStack.peek().tokens.size - 1)
-                            resultStack.peek()
-                                .tokens
-                                .add(SynchronizedBreakToken(whitespaceLength = 1))
+                    if (consolidateWithLastToken()) {
+                        val element = lastElementWithTokens()
+                        val whitespaceLength = lastTokenWhitespaceLength(element)
+                        if (whitespaceLength == 0) {
+                            element?.tokens?.removeAt(element.tokens.size - 1)
+                            element?.tokens?.add(SynchronizedBreakToken(whitespaceLength = 1))
                         }
                     } else if (token.content.isNotEmpty() || !lastTokenWasWhitespace()) {
                         resultStack.push(
@@ -128,8 +127,26 @@ class TokenPreprocessor {
         return popBlock().tokens
     }
 
-    private fun lastToken() =
-        resultStack.lastOrNull { it.tokens.isNotEmpty() }?.tokens?.lastOrNull()
+    private fun consolidateWithLastToken(): Boolean {
+        val lastToken = lastToken()
+        return lastToken is SynchronizedBreakToken || lastToken is ClosingSynchronizedBreakToken
+    }
+
+    private fun lastTokenWhitespaceLength(element: StackElement?): Int {
+        val token = element?.tokens?.last()
+        return if (token is SynchronizedBreakToken) {
+            token.whitespaceLength
+        } else if (token is ClosingSynchronizedBreakToken) {
+            token.whitespaceLength
+        } else {
+            0
+        }
+    }
+
+    private fun lastToken(): Token? = lastElementWithTokens()?.tokens?.lastOrNull()
+
+    private fun lastElementWithTokens(): StackElement? =
+        resultStack.lastOrNull { it.tokens.isNotEmpty() }
 
     private fun handleDeferredTokens(deferredTokens: List<Token>) {
         for (deferredToken in deferredTokens) {
