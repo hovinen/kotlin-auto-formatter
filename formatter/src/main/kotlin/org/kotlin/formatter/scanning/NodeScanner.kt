@@ -116,14 +116,16 @@ internal fun nodeScannerForElementType(kotlinScanner: KotlinScanner, elementType
             KtNodeTypes.PROPERTY_ACCESSOR -> {
                 PropertyAccessorScanner(kotlinScanner)
             }
+            KtNodeTypes.PARENTHESIZED -> {
+                ParenthesizedScanner(kotlinScanner)
+            }
             KtFileElementType.INSTANCE, is KtScriptElementType,
                 KtNodeTypes.LITERAL_STRING_TEMPLATE_ENTRY -> {
                     SimpleScanner(kotlinScanner, ScannerState.BLOCK)
                 }
             KtNodeTypes.WHEN_ENTRY, KtNodeTypes.ANNOTATION_ENTRY, KtNodeTypes.PREFIX_EXPRESSION,
-                KtNodeTypes.PARENTHESIZED, KtNodeTypes.VALUE_PARAMETER,
-                KtNodeTypes.SUPER_TYPE_ENTRY, KtNodeTypes.SUPER_TYPE_CALL_ENTRY, KtNodeTypes.TRY,
-                KtNodeTypes.USER_TYPE -> {
+                KtNodeTypes.VALUE_PARAMETER, KtNodeTypes.SUPER_TYPE_ENTRY,
+                KtNodeTypes.SUPER_TYPE_CALL_ENTRY, KtNodeTypes.TRY, KtNodeTypes.USER_TYPE -> {
                     SimpleBlockScanner(kotlinScanner, ScannerState.STATEMENT, State.CODE)
                 }
             KtNodeTypes.SHORT_STRING_TEMPLATE_ENTRY, KtNodeTypes.LONG_STRING_TEMPLATE_ENTRY -> {

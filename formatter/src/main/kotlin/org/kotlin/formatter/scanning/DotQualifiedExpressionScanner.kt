@@ -82,7 +82,11 @@ internal class DotQualifiedExpressionScanner(private val kotlinScanner: KotlinSc
                     }
                 } or {
                     either {
-                        nodeOfType(KtNodeTypes.CALL_EXPRESSION) thenMapToTokens { nodes ->
+                        nodeOfOneOfTypes(
+                            KtNodeTypes.CALL_EXPRESSION,
+                            KtNodeTypes.ARRAY_ACCESS_EXPRESSION,
+                            KtNodeTypes.PARENTHESIZED
+                        ) thenMapToTokens { nodes ->
                             kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
                         }
                         possibleWhitespaceWithComment()

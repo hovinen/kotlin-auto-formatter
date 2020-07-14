@@ -370,6 +370,49 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `removes spaces inside parenthesis`() {
+        val result =
+            KotlinFormatter(maxLineLength = 81)
+                .format(
+                    """
+                        (
+                            anObject as AnotherClass
+                        )
+                    """.trimIndent()
+                )
+
+        assertThat(result).isEqualTo("""(anObject as AnotherClass)""".trimIndent())
+    }
+
+    @Test
+    fun `allows line break between parenthesized expression and dot`() {
+        val result =
+            KotlinFormatter(maxLineLength = 28)
+                .format("""(anObject as AnotherClass).aMethod()""".trimIndent())
+
+        assertThat(result).isEqualTo(
+            """
+                (anObject as AnotherClass)
+                    .aMethod()
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun `allows line break between array expression and dot`() {
+        val result =
+            KotlinFormatter(maxLineLength = 19)
+                .format("""anArray[anIndex].aMethod()""".trimIndent())
+
+        assertThat(result).isEqualTo(
+            """
+                anArray[anIndex]
+                    .aMethod()
+            """.trimIndent()
+        )
+    }
+
+    @Test
     fun `allows comments inside dot-qualified expressions`() {
         val result =
             KotlinFormatter(maxLineLength = 100)
