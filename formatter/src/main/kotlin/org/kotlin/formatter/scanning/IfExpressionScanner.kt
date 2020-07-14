@@ -63,7 +63,7 @@ internal class IfExpressionScanner(private val kotlinScanner: KotlinScanner) : N
             end()
         }
 
-    private val elsePattern =
+    private val elsePattern: NodePattern =
         nodePattern {
             either {
                 nodeOfOneOfTypes(KtNodeTypes.BLOCK, KtNodeTypes.IF) thenMapToTokens { nodes ->
