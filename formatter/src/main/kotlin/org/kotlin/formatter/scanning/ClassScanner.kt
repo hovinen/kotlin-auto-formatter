@@ -51,13 +51,16 @@ internal class ClassScanner(private val kotlinScanner: KotlinScanner) : NodeScan
                 nodeOfType(KtTokens.COLON)
                 possibleWhitespace()
                 nodeOfType(KtNodeTypes.SUPER_TYPE_LIST) thenMapToTokens { nodes ->
-                    inBeginEndBlock(
-                        listOf(LeafNodeToken(" :"), WhitespaceToken(" "))
-                            .plus(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT))
-                            .plus(LeafNodeToken(" {"))
-                            .plus(NonIndentingSynchronizedBreakToken(whitespaceLength = 0)),
-                        State.CODE
-                    )
+                    listOf(LeafNodeToken(" :"))
+                        .plus(
+                            inBeginEndBlock(
+                                listOf(WhitespaceToken(" "))
+                                    .plus(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT))
+                                    .plus(LeafNodeToken(" {"))
+                                    .plus(NonIndentingSynchronizedBreakToken(whitespaceLength = 0)),
+                                State.CODE
+                            )
+                        )
                 }
                 possibleWhitespace()
                 nodeOfType(KtNodeTypes.CLASS_BODY) thenMapToTokens { nodes ->
