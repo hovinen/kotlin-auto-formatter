@@ -17,6 +17,7 @@ import org.kotlin.formatter.KDocContentToken
 import org.kotlin.formatter.LeafNodeToken
 import org.kotlin.formatter.LiteralWhitespaceToken
 import org.kotlin.formatter.MarkerToken
+import org.kotlin.formatter.NonIndentingSynchronizedBreakToken
 import org.kotlin.formatter.State
 import org.kotlin.formatter.SynchronizedBreakToken
 import org.kotlin.formatter.WhitespaceToken
@@ -738,7 +739,7 @@ internal class KotlinScannerTest {
                 LeafNodeToken("MyClass"),
                 LeafNodeToken("AnInterface"),
                 LeafNodeToken(" {"),
-                ClosingSynchronizedBreakToken(whitespaceLength = 0),
+                NonIndentingSynchronizedBreakToken(whitespaceLength = 0),
                 BlockFromMarkerToken
             )
     }

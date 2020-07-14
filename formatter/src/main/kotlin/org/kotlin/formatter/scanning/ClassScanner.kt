@@ -7,11 +7,11 @@ import org.jetbrains.kotlin.psi.psiUtil.children
 import org.kotlin.formatter.BeginToken
 import org.kotlin.formatter.BlockFromMarkerToken
 import org.kotlin.formatter.ClosingForcedBreakToken
-import org.kotlin.formatter.ClosingSynchronizedBreakToken
 import org.kotlin.formatter.EndToken
 import org.kotlin.formatter.ForcedBreakToken
 import org.kotlin.formatter.LeafNodeToken
 import org.kotlin.formatter.MarkerToken
+import org.kotlin.formatter.NonIndentingSynchronizedBreakToken
 import org.kotlin.formatter.State
 import org.kotlin.formatter.Token
 import org.kotlin.formatter.WhitespaceToken
@@ -55,7 +55,7 @@ internal class ClassScanner(private val kotlinScanner: KotlinScanner) : NodeScan
                         listOf(LeafNodeToken(" :"), WhitespaceToken(" "))
                             .plus(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT))
                             .plus(LeafNodeToken(" {"))
-                            .plus(ClosingSynchronizedBreakToken(whitespaceLength = 0)),
+                            .plus(NonIndentingSynchronizedBreakToken(whitespaceLength = 0)),
                         State.CODE
                     )
                 }

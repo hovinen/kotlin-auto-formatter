@@ -2712,6 +2712,37 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `does not have trailing whitespace when inserting a blank line`() {
+        val subject = KotlinFormatter(maxLineLength = 46)
+
+        val result =
+            subject.format(
+                """
+                    class OuterClass {
+                        class MyClass(aParameter: String) :
+                            AnInterface {
+                    
+                            val aProperty: String = ""
+                        }
+                    }
+                """.trimIndent()
+            )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    class OuterClass {
+                        class MyClass(aParameter: String) :
+                            AnInterface {
+                    
+                            val aProperty: String = ""
+                        }
+                    }
+                """.trimIndent()
+            )
+    }
+
+    @Test
     fun `does not break before object expression when unnecessary`() {
         val subject = KotlinFormatter()
 

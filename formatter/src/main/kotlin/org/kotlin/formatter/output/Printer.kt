@@ -9,6 +9,7 @@ import org.kotlin.formatter.ForcedBreakToken
 import org.kotlin.formatter.KDocContentToken
 import org.kotlin.formatter.LeafNodeToken
 import org.kotlin.formatter.LiteralWhitespaceToken
+import org.kotlin.formatter.NonIndentingSynchronizedBreakToken
 import org.kotlin.formatter.State
 import org.kotlin.formatter.SynchronizedBreakToken
 import org.kotlin.formatter.Token
@@ -191,23 +192,33 @@ class Printer(
                 atStartOfLine = true
             }
             is SynchronizedBreakToken -> {
-                if (breakingAllowed && !blockStack.peek().topBlockFitsOnLine(maxLineLength)) {
+                if (blockStack.peek().topBlockFitsOnLine(maxLineLength) || !breakingAllowed) {
+                    appendTextOnSameLine(" ".repeat(token.whitespaceLength))
+                } else {
                     indent(continuationIndent)
                     atStartOfLine = true
-                } else {
-                    appendTextOnSameLine(" ".repeat(token.whitespaceLength))
                 }
             }
             is ClosingSynchronizedBreakToken -> {
-                if (!blockStack.peek().topBlockFitsOnLine(maxLineLength)) {
+                if (blockStack.peek().topBlockFitsOnLine(maxLineLength)) {
+                    appendTextOnSameLine(" ".repeat(token.whitespaceLength))
+                } else {
                     if (blockStack.peek().state == State.LONG_COMMENT) {
                         indentForComment(" ")
                     } else {
                         indent(0)
                     }
                     atStartOfLine = true
-                } else {
+                }
+            }
+            is NonIndentingSynchronizedBreakToken -> {
+                if (blockStack.peek().topBlockFitsOnLine(maxLineLength)) {
                     appendTextOnSameLine(" ".repeat(token.whitespaceLength))
+                } else {
+                    result.append("\n")
+                    currentLineIndent = blockStack.peek().currentIndent
+                    spaceRemaining = maxLineLength - currentLineIndent
+                    atStartOfLine = true
                 }
             }
             is BeginToken -> {

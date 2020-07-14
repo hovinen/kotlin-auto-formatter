@@ -13,6 +13,7 @@ import org.kotlin.formatter.ForcedBreakToken
 import org.kotlin.formatter.KDocContentToken
 import org.kotlin.formatter.LeafNodeToken
 import org.kotlin.formatter.LiteralWhitespaceToken
+import org.kotlin.formatter.NonIndentingSynchronizedBreakToken
 import org.kotlin.formatter.State
 import org.kotlin.formatter.SynchronizedBreakToken
 import org.kotlin.formatter.Token
@@ -355,6 +356,30 @@ internal class PrinterTest {
             )
 
         assertThat(result).isEqualTo("\nvariable")
+    }
+
+    @Test
+    fun `does not print trailing whitespace on NonIndentingSynchronizedBreakToken`() {
+        val subject = subject(maxLineLength = 80, standardIndent = 4, continuationIndent = 4)
+
+        val result =
+            subject.print(
+                listOf(
+                    LeafNodeToken("Before block"),
+                    WhitespaceToken(length = 81, content = " "),
+                    BeginToken(State.CODE),
+                    LeafNodeToken("Before whitespace"),
+                    BeginToken(length = 81, state = State.CODE),
+                    NonIndentingSynchronizedBreakToken(whitespaceLength = 0),
+                    EndToken,
+                    EndToken,
+                    BeginToken(State.CODE),
+                    ForcedBreakToken(count = 1),
+                    LeafNodeToken("After break")
+                )
+            )
+
+        assertThat(result).isEqualTo("Before block\n    Before whitespace\n\n        After break")
     }
 
     @Test

@@ -109,7 +109,8 @@ object ClosingForcedBreakToken : Token()
  * A directive to add a line break only if the containing block does not fit on one line.
  *
  * Similarly to [WhitespaceToken], the following line is indented with a continuation indent from
- * the containing block's indentation level.
+ * the containing block's indentation level. The token should always be followed by [LeafNodeToken]
+ * to ensure that there is no trailing whitespace on the line in case of a break.
  *
  * @property whitespaceLength the number of spaces of whitespace to be output by this token if no
  *     line break is introduced; normally either zero or one
@@ -119,12 +120,26 @@ data class SynchronizedBreakToken(internal val whitespaceLength: Int) : Token()
 /**
  * A directive to add a closing line break only if the containing block does not fit on one line.
  *
- * The following line is indented at the same level as the containing block.
+ * The following line is indented at the same level as the containing block. The token should always
+ * be followed by [LeafNodeToken] to ensure that there is no trailing whitespace on the line in case
+ * of a break.
  *
  * @property whitespaceLength the number of spaces of whitespace to be output by this token if no
  *     line break is introduced; normally either zero or one
  */
 data class ClosingSynchronizedBreakToken(internal val whitespaceLength: Int) : Token()
+
+/**
+ * A directive to add line break without indent only if the containing block does not fit on one
+ * line.
+ *
+ * The following line is not indented at all. This is intended for cases that the following line
+ * would be completely empty and therefore any indentation would cause trailing whitespace.
+ *
+ * @property whitespaceLength the number of spaces of whitespace to be output by this token if no
+ *     line break is introduced; normally either zero or one
+ */
+data class NonIndentingSynchronizedBreakToken(internal val whitespaceLength: Int) : Token()
 
 /**
  * A directive to begin a new block in the given [State].
