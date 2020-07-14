@@ -1322,6 +1322,49 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `breaks a too long if-else block`() {
+        val result =
+            KotlinFormatter(maxLineLength = 51)
+                .format("""if (aCondition) "Some value" else "Some other value"""".trimIndent())
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    if (aCondition)
+                        "Some value"
+                    else
+                        "Some other value"
+                """.trimIndent()
+            )
+    }
+
+    @Test
+    fun `does not break a before else if`() {
+        val result =
+            KotlinFormatter(maxLineLength = 51)
+                .format(
+                    """
+                        if (aCondition) {
+                            something()
+                        } else if (anotherCondition) {
+                            somethingElse()
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    if (aCondition) {
+                        something()
+                    } else if (anotherCondition) {
+                        somethingElse()
+                    }
+                """.trimIndent()
+            )
+    }
+
+    @Test
     fun `format breaks at logical operator in a while statement`() {
         val result =
             KotlinFormatter(maxLineLength = 50)
