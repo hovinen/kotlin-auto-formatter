@@ -1,5 +1,6 @@
 package org.kotlin.formatter.plugin
 
+import java.io.File
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.dsl.KotlinProjectExtension
@@ -15,9 +16,9 @@ class KotlinFormatterPlugin : Plugin<Project> {
             .register("formatKotlin", FormatKotlinTask::class.java) {
                 it.source(
                     target.extensions
-                        .getByType(KotlinProjectExtension::class.java)
-                        .sourceSets
-                        .flatMap { set -> set.kotlin.sourceDirectories.files }
+                        .findByType(KotlinProjectExtension::class.java)
+                        ?.sourceSets
+                        ?.flatMap { set -> set.kotlin.sourceDirectories.files } ?: setOf<File>()
                 )
             }
     }
