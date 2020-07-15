@@ -48,23 +48,44 @@ internal class ClassScanner(private val kotlinScanner: KotlinScanner) : NodeScan
             } thenMapToTokens { nodes -> kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT) }
             possibleWhitespace()
             either {
-                nodeOfType(KtTokens.COLON)
-                possibleWhitespace()
-                nodeOfType(KtNodeTypes.SUPER_TYPE_LIST) thenMapToTokens { nodes ->
-                    listOf(LeafNodeToken(" :"))
-                        .plus(
-                            inBeginEndBlock(
-                                listOf(WhitespaceToken(" "))
-                                    .plus(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT))
-                                    .plus(LeafNodeToken(" {"))
-                                    .plus(NonIndentingSynchronizedBreakToken(whitespaceLength = 0)),
-                                State.CODE
+                either {
+                    nodeOfType(KtTokens.COLON)
+                    possibleWhitespace()
+                    nodeOfType(KtNodeTypes.SUPER_TYPE_LIST) thenMapToTokens { nodes ->
+                        listOf(LeafNodeToken(" :"))
+                            .plus(
+                                inBeginEndBlock(
+                                    listOf(WhitespaceToken(" "))
+                                        .plus(
+                                            kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
+                                        )
+                                        .plus(LeafNodeToken(" {"))
+                                        .plus(
+                                            NonIndentingSynchronizedBreakToken(whitespaceLength = 0)
+                                        ),
+                                    State.CODE
+                                )
                             )
-                        )
-                }
-                possibleWhitespace()
-                nodeOfType(KtNodeTypes.CLASS_BODY) thenMapToTokens { nodes ->
-                    classBodyNodePattern.matchSequence(nodes.first().children().asIterable())
+                    }
+                    possibleWhitespace()
+                    nodeOfType(KtNodeTypes.CLASS_BODY) thenMapToTokens { nodes ->
+                        classBodyNodePattern.matchSequence(nodes.first().children().asIterable())
+                    }
+                } or {
+                    nodeOfType(KtTokens.COLON)
+                    possibleWhitespace()
+                    nodeOfType(KtNodeTypes.SUPER_TYPE_LIST) thenMapToTokens { nodes ->
+                        listOf(LeafNodeToken(" :"))
+                            .plus(
+                                inBeginEndBlock(
+                                    listOf(WhitespaceToken(" "))
+                                        .plus(
+                                            kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
+                                        ),
+                                    State.CODE
+                                )
+                            )
+                    }
                 }
             } or {
                 zeroOrOne { nodeOfType(KtNodeTypes.CLASS_BODY) } thenMapToTokens { nodes ->

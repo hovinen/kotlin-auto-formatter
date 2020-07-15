@@ -2771,7 +2771,7 @@ class KotlinFormatterTest {
     }
 
     @Test
-    fun `does not break before colon before inheritance spec`() {
+    fun `breaks parameters list when existence of supertype spec would break column limit`() {
         val subject = KotlinFormatter(maxLineLength = 33)
 
         val result =
@@ -2791,6 +2791,23 @@ class KotlinFormatterTest {
                     ) : AnInterface {
                         val aProperty: String = ""
                     }
+                """.trimIndent()
+            )
+    }
+
+    @Test
+    fun `does not break before colon before inheritance spec`() {
+        val subject = KotlinFormatter(maxLineLength = 33)
+
+        val result =
+            subject.format("""class MyClass(aParameter: String) : AnInterface""".trimIndent())
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    class MyClass(
+                        aParameter: String
+                    ) : AnInterface
                 """.trimIndent()
             )
     }
