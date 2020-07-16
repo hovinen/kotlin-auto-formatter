@@ -57,7 +57,7 @@ internal fun nodeScannerForElementType(kotlinScanner: KotlinScanner, elementType
             KtNodeTypes.CLASS, KtNodeTypes.OBJECT_DECLARATION -> {
                 ClassScanner(kotlinScanner)
             }
-            KtNodeTypes.FUN -> {
+            KtNodeTypes.FUN, KtNodeTypes.SECONDARY_CONSTRUCTOR -> {
                 FunctionDeclarationScanner(kotlinScanner)
             }
             KtNodeTypes.TYPEALIAS -> {

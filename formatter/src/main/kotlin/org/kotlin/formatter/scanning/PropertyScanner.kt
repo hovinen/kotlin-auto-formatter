@@ -9,8 +9,10 @@ import org.kotlin.formatter.BlockFromMarkerToken
 import org.kotlin.formatter.ForcedBreakToken
 import org.kotlin.formatter.LeafNodeToken
 import org.kotlin.formatter.MarkerToken
+import org.kotlin.formatter.State
 import org.kotlin.formatter.Token
 import org.kotlin.formatter.WhitespaceToken
+import org.kotlin.formatter.inBeginEndBlock
 import org.kotlin.formatter.nonBreakingSpaceToken
 import org.kotlin.formatter.scanning.nodepattern.NodePatternBuilder
 import org.kotlin.formatter.scanning.nodepattern.nodePattern
@@ -66,25 +68,47 @@ internal fun NodePatternBuilder.declarationWithOptionalModifierList(
                 listOf(ForcedBreakToken(count = 1)).plus(List(markerCount) { MarkerToken })
             }
         }
-        anyNode() thenMapToTokens { nodes ->
-            kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT).plus(nonBreakingSpaceToken())
-        }
+        declarationKeyword(kotlinScanner)
         possibleWhitespace()
         zeroOrMoreFrugal { anyNode() } thenMapToTokens { nodes ->
             kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
         }
     } or {
-        anyNode() thenMapToTokens { nodes ->
-            List(markerCount) { MarkerToken }
-                .plus(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT))
-                .plus(nonBreakingSpaceToken())
+        declarationKeyword(kotlinScanner) thenMapTokens { tokens ->
+            List(markerCount) { MarkerToken }.plus(tokens)
         }
         possibleWhitespace()
         zeroOrMoreFrugal { anyNode() } thenMapToTokens { nodes ->
             kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
         }
     }
+    zeroOrOne {
+        possibleWhitespace()
+        nodeOfType(KtTokens.COLON)
+        possibleWhitespace()
+        nodeOfType(KtNodeTypes.CONSTRUCTOR_DELEGATION_CALL) thenMapToTokens { nodes ->
+            listOf(LeafNodeToken(" :"), WhitespaceToken(" "))
+                .plus(
+                    inBeginEndBlock(
+                        kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT),
+                        State.CODE
+                    )
+                )
+        }
+    }
 }
+
+private fun NodePatternBuilder.declarationKeyword(kotlinScanner: KotlinScanner):
+    NodePatternBuilder =
+        either {
+            nodeOfType(KtTokens.CONSTRUCTOR_KEYWORD) thenMapToTokens {
+                listOf(LeafNodeToken("constructor"))
+            }
+        } or {
+            anyNode() thenMapToTokens { nodes ->
+                kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT).plus(nonBreakingSpaceToken())
+            }
+        }
 
 /**
  * Adds to the receiver [NodePatternBuilder] a sequence matching optionally present KDoc.

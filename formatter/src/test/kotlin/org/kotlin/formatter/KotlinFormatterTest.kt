@@ -1261,6 +1261,99 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `properly handles spacing around secondary constructor with modifiers`() {
+        val result =
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        class MyClass {
+                            @AnAnnotation
+                            constructor()
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    class MyClass {
+                        @AnAnnotation
+                        constructor()
+                    }
+                """.trimIndent()
+            )
+    }
+
+    @Test
+    fun `properly handles delegated constructor call`() {
+        val result =
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        class MyClass {
+                            constructor() : this("Something")
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    class MyClass {
+                        constructor() : this("Something")
+                    }
+                """.trimIndent()
+            )
+    }
+
+    @Test
+    fun `treats delegated constructor call as a block`() {
+        val result =
+            KotlinFormatter(maxLineLength = 25)
+                .format(
+                    """
+                        class MyClass {
+                            constructor() : this("Something")
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    class MyClass {
+                        constructor() :
+                            this("Something")
+                    }
+                """.trimIndent()
+            )
+    }
+
+    @Test
+    fun `breaks after colon in delegated constructor call`() {
+        val result =
+            KotlinFormatter(maxLineLength = 35)
+                .format(
+                    """
+                        class MyClass {
+                            constructor(aParameter: String) : this("Something")
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    class MyClass {
+                        constructor(
+                            aParameter: String
+                        ) : this("Something")
+                    }
+                """.trimIndent()
+            )
+    }
+
+    @Test
     fun `format breaks at logical operator in an if statement`() {
         val result =
             KotlinFormatter(maxLineLength = 50)
@@ -3281,6 +3374,33 @@ class KotlinFormatterTest {
                     class MyClass {
                         /** Some KDoc. */
                         fun aFunction() {
+                        }
+                    }
+                """.trimIndent()
+            )
+    }
+
+    @Test
+    fun `maintains line break between KDoc and a class constructor`() {
+        val subject = KotlinFormatter()
+
+        val result =
+            subject.format(
+                """
+                    class MyClass {
+                        /** Some KDoc. */
+                        constructor() {
+                        }
+                    }
+                """.trimIndent()
+            )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    class MyClass {
+                        /** Some KDoc. */
+                        constructor() {
                         }
                     }
                 """.trimIndent()

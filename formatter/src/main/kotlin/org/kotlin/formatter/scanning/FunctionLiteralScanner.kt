@@ -39,9 +39,7 @@ internal class FunctionLiteralScanner(private val kotlinScanner: KotlinScanner) 
                     listOf(nonBreakingSpaceToken(), LeafNodeToken("->"))
                 }
                 possibleWhitespace()
-                zeroOrOne {
-                    emptyBlock() thenMapToTokens { listOf(nonBreakingSpaceToken()) }
-                }
+                zeroOrOne { emptyBlock() thenMapToTokens { listOf(nonBreakingSpaceToken()) } }
             } thenMapTokens { it.plus(EndToken) }
             zeroOrOne {
                 nodeOfType(KtNodeTypes.BLOCK) thenMapToTokens { nodes ->
