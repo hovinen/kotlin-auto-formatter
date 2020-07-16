@@ -145,4 +145,7 @@ internal class ParameterListScanner(private val kotlinScanner: KotlinScanner) : 
 }
 
 private fun NodePatternBuilder.collectionLiteralExpression() =
-    nodeMatching { it.elementType == KtNodeTypes.VALUE_ARGUMENT && it.lastChildNode.elementType == KtNodeTypes.COLLECTION_LITERAL_EXPRESSION }
+    nodeMatching {
+        it.elementType == KtNodeTypes.VALUE_ARGUMENT &&
+            it.lastChildNode.elementType == KtNodeTypes.COLLECTION_LITERAL_EXPRESSION
+    }

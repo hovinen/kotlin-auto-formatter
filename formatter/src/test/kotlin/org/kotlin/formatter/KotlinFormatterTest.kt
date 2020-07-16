@@ -790,6 +790,34 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `preserves comment formatting in collection literal expressions`() {
+        val result =
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        @AnAnnotation([
+                            "An argument", // A comment
+                            "Another argument", // Another comment
+                            "A third argument" // A third comment
+                        ])
+                        fun myFunction()
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    @AnAnnotation([
+                        "An argument", // A comment
+                        "Another argument", // Another comment
+                        "A third argument" // A third comment
+                    ])
+                    fun myFunction()
+                """.trimIndent()
+            )
+    }
+
+    @Test
     fun `strips trailing newline whitespace from array initializers in annotations`() {
         val result =
             KotlinFormatter(maxLineLength = 80)

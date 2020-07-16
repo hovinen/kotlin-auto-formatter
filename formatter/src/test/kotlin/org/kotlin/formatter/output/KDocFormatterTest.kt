@@ -125,22 +125,19 @@ internal class KDocFormatterTest {
     }
 
     @ParameterizedTest
-    @ValueSource(
-        strings =
-            [
-                "@param",
-                "@property",
-                "@return",
-                "@throws",
-                "@exception",
-                "@see",
-                "@constructor",
-                "@receiver",
-                "@author",
-                "@since",
-                "@suppress"
-            ]
-    )
+    @ValueSource(strings = [
+        "@param",
+        "@property",
+        "@return",
+        "@throws",
+        "@exception",
+        "@see",
+        "@constructor",
+        "@receiver",
+        "@author",
+        "@since",
+        "@suppress"
+    ])
     fun `keeps tags in separate paragraphs`(tag: String) {
         val subject = KDocFormatter(maxLineLength = 50)
 

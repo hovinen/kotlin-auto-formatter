@@ -5,10 +5,8 @@ import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.psi.psiUtil.children
 import org.kotlin.formatter.ClosingSynchronizedBreakToken
 import org.kotlin.formatter.LeafNodeToken
-import org.kotlin.formatter.State
 import org.kotlin.formatter.SynchronizedBreakToken
 import org.kotlin.formatter.Token
-import org.kotlin.formatter.inBeginEndBlock
 import org.kotlin.formatter.scanning.nodepattern.nodePattern
 
 /** A [NodeScanner] for array initializers in annotation arguments. */
@@ -26,7 +24,7 @@ internal class CollectionLiteralExpressionScanner(private val kotlinScanner: Kot
                 }
                 possibleWhitespace()
                 nodeOfType(KtTokens.COMMA) thenMapToTokens { listOf(LeafNodeToken(",")) }
-                possibleWhitespace()
+                possibleWhitespaceWithComment()
                 zeroOrMore {
                     oneOrMoreFrugal { anyNode() } thenMapToTokens { nodes ->
                         listOf(SynchronizedBreakToken(whitespaceLength = 1))
@@ -34,7 +32,7 @@ internal class CollectionLiteralExpressionScanner(private val kotlinScanner: Kot
                     }
                     possibleWhitespace()
                     nodeOfType(KtTokens.COMMA) thenMapToTokens { listOf(LeafNodeToken(",")) }
-                    possibleWhitespace()
+                    possibleWhitespaceWithComment()
                 }
                 oneOrMoreFrugal { anyNode() } thenMapToTokens { nodes ->
                     listOf(SynchronizedBreakToken(whitespaceLength = 1))
