@@ -1916,6 +1916,25 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `prefers to break before function literal following argument list`() {
+        val result =
+            KotlinFormatter(maxLineLength = 57)
+                .format(
+                    """
+                        aFunction("Something", "Something else") { aParameter, anotherParameter -> anotherFunction() }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    aFunction("Something", "Something else")
+                        { aParameter, anotherParameter -> anotherFunction() }
+                """.trimIndent()
+            )
+    }
+
+    @Test
     fun `prefers not to break before a function name`() {
         val result =
             KotlinFormatter(maxLineLength = 50)
