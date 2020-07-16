@@ -15,6 +15,7 @@ import org.kotlin.formatter.State
 import org.kotlin.formatter.SynchronizedBreakToken
 import org.kotlin.formatter.Token
 import org.kotlin.formatter.WhitespaceToken
+import org.kotlin.formatter.scanning.nodepattern.NodePatternBuilder
 import org.kotlin.formatter.scanning.nodepattern.nodePattern
 
 /**
@@ -27,6 +28,20 @@ internal class ParameterListScanner(private val kotlinScanner: KotlinScanner) : 
     private val parameterListPattern =
         nodePattern {
             either {
+                either {
+                    nodeOfType(KtTokens.LPAR) thenMapToTokens { listOf(LeafNodeToken("(")) }
+                    possibleWhitespace()
+                    collectionLiteralExpression() thenMapToTokens { nodes ->
+                        parameterPattern.matchSequence(nodes.first().children().asIterable())
+                    }
+                    possibleWhitespace()
+                    nodeOfType(KtTokens.RPAR) thenMapToTokens { listOf(LeafNodeToken(")")) }
+                } or {
+                    nodeOfType(KtTokens.LPAR) thenMapToTokens { listOf(LeafNodeToken("(")) }
+                    possibleWhitespaceWithComment()
+                    nodeOfType(KtTokens.RPAR) thenMapToTokens { listOf(LeafNodeToken(")")) }
+                }
+            } or {
                 zeroOrOne {
                     nodeOfType(KtTokens.LPAR) thenMapToTokens {
                         listOf(BeginToken(State.CODE), LeafNodeToken("("))
@@ -99,10 +114,6 @@ internal class ParameterListScanner(private val kotlinScanner: KotlinScanner) : 
                         )
                     }
                 }
-            } or {
-                nodeOfType(KtTokens.LPAR) thenMapToTokens { listOf(LeafNodeToken("(")) }
-                possibleWhitespaceWithComment()
-                nodeOfType(KtTokens.RPAR) thenMapToTokens { listOf(LeafNodeToken(")")) }
             }
             end()
         }
@@ -132,3 +143,6 @@ internal class ParameterListScanner(private val kotlinScanner: KotlinScanner) : 
     override fun scan(node: ASTNode, scannerState: ScannerState): List<Token> =
         parameterListPattern.matchSequence(node.children().toList())
 }
+
+private fun NodePatternBuilder.collectionLiteralExpression() =
+    nodeMatching { it.elementType == KtNodeTypes.VALUE_ARGUMENT && it.lastChildNode.elementType == KtNodeTypes.COLLECTION_LITERAL_EXPRESSION }

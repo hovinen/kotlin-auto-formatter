@@ -778,13 +778,11 @@ class KotlinFormatterTest {
             .isEqualTo(
                 """
                     class MyClass {
-                        @AnAnnotation(
-                            [
-                                "An argument",
-                                "Another argument",
-                                "A third argument"
-                            ]
-                        )
+                        @AnAnnotation([
+                            "An argument",
+                            "Another argument",
+                            "A third argument"
+                        ])
                         fun myFunction()
                     }
                 """.trimIndent()

@@ -53,5 +53,5 @@ internal class CollectionLiteralExpressionScanner(private val kotlinScanner: Kot
         }
 
     override fun scan(node: ASTNode, scannerState: ScannerState): List<Token> =
-        inBeginEndBlock(nodePattern.matchSequence(node.children().asIterable()), State.CODE)
+        nodePattern.matchSequence(node.children().asIterable())
 }
