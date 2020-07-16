@@ -13,6 +13,7 @@ import org.kotlin.formatter.SynchronizedBreakToken
 import org.kotlin.formatter.Token
 import org.kotlin.formatter.inBeginEndBlock
 import org.kotlin.formatter.nonBreakingSpaceToken
+import org.kotlin.formatter.scanning.nodepattern.NodePatternBuilder
 import org.kotlin.formatter.scanning.nodepattern.nodePattern
 
 /** A [NodeScanner] for anonymous function literals, i.e. lambda expressions. */
@@ -38,6 +39,9 @@ internal class FunctionLiteralScanner(private val kotlinScanner: KotlinScanner) 
                     listOf(nonBreakingSpaceToken(), LeafNodeToken("->"))
                 }
                 possibleWhitespace()
+                zeroOrOne {
+                    emptyBlock() thenMapToTokens { listOf(nonBreakingSpaceToken()) }
+                }
             } thenMapTokens { it.plus(EndToken) }
             zeroOrOne {
                 nodeOfType(KtNodeTypes.BLOCK) thenMapToTokens { nodes ->
@@ -56,6 +60,9 @@ internal class FunctionLiteralScanner(private val kotlinScanner: KotlinScanner) 
             nodeOfType(KtTokens.RBRACE) thenMapToTokens { listOf(LeafNodeToken("}")) }
             end()
         }
+
+    private fun NodePatternBuilder.emptyBlock() =
+        nodeMatching { it.elementType == KtNodeTypes.BLOCK && it.children().toList().isEmpty() }
 
     override fun scan(node: ASTNode, scannerState: ScannerState): List<Token> =
         nodePattern.matchSequence(node.children().asIterable())

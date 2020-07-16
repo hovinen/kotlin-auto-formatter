@@ -349,6 +349,13 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `maintains spacing in an empty function literal with parameters`() {
+        val result = KotlinFormatter(maxLineLength = 37).format("{ aValue -> }")
+
+        assertThat(result).isEqualTo("{ aValue -> }")
+    }
+
+    @Test
     fun `breaks before a dot when next block does not fit on line`() {
         val result =
             KotlinFormatter(maxLineLength = 45)
