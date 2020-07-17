@@ -2084,6 +2084,28 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `maintains a newline before an EOL comment at the beginning of an initializer`() {
+        val result =
+            KotlinFormatter(maxLineLength = 66)
+                .format(
+                    """
+                        fun aFunction(): String =
+                            // A comment
+                            "A value"
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    fun aFunction(): String =
+                        // A comment
+                        "A value"
+                """.trimIndent()
+            )
+    }
+
+    @Test
     fun `format breaks strings at multiple word boundaries when possible`() {
         val result =
             KotlinFormatter(maxLineLength = 50)

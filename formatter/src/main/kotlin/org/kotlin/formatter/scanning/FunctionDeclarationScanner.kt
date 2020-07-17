@@ -4,12 +4,13 @@ import org.jetbrains.kotlin.KtNodeTypes
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.psi.psiUtil.children
+import org.kotlin.formatter.BeginToken
 import org.kotlin.formatter.BlockFromMarkerToken
+import org.kotlin.formatter.EndToken
 import org.kotlin.formatter.LeafNodeToken
 import org.kotlin.formatter.State
 import org.kotlin.formatter.Token
 import org.kotlin.formatter.WhitespaceToken
-import org.kotlin.formatter.inBeginEndBlock
 import org.kotlin.formatter.nonBreakingSpaceToken
 import org.kotlin.formatter.scanning.nodepattern.NodePatternBuilder
 import org.kotlin.formatter.scanning.nodepattern.nodePattern
@@ -53,14 +54,17 @@ internal class FunctionDeclarationScanner(private val kotlinScanner: KotlinScann
 private fun NodePatternBuilder.optionalFunctionInitializer(kotlinScanner: KotlinScanner) {
     zeroOrOne {
         possibleWhitespace() thenMapToTokens { listOf(nonBreakingSpaceToken()) }
-        nodeOfType(KtTokens.EQ) thenMapToTokens { listOf(LeafNodeToken("="), BlockFromMarkerToken) }
-        possibleWhitespace()
-        zeroOrMoreFrugal { anyNode() } thenMapToTokens { nodes ->
-            inBeginEndBlock(
-                listOf(WhitespaceToken(" "))
-                    .plus(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)),
-                State.CODE
+        nodeOfType(KtTokens.EQ) thenMapToTokens {
+            listOf(
+                LeafNodeToken("="),
+                BlockFromMarkerToken,
+                BeginToken(state = State.CODE),
+                WhitespaceToken(" ")
             )
+        }
+        possibleWhitespaceWithComment()
+        zeroOrMoreFrugal { anyNode() } thenMapToTokens { nodes ->
+            kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT).plus(EndToken)
         }
     } thenMapTokens { it.plus(BlockFromMarkerToken) }
 }
