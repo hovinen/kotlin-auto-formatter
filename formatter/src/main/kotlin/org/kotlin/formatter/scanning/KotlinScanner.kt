@@ -132,14 +132,22 @@ private fun NodePatternBuilder.commentWithPossibleWhitespace(ignoreTrailingWhite
                 listOf()
             }
         }
-        oneOrMore {
+        zeroOrMore {
             singleComment()
             possibleWhitespace() thenMapToTokens { nodes ->
-                if (nodes.isNotEmpty() && !ignoreTrailingWhitespace) {
+                if (nodes.isNotEmpty()) {
                     toForcedBreak(nodes.first())
                 } else {
                     listOf()
                 }
+            }
+        }
+        singleComment()
+        possibleWhitespace() thenMapToTokens { nodes ->
+            if (nodes.isNotEmpty() && !ignoreTrailingWhitespace) {
+                toForcedBreak(nodes.first())
+            } else {
+                listOf()
             }
         }
     }

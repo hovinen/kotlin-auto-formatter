@@ -1847,6 +1847,36 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `preserves sequence of EOL comments inside when expression`() {
+        val result =
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        when (aCondition) {
+                            // A comment
+                            // A second line
+                            1 -> {
+                                aVariable = aValue
+                            }
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    when (aCondition) {
+                        // A comment
+                        // A second line
+                        1 -> {
+                            aVariable = aValue
+                        }
+                    }
+                """.trimIndent()
+            )
+    }
+
+    @Test
     fun `preserves comment at the end of a when expression`() {
         val result =
             KotlinFormatter(maxLineLength = 50)
