@@ -224,6 +224,32 @@ internal class KDocFormatterTest {
             )
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = ["*", "-", "+"])
+    fun `handles all marker types for unordered lists`(symbol: String) {
+        val subject = KDocFormatter(maxLineLength = 50)
+
+        val result =
+            subject.format(
+                """
+                    A paragraph
+                    
+                     $symbol A list item.
+                     $symbol Another list item.
+                """.trimIndent()
+            )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    A paragraph
+                    
+                     $symbol A list item.
+                     $symbol Another list item.
+                """.trimIndent()
+            )
+    }
+
     @Test
     fun `corrects formatting of unordered lists`() {
         val subject = KDocFormatter(maxLineLength = 50)

@@ -53,8 +53,8 @@ class KDocFormatter(private val maxLineLength: Int) {
         }
 
         fun handleParagraphLine(line: String) {
-            val unorderedListMatch = numberedListElement.matchEntire(line)
-            val orderedListMatch = orderedListElement.matchEntire(line)
+            val numberedListMatch = numberedListElement.matchEntire(line)
+            val unorderedListMatch = unorderedListElement.matchEntire(line)
             when {
                 line.isBlank() -> {
                     continuationIndent = 0
@@ -75,28 +75,31 @@ class KDocFormatter(private val maxLineLength: Int) {
                     linesInBlock.add(line)
                     pushBlock(1)
                 }
-                line.startsWith("=") || line.startsWith("-") -> {
-                    pushBlock(0)
-                    linesInBlock.add(line)
-                    pushBlock(0)
-                }
                 isTag(line) -> {
                     pushBlock(0)
                     continuationIndent = 4
                     linesInBlock.add(line)
                 }
-                unorderedListMatch != null -> {
+                numberedListMatch != null -> {
                     pushBlock(0)
-                    val value = unorderedListMatch.groups[2]?.value ?: ""
+                    val value = numberedListMatch.groups[2]?.value ?: ""
                     continuationIndent = value.length + 1
                     linesInBlock.add(
-                        line.replace(unorderedListMatch.groups[1]?.value ?: "", " $value")
+                        line.replace(numberedListMatch.groups[1]?.value ?: "", " $value")
                     )
                 }
-                orderedListMatch != null -> {
+                unorderedListMatch != null -> {
                     pushBlock(0)
                     continuationIndent = 3
-                    linesInBlock.add(line.replace(orderedListMatch.groups[1]?.value ?: "", " * "))
+                    val marker = unorderedListMatch.groups[2]?.value ?: "*"
+                    linesInBlock.add(
+                        line.replace(unorderedListMatch.groups[1]?.value ?: "", " $marker ")
+                    )
+                }
+                line.startsWith("=") || line.startsWith("-") -> {
+                    pushBlock(0)
+                    linesInBlock.add(line)
+                    pushBlock(0)
                 }
                 line.contains('|') -> {
                     pushBlock(0)
@@ -221,7 +224,7 @@ class KDocFormatter(private val maxLineLength: Int) {
         private const val BLOCK_QUOTE_PREFIX = "> "
 
         private val numberedListElement = Regex("(\\s*(\\d+. )).*")
-        private val orderedListElement = Regex("(\\s*\\*\\s+).*")
+        private val unorderedListElement = Regex("(\\s*([*\\-+])\\s+).*")
 
         private val linkElement = Regex("[^\\s]*\\[.+?](\\(.+?\\))?[^\\s]*")
     }
