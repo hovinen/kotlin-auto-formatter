@@ -89,6 +89,27 @@ internal class KDocFormatterTest {
     }
 
     @Test
+    fun `preserves blank lines after tables`() {
+        val subject = KDocFormatter(maxLineLength = 20)
+
+        val result = subject.format(
+            """
+                A | Table
+                
+                A paragraph
+            """.trimIndent()
+        )
+
+        assertThat(result).isEqualTo(
+            """
+                A | Table
+                
+                A paragraph
+            """.trimIndent()
+        )
+    }
+
+    @Test
     fun `does not break inside a link`() {
         val subject = KDocFormatter(maxLineLength = 10)
 

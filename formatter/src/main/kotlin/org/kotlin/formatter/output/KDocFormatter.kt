@@ -105,8 +105,6 @@ class KDocFormatter(private val maxLineLength: Int) {
                     pushBlock(0)
                     state = State.EXITING_RAW_BLOCK
                     linesInBlock.add(line)
-                    pushBlock(0)
-                    state = State.PARAGRAPH
                 }
                 else -> {
                     linesInBlock.add(line)
