@@ -33,13 +33,12 @@ internal class LeafScanner {
                     .plus(EndToken)
             KtTokens.BLOCK_COMMENT ->
                 listOf(
-                    LeafNodeToken("/*"),
                     BeginToken(State.LONG_COMMENT),
+                    LeafNodeToken("/*"),
                     LiteralWhitespaceToken(" ")
                 ).plus(tokenizeNodeContentInBlockComment(node))
+                    .plus(LeafNodeToken(" */"))
                     .plus(EndToken)
-                    .plus(LiteralWhitespaceToken(" "))
-                    .plus(LeafNodeToken("*/"))
             else -> throw IllegalArgumentException("Invalid node for comment $node")
         }
 

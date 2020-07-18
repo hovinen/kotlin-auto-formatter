@@ -483,13 +483,15 @@ internal class PrinterTest {
             subject.print(
                 listOf(
                     BeginToken(state = State.LONG_COMMENT),
+                    LeafNodeToken("/*"),
+                    LiteralWhitespaceToken(content = " ", length = 1),
                     LeafNodeToken("Before whitespace"),
                     LiteralWhitespaceToken(content = " ", length = 64),
                     LeafNodeToken("After whitespace")
                 )
             )
 
-        assertThat(result).isEqualTo("Before whitespace\n * After whitespace")
+        assertThat(result).isEqualTo("/* Before whitespace\n * After whitespace")
     }
 
     @ParameterizedTest
