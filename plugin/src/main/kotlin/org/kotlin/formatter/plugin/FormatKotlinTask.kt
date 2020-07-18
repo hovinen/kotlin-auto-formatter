@@ -12,7 +12,7 @@ import org.kotlin.formatter.KotlinFormatter
  * existing content with the formatted output.
  */
 internal open class FormatKotlinTask : SourceTask() {
-    private val pathMatcher = FileSystems.getDefault().getPathMatcher("glob:**/*.kt")
+    private val pathMatcher = FileSystems.getDefault().getPathMatcher("glob:**/*.{kt,kts}")
 
     @TaskAction
     fun format() {

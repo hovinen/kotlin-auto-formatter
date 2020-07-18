@@ -24,12 +24,8 @@ dependencies {
 }
 
 tasks {
-    compileKotlin {
-        kotlinOptions.jvmTarget = "1.8"
-    }
-    compileTestKotlin {
-        kotlinOptions.jvmTarget = "1.8"
-    }
+    compileKotlin { kotlinOptions.jvmTarget = "1.8" }
+    compileTestKotlin { kotlinOptions.jvmTarget = "1.8" }
     test {
         useJUnitPlatform()
         finalizedBy(jacocoTestReport) // report is always generated after tests run
@@ -44,27 +40,28 @@ tasks {
     }
 }
 
-val dokka by tasks.getting(DokkaTask::class) {
-    outputFormat = "html"
-    outputDirectory = "$buildDir/dokka"
-}
+val dokka by
+    tasks.getting(DokkaTask::class) {
+        outputFormat = "html"
+        outputDirectory = "$buildDir/dokka"
+    }
 
-val dokkaJar by tasks.creating(Jar::class) {
-    group = JavaBasePlugin.DOCUMENTATION_GROUP
-    archiveClassifier.set("javadoc")
-    from(dokka.outputs)
-    dependsOn(dokka)
-}
+val dokkaJar by
+    tasks.creating(Jar::class) {
+        group = JavaBasePlugin.DOCUMENTATION_GROUP
+        archiveClassifier.set("javadoc")
+        from(dokka.outputs)
+        dependsOn(dokka)
+    }
 
-val sourcesJar by tasks.creating(Jar::class) {
-    group = JavaBasePlugin.DOCUMENTATION_GROUP
-    archiveClassifier.set("sources")
-    from(sourceSets.main.get().allSource)
-}
+val sourcesJar by
+    tasks.creating(Jar::class) {
+        group = JavaBasePlugin.DOCUMENTATION_GROUP
+        archiveClassifier.set("sources")
+        from(sourceSets.main.get().allSource)
+    }
 
-application {
-    mainClassName = "org.kotlin.formatter.KotlinFormatterKt"
-}
+application { mainClassName = "org.kotlin.formatter.KotlinFormatterKt" }
 
 publishing {
     publications {
@@ -128,11 +125,12 @@ fun gitVersion(default: String = "0.0.0"): String {
 }
 
 fun tagNameFromGit(): String {
-    ByteArrayOutputStream().use { stream ->
-        exec {
-            commandLine("git", "describe", "--tags")
-            standardOutput = stream
+    ByteArrayOutputStream()
+        .use { stream ->
+            exec {
+                commandLine("git", "describe", "--tags")
+                standardOutput = stream
+            }
+            return stream.toString(Charsets.UTF_8).trim()
         }
-        return stream.toString(Charsets.UTF_8).trim()
-    }
 }

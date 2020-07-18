@@ -57,7 +57,7 @@ class FormatKotlinTaskTest {
                 sourceFile.toFile()
             )
 
-            runFormatter()
+            runFormatter("formatKotlinSource")
 
             assertThat(Files.readString(sourceFile))
                 .isEqualTo(
@@ -86,9 +86,9 @@ class FormatKotlinTaskTest {
                 sourceFile.toFile()
             )
 
-            val result = runFormatter()
+            val result = runFormatter("formatKotlinSource")
 
-            assertThat(result.task(":formatKotlin")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
+            assertThat(result.task(":formatKotlinSource")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
             assertThat(Files.readString(sourceFile))
                 .isEqualTo(
                     """
@@ -126,17 +126,120 @@ class FormatKotlinTaskTest {
                 testFolder.resolve("build.gradle.kts").toFile()
             )
 
-            val result = runFormatter()
+            val result = runFormatter("formatKotlinSource")
 
-            assertThat(result.task(":formatKotlin")?.outcome).isEqualTo(TaskOutcome.NO_SOURCE)
+            assertThat(result.task(":formatKotlinSource")?.outcome).isEqualTo(TaskOutcome.NO_SOURCE)
         }
     }
 
-    private fun runFormatter(): BuildResult {
+    @Nested
+    inner class FormattingBuildScript {
+        @Test
+        fun `formats Kotlin DSL build scripts`() {
+            val buildFile = testFolder.resolve("build.gradle.kts")
+            writeFile(
+                """
+                    plugins { java
+                        id("tech.formatter-kt.formatter")
+                    }
+                """.trimIndent(),
+                buildFile.toFile()
+            )
+
+            val result = runFormatter("formatKotlinScript")
+
+            assertThat(result.task(":formatKotlinScript")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
+            assertThat(Files.readString(buildFile))
+                .isEqualTo(
+                    """
+                        plugins {
+                            java
+                            id("tech.formatter-kt.formatter")
+                        }
+                    """.trimIndent()
+                )
+        }
+
+        @Test
+        fun `does not format Groovy DSL build scripts`() {
+            val buildFile = testFolder.resolve("build.gradle")
+            writeFile(
+                """
+                    plugins { id("tech.formatter-kt.formatter")
+                    }
+                """.trimIndent(),
+                buildFile.toFile()
+            )
+
+            runFormatter("formatKotlinScript")
+
+            assertThat(Files.readString(buildFile))
+                .isEqualTo(
+                    """
+                        plugins { id("tech.formatter-kt.formatter")
+                        }
+                    """.trimIndent()
+                )
+        }
+    }
+
+    @Nested
+    inner class FormattingAllSources {
+        @Test
+        fun `formats both sources and scripts with formatKotlin task`() {
+            val buildFile = testFolder.resolve("build.gradle.kts")
+            writeFile(
+                """
+                    plugins { kotlin("jvm") version "1.3.72"
+                        id("tech.formatter-kt.formatter")
+                    }
+                """.trimIndent(),
+                buildFile.toFile()
+            )
+            val sourceDirectory = testFolder.resolve("src/main/kotlin/somepackage")
+            val sourceFile = sourceDirectory.resolve("AClass.kt")
+            parentMkdirs(sourceDirectory.toFile())
+            writeFile(
+                """
+                    package somepackage
+                    
+                    class  AClass {
+                    val aProperty:
+                    String = "Hello"
+                    }
+                """.trimIndent(),
+                sourceFile.toFile()
+            )
+
+            runFormatter("formatKotlin")
+
+            assertThat(Files.readString(buildFile))
+                .isEqualTo(
+                    """
+                        plugins {
+                            kotlin("jvm") version "1.3.72"
+                            id("tech.formatter-kt.formatter")
+                        }
+                    """.trimIndent()
+                )
+            assertThat(Files.readString(sourceFile))
+                .isEqualTo(
+                    """
+                        package somepackage
+                        
+                        class AClass {
+                            val aProperty: String = "Hello"
+                        }
+                    """.trimIndent()
+                )
+        }
+    }
+
+    private fun runFormatter(task: String): BuildResult {
         return GradleRunner.create()
             .withProjectDir(testFolder.toFile())
             .withPluginClasspath()
-            .withArguments("formatKotlin")
+            .withArguments(task)
             .forwardOutput()
             .build()
     }

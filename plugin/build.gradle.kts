@@ -10,9 +10,7 @@ plugins {
 group = "tech.formatter-kt"
 version = gitVersion()
 
-repositories {
-    mavenCentral()
-}
+repositories { mavenCentral() }
 
 dependencies {
     implementation(kotlin("stdlib-jdk8"))
@@ -35,18 +33,10 @@ gradlePlugin {
 }
 
 tasks {
-    compileKotlin {
-        kotlinOptions.jvmTarget = "1.8"
-    }
-    compileTestKotlin {
-        kotlinOptions.jvmTarget = "1.8"
-    }
-    jar {
-        from(project(":formatter").tasks["compileKotlin"].outputs)
-    }
-    test {
-        useJUnitPlatform()
-    }
+    compileKotlin { kotlinOptions.jvmTarget = "1.8" }
+    compileTestKotlin { kotlinOptions.jvmTarget = "1.8" }
+    jar { from(project(":formatter").tasks["compileKotlin"].outputs) }
+    test { useJUnitPlatform() }
     pluginUnderTestMetadata {
         pluginClasspath.setFrom(
             sourceSets.main.get().runtimeClasspath,
@@ -78,11 +68,12 @@ fun gitVersion(default: String = "0.0.0"): String {
 }
 
 fun tagNameFromGit(): String {
-    ByteArrayOutputStream().use { stream ->
-        exec {
-            commandLine("git", "describe", "--tags")
-            standardOutput = stream
+    ByteArrayOutputStream()
+        .use { stream ->
+            exec {
+                commandLine("git", "describe", "--tags")
+                standardOutput = stream
+            }
+            return stream.toString(Charsets.UTF_8).trim()
         }
-        return stream.toString(Charsets.UTF_8).trim()
-    }
 }
