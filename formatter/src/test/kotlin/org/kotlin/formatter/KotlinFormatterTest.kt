@@ -3314,6 +3314,41 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `does not insert a line break in an EOL comment when column limit impossible to keep`() {
+        val subject = KotlinFormatter(maxLineLength = 20)
+
+        val result = subject.format(
+            """
+                // aaaa_aaaa_aaaa_aaaa_aaaa
+            """.trimIndent()
+        )
+
+        assertThat(result).isEqualTo(
+            """
+                // aaaa_aaaa_aaaa_aaaa_aaaa
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun `does not insert a line break in string literal when column limit impossible to keep`() {
+        val subject = KotlinFormatter(maxLineLength = 20)
+
+        val result = subject.format(
+            """
+                val str = "aaaa_aaaa_aaaa_aaaa_aaaa"
+            """.trimIndent()
+        )
+
+        assertThat(result).isEqualTo(
+            """
+                val str =
+                    "aaaa_aaaa_aaaa_aaaa_aaaa"
+            """.trimIndent()
+        )
+    }
+
+    @Test
     fun `does not indent init block`() {
         val subject = KotlinFormatter()
 

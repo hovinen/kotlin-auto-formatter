@@ -64,6 +64,7 @@ class Printer(
     private val inComment: Boolean
         get() = COMMENT_STATES.contains(blockStack.peek().state)
     private var atStartOfLine = true
+    private var atStartOfLineAfterCommentMarker = false
 
     /**
      * Converts the given [tokens] into a formatted String.
@@ -158,6 +159,11 @@ class Printer(
         when (token) {
             is LeafNodeToken -> {
                 appendTextOnSameLine(token.text)
+                if (atStartOfLineAfterCommentMarker && token.text.isNotEmpty()) {
+                    atStartOfLineAfterCommentMarker = false
+                } else if (inComment && atStartOfLine) {
+                    atStartOfLineAfterCommentMarker = true
+                }
                 if (token.text.isNotEmpty()) {
                     atStartOfLine = false
                 }
@@ -262,7 +268,7 @@ class Printer(
     }
 
     private fun appendLiteralWhitespaceToken(token: LiteralWhitespaceToken) {
-        if (!breakingAllowed || token.length <= spaceRemaining) {
+        if (!breakingAllowed || token.length <= spaceRemaining || atStartOfLineAfterCommentMarker) {
             if (inComment && token.content.contains('\n')) {
                 appendWhitespaceForComment(token.content)
             } else {
