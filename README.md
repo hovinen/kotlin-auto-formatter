@@ -91,10 +91,7 @@ It should be fine to use both ktlint and this formatter in the same project.
 
 ## Upcoming work
 
- * Ensuring that the output does not conflict with the Kotlin coding conventions or the Google
-   Kotlin style guide.
- * Organizing of imports and removal of unused imports.
- * Enforcing more horizontal whitespace rules from the Kotlin coding conventions.
+ * Removal of unused imports.
  * Creation of an IntelliJ plugin.
  * Allow configuration via command line arguments and Gradle plugin.
  * Configuration of the maximum line length from `.editorconfig`.
