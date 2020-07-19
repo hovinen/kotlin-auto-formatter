@@ -70,7 +70,6 @@ Currently, it is only possible to configure the formatter when it is embedded as
    violate linting rules.
  * Does not have all of the rules of ktlint, e.g. replacing `${variable}` with `$variable` in a
    string template.
- * Currently does not remove unused imports, though that feature is planned.
 
 It should be fine to use both ktlint and this formatter in the same project.
 
