@@ -40,6 +40,9 @@ typealias ImportPolicy = (String, String) -> Boolean
  * [delegated properties](https://kotlinlang.org/docs/reference/delegated-properties.html)).
  *
  * All other imports are identified for removal.
+ *
+ * These rules are based on the implementation of `NoUnusedImportsRule` in
+ * [ktlint](https://github.com/pinterest/ktlint).
  */
 fun importPolicyForNode(node: ASTNode): ImportPolicy {
     val foundNames = mutableSetOf("*")
