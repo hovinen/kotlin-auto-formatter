@@ -20,6 +20,11 @@ jobs:
         with:
           java-version: 11
 
+      - name: Run tests and linter
+        env:
+          TAG_NAME: ${{steps.tag_name.outputs.TAG_NAME}}
+        run: ./gradlew check
+
       - name: Publish library
         env:
           TAG_NAME: ${{steps.tag_name.outputs.TAG_NAME}}
