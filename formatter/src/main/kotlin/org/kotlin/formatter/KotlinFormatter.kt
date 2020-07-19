@@ -2,7 +2,10 @@ package org.kotlin.formatter
 
 import java.nio.file.Path
 import java.nio.file.Paths
+import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.utils.addToStdlib.indexOfOrNull
+import org.kotlin.formatter.imports.ImportPolicy
+import org.kotlin.formatter.imports.importPolicyForNode
 import org.kotlin.formatter.loading.KotlinFileLoader
 import org.kotlin.formatter.output.Printer
 import org.kotlin.formatter.output.TokenPreprocessor
@@ -15,11 +18,14 @@ import org.kotlin.formatter.scanning.nodepattern.NodeSequenceNotMatchedException
  * @property maxLineLength the maximum column limit in which to try to fit the code
  * @property continuationIndentSize the additional amount to indent when introducing a line break
  *     within an existing statement
+ * @property importPolicy a function which scans the given [ASTNode] and produces an [ImportPolicy]
+ *     based on the file contents; by default [importPolicyForNode]
  */
 class KotlinFormatter(
     private val maxLineLength: Int = 100,
     private val standardIndentSize: Int = 4,
-    private val continuationIndentSize: Int = 4
+    private val continuationIndentSize: Int = 4,
+    private val importPolicySupplier: (ASTNode) -> ImportPolicy = ::importPolicyForNode
 ) {
     private val kotlinLoader = KotlinFileLoader()
 
@@ -29,7 +35,8 @@ class KotlinFormatter(
      * Returns the formatted source code.
      */
     fun format(input: String): String {
-        val kotlinScanner = KotlinScanner()
+        val rootNode = kotlinLoader.parseKotlin(input)
+        val kotlinScanner = KotlinScanner(importPolicySupplier(rootNode))
         val tokenPreprocessor = TokenPreprocessor()
         val printer =
             Printer(
@@ -37,9 +44,7 @@ class KotlinFormatter(
                 standardIndent = standardIndentSize,
                 continuationIndent = continuationIndentSize
             )
-        return printer.print(
-            tokenPreprocessor.preprocess(kotlinScanner.scan(kotlinLoader.parseKotlin(input)))
-        )
+        return printer.print(tokenPreprocessor.preprocess(kotlinScanner.scan(rootNode)))
     }
 
     /**

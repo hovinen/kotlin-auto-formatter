@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
+import org.kotlin.formatter.imports.ImportPolicy
 
 class KotlinFormatterTest {
     @Test
@@ -2820,7 +2821,8 @@ class KotlinFormatterTest {
 
     @Test
     fun `does not insert line breaks in an import statement`() {
-        val subject = KotlinFormatter(maxLineLength = 20)
+        val subject =
+            KotlinFormatter(maxLineLength = 20, importPolicySupplier = { { _, _ -> true } })
 
         val result =
             subject.format(
@@ -2839,7 +2841,8 @@ class KotlinFormatterTest {
 
     @Test
     fun `does not insert line breaks in an import statement with alias`() {
-        val subject = KotlinFormatter(maxLineLength = 20)
+        val subject =
+            KotlinFormatter(maxLineLength = 20, importPolicySupplier = { { _, _ -> true } })
 
         val result =
             subject.format(
@@ -2858,7 +2861,7 @@ class KotlinFormatterTest {
 
     @Test
     fun `preserves single line breaks between import statements`() {
-        val subject = KotlinFormatter()
+        val subject = KotlinFormatter(importPolicySupplier = { { _, _ -> true } })
 
         val result =
             subject.format(
@@ -2879,7 +2882,7 @@ class KotlinFormatterTest {
 
     @Test
     fun `does not indent import statements after a package statement`() {
-        val subject = KotlinFormatter()
+        val subject = KotlinFormatter(importPolicySupplier = { { _, _ -> true } })
 
         val result =
             subject.format(
@@ -2902,11 +2905,12 @@ class KotlinFormatterTest {
 
     @Test
     fun `sorts import statements alphabetically`() {
-        val subject = KotlinFormatter()
+        val subject = KotlinFormatter(importPolicySupplier = { { _, _ -> true } })
 
         val result =
             subject.format(
                 """
+                    import java.time.LocalDate
                     import org.kotlin.formatter.BClass
                     import org.kotlin.formatter.AClass
                 """.trimIndent()
@@ -2915,6 +2919,7 @@ class KotlinFormatterTest {
         assertThat(result)
             .isEqualTo(
                 """
+                    import java.time.LocalDate
                     import org.kotlin.formatter.AClass
                     import org.kotlin.formatter.BClass
                 """.trimIndent()
@@ -4330,7 +4335,7 @@ class KotlinFormatterTest {
     @Test
     fun `removes whitespace between imports`() {
         val result =
-            KotlinFormatter()
+            KotlinFormatter(importPolicySupplier = { { _, _ -> true } })
                 .format(
                     """
                         import apackage.AClass
@@ -4344,6 +4349,54 @@ class KotlinFormatterTest {
                 """
                     import apackage.AClass
                     import apackage.BClass
+                """.trimIndent()
+            )
+    }
+
+    @Test
+    fun `removes imports when directed`() {
+        val importPolicy: ImportPolicy = { importName, importPath ->
+            !(importName == "AClass" && importPath == "apackage.AClass")
+        }
+        val subject = KotlinFormatter(importPolicySupplier = { importPolicy })
+
+        val result = subject.format("import apackage.AClass")
+
+        assertThat(result).isEqualTo("")
+    }
+
+    @Test
+    fun `retains imports whose alias is used`() {
+        val importPolicy: ImportPolicy = { importName, importPath ->
+            importName == "AClassAlias" && importPath == "apackage.AClass"
+        }
+        val subject = KotlinFormatter(importPolicySupplier = { importPolicy })
+
+        val result = subject.format("import apackage.AClass as AClassAlias")
+
+        assertThat(result).isEqualTo("import apackage.AClass as AClassAlias")
+    }
+
+    @Test
+    fun `removes imports by default according to the standard policy`() {
+        val subject = KotlinFormatter()
+
+        val result =
+            subject.format(
+                """
+                    import apackage.AnUnusedClass
+                    import apackage.AUsedClass
+                    
+                    val aVariable: AUsedClass
+                """.trimIndent()
+            )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    import apackage.AUsedClass
+                    
+                    val aVariable: AUsedClass
                 """.trimIndent()
             )
     }

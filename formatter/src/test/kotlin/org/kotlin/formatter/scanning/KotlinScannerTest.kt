@@ -1480,5 +1480,5 @@ internal class KotlinScannerTest {
             )
     }
 
-    private fun subject() = KotlinScanner()
+    private fun subject() = KotlinScanner({ _, _ -> true })
 }

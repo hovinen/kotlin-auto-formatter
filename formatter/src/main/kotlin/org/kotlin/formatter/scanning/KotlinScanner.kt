@@ -20,10 +20,12 @@ import org.kotlin.formatter.scanning.nodepattern.nodePattern
  * Derek Oppen [1] with some inspiration from the
  * [Google Java formatter](https://github.com/google/google-java-format).
  *
+ * The parameter [importPolicy] determines whether imports are retained or removed in the output.
+ *
  * [1] Oppen, Derek C. "Prettyprinting". ACM Transactions on Programming Languages and Systems,
  * Volume 2 Issue 4, Oct. 1980, pp. 465-483.
  */
-class KotlinScanner {
+class KotlinScanner(private val importPolicy: (String, String) -> Boolean) {
     /**
      * Returns a list of [Token] derived from the given [ASTNode].
      *
@@ -40,7 +42,9 @@ class KotlinScanner {
     internal fun scanInState(node: ASTNode, scannerState: ScannerState): List<Token> {
         return when (node) {
             is LeafPsiElement -> LeafScanner().scanLeaf(node)
-            else -> nodeScannerForElementType(this, node.elementType).scan(node, scannerState)
+            else ->
+                nodeScannerForElementType(this, node.elementType, importPolicy)
+                    .scan(node, scannerState)
         }
     }
 

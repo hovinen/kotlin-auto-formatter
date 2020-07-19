@@ -91,7 +91,6 @@ It should be fine to use both ktlint and this formatter in the same project.
 
 ## Upcoming work
 
- * Removal of unused imports.
  * Creation of an IntelliJ plugin.
  * Allow configuration via command line arguments and Gradle plugin.
  * Configuration of the maximum line length from `.editorconfig`.
