@@ -14,51 +14,73 @@ import org.kotlin.formatter.Token
 import org.kotlin.formatter.WhitespaceToken
 import org.kotlin.formatter.inBeginEndBlock
 import org.kotlin.formatter.scanning.nodepattern.NodePattern
+import org.kotlin.formatter.scanning.nodepattern.NodePatternBuilder
 import org.kotlin.formatter.scanning.nodepattern.nodePattern
 
 /** A [NodeScanner] for `if` expressions. */
 internal class IfExpressionScanner(private val kotlinScanner: KotlinScanner) : NodeScanner {
     private val nodePattern =
         nodePattern {
-            exactlyOne {
-                nodeOfType(KtTokens.IF_KEYWORD)
-                possibleWhitespace()
-                nodeOfType(KtTokens.LPAR)
-                nodeOfType(KtNodeTypes.CONDITION) thenMapToTokens { nodes ->
-                    listOf(LeafNodeToken("if ("), BeginToken(State.CODE))
-                        .plus(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT))
-                        .plus(EndToken)
-                }
-                possibleWhitespace()
-                nodeOfType(KtTokens.RPAR)
-                possibleWhitespace()
-                nodeOfType(KtNodeTypes.THEN) thenMapToTokens { nodes ->
-                    thenPattern.matchSequence(nodes.first().children().asIterable())
-                }
+            nodeOfType(KtTokens.IF_KEYWORD)
+            possibleWhitespace()
+            nodeOfType(KtTokens.LPAR)
+            nodeOfType(KtNodeTypes.CONDITION) thenMapToTokens { nodes ->
+                listOf(LeafNodeToken("if ("), BeginToken(State.CODE))
+                    .plus(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT))
+                    .plus(EndToken)
             }
-            zeroOrOne {
-                possibleWhitespace()
-                nodeOfType(KtTokens.ELSE_KEYWORD)
-                possibleWhitespace()
-                nodeOfType(KtNodeTypes.ELSE) thenMapToTokens { nodes ->
-                    elsePattern.matchSequence(nodes.first().children().asIterable())
+            possibleWhitespace()
+            nodeOfType(KtTokens.RPAR)
+            possibleWhitespace()
+            either {
+                thenWithBlock() thenMapToTokens { nodes ->
+                    thenWithBlockPattern.matchSequence(nodes.first().children().asIterable())
+                }
+                zeroOrOne {
+                    possibleWhitespace()
+                    nodeOfType(KtTokens.ELSE_KEYWORD)
+                    possibleWhitespace()
+                    nodeOfType(KtNodeTypes.ELSE) thenMapToTokens { nodes ->
+                        elsePatternFollowingBlock.matchSequence(
+                            nodes.first().children().asIterable()
+                        )
+                    }
+                }
+            } or {
+                nodeOfType(KtNodeTypes.THEN) thenMapToTokens { nodes ->
+                    thenWithoutBlockPattern.matchSequence(nodes.first().children().asIterable())
+                }
+                zeroOrOne {
+                    possibleWhitespace()
+                    nodeOfType(KtTokens.ELSE_KEYWORD)
+                    possibleWhitespace()
+                    nodeOfType(KtNodeTypes.ELSE) thenMapToTokens { nodes ->
+                        elsePattern.matchSequence(nodes.first().children().asIterable())
+                    }
                 }
             }
             end()
         }
 
-    private val thenPattern: NodePattern =
+    private fun NodePatternBuilder.thenWithBlock(): NodePatternBuilder =
+        nodeMatching {
+            it.elementType == KtNodeTypes.THEN && it.firstChildNode.elementType == KtNodeTypes.BLOCK
+        }
+
+    private val thenWithBlockPattern: NodePattern =
         nodePattern {
-            either {
-                nodeOfType(KtNodeTypes.BLOCK) thenMapToTokens { nodes ->
-                    listOf(LeafNodeToken(") "))
-                        .plus(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT))
-                }
-            } or {
-                oneOrMore { anyNode() } thenMapToTokens { nodes ->
-                    listOf(LeafNodeToken(")"), SynchronizedBreakToken(whitespaceLength = 1))
-                        .plus(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT))
-                }
+            nodeOfType(KtNodeTypes.BLOCK) thenMapToTokens { nodes ->
+                listOf(LeafNodeToken(") "))
+                    .plus(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT))
+            }
+            end()
+        }
+
+    private val thenWithoutBlockPattern: NodePattern =
+        nodePattern {
+            oneOrMore { anyNode() } thenMapToTokens { nodes ->
+                listOf(LeafNodeToken(")"), SynchronizedBreakToken(whitespaceLength = 1))
+                    .plus(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT))
             }
             end()
         }
@@ -77,6 +99,22 @@ internal class IfExpressionScanner(private val kotlinScanner: KotlinScanner) : N
                         LeafNodeToken("else"),
                         SynchronizedBreakToken(whitespaceLength = 1)
                     ).plus(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT))
+                }
+            }
+            end()
+        }
+
+    private val elsePatternFollowingBlock: NodePattern =
+        nodePattern {
+            either {
+                nodeOfOneOfTypes(KtNodeTypes.BLOCK, KtNodeTypes.IF) thenMapToTokens { nodes ->
+                    listOf(LeafNodeToken(" else "))
+                        .plus(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT))
+                }
+            } or {
+                oneOrMore { anyNode() } thenMapToTokens { nodes ->
+                    listOf(LeafNodeToken(" else"), SynchronizedBreakToken(whitespaceLength = 1))
+                        .plus(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT))
                 }
             }
             end()

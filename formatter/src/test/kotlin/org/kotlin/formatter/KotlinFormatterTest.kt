@@ -2523,6 +2523,30 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `does not break before else when preceded by a block`() {
+        val result =
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        if (aCondition) {
+                            doSomething()
+                        } else
+                            doSomethingElse()
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    if (aCondition) {
+                        doSomething()
+                    } else
+                        doSomethingElse()
+                """.trimIndent()
+            )
+    }
+
+    @Test
     fun `does not break between function and closure parameter`() {
         val result =
             KotlinFormatter(maxLineLength = 50)
