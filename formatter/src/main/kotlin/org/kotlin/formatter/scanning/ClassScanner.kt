@@ -36,8 +36,14 @@ internal class ClassScanner(private val kotlinScanner: KotlinScanner) : NodeScan
                 nodeOfType(KtNodeTypes.MODIFIER_LIST) thenMapToTokens { nodes ->
                     modifierListScanner.scan(nodes.first(), ScannerState.STATEMENT)
                 }
+                possibleWhitespace()
+                zeroOrOne {
+                    comment()
+                    possibleWhitespaceOutputToToken() thenMapTokens { tokens ->
+                        tokens.plus(MarkerToken)
+                    }
+                }
             } thenMapTokens { tokens -> listOf(MarkerToken).plus(tokens) }
-            possibleWhitespace()
             exactlyOne {
                 nodeOfOneOfTypes(
                     KtTokens.CLASS_KEYWORD,

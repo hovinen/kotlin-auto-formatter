@@ -183,7 +183,13 @@ private fun NodePatternBuilder.singleComment() {
     }
 }
 
-private fun NodePatternBuilder.possibleWhitespaceOutputToToken() {
+/**
+ * Matches optional whitespace and, if it is present, converts it into a suitable [Token].
+ *
+ * Whitespace containing a newline is converted into a single line [ForcedBreakToken]. Any other
+ * whitespace is converted into an equivalent [WhitespaceToken].
+ */
+fun NodePatternBuilder.possibleWhitespaceOutputToToken(): NodePatternBuilder {
     possibleWhitespace() thenMapToTokens { nodes ->
         if (nodes.isNotEmpty()) {
             if (nodes.first().textContains('\n')) {
@@ -195,6 +201,7 @@ private fun NodePatternBuilder.possibleWhitespaceOutputToToken() {
             listOf()
         }
     }
+    return this
 }
 
 private fun toForcedBreak(node: ASTNode) =

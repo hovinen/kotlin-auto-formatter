@@ -3305,6 +3305,52 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `preserves EOL comments between annotations and declarations`() {
+        val subject = KotlinFormatter()
+
+        val result =
+            subject.format(
+                """
+                    @AnAnnotation
+                    // A comment
+                    class MyClass
+                """.trimIndent()
+            )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    @AnAnnotation
+                    // A comment
+                    class MyClass
+                """.trimIndent()
+            )
+    }
+
+    @Test
+    fun `preserves EOL comments between annotations and declarations with modifiers`() {
+        val subject = KotlinFormatter()
+
+        val result =
+            subject.format(
+                """
+                    @AnAnnotation
+                    // A comment
+                    internal class MyClass
+                """.trimIndent()
+            )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    @AnAnnotation
+                    // A comment
+                    internal class MyClass
+                """.trimIndent()
+            )
+    }
+
+    @Test
     fun `preserves formatting within EOL comments`() {
         val subject = KotlinFormatter()
 
