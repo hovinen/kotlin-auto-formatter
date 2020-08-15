@@ -357,6 +357,30 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `puts arrow on its own line if the parameter list does not fit on a line`() {
+        val result =
+            KotlinFormatter(maxLineLength = 38)
+                .format("{ aValue: String, anotherValue: String -> doSomething() }")
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    {
+                        aValue: String,
+                        anotherValue: String
+                        -> doSomething() }
+                """.trimIndent()
+            )
+    }
+
+    @Test
+    fun `strips spacing around label of function literal`() {
+        val result = KotlinFormatter(maxLineLength = 37).format("map label@ { doSomething() }")
+
+        assertThat(result).isEqualTo("map label@{ doSomething() }")
+    }
+
+    @Test
     fun `breaks before a dot when next block does not fit on line`() {
         val result =
             KotlinFormatter(maxLineLength = 45)
@@ -3308,23 +3332,21 @@ class KotlinFormatterTest {
     fun `preserves EOL comments between annotations and declarations`() {
         val subject = KotlinFormatter()
 
-        val result =
-            subject.format(
-                """
-                    @AnAnnotation
-                    // A comment
-                    class MyClass
-                """.trimIndent()
-            )
+        val result = subject.format(
+            """
+                @AnAnnotation
+                // A comment
+                class MyClass
+            """.trimIndent()
+        )
 
-        assertThat(result)
-            .isEqualTo(
-                """
-                    @AnAnnotation
-                    // A comment
-                    class MyClass
-                """.trimIndent()
-            )
+        assertThat(result).isEqualTo(
+            """
+                @AnAnnotation
+                // A comment
+                class MyClass
+            """.trimIndent()
+        )
     }
 
     @Test

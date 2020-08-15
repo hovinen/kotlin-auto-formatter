@@ -120,6 +120,9 @@ internal fun nodeScannerForElementType(
         KtNodeTypes.PARENTHESIZED -> {
             ParenthesizedScanner(kotlinScanner)
         }
+        KtNodeTypes.LABELED_EXPRESSION -> {
+            LabeledExpressionScanner(kotlinScanner)
+        }
         KtFileElementType.INSTANCE, is KtScriptElementType,
             KtNodeTypes.LITERAL_STRING_TEMPLATE_ENTRY -> {
                 SimpleScanner(kotlinScanner, ScannerState.BLOCK)

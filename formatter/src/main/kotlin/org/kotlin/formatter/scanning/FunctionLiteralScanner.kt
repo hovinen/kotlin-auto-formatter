@@ -11,6 +11,7 @@ import org.kotlin.formatter.LeafNodeToken
 import org.kotlin.formatter.State
 import org.kotlin.formatter.SynchronizedBreakToken
 import org.kotlin.formatter.Token
+import org.kotlin.formatter.WhitespaceToken
 import org.kotlin.formatter.inBeginEndBlock
 import org.kotlin.formatter.nonBreakingSpaceToken
 import org.kotlin.formatter.scanning.nodepattern.NodePatternBuilder
@@ -25,19 +26,16 @@ internal class FunctionLiteralScanner(private val kotlinScanner: KotlinScanner) 
             }
             possibleWhitespace()
             zeroOrOne {
-                nodeOfType(KtNodeTypes.VALUE_PARAMETER_LIST) thenMapToTokens { nodes ->
-                    listOf(nonBreakingSpaceToken())
-                        .plus(
-                            inBeginEndBlock(
-                                kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT),
-                                State.CODE
-                            )
-                        )
-                }
-                possibleWhitespace()
-                nodeOfType(KtTokens.ARROW) thenMapToTokens {
-                    listOf(nonBreakingSpaceToken(), LeafNodeToken("->"))
-                }
+                exactlyOne {
+                    nodeOfType(KtNodeTypes.VALUE_PARAMETER_LIST) thenMapToTokens { nodes ->
+                        listOf(WhitespaceToken(" "))
+                            .plus(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT))
+                    }
+                    possibleWhitespace()
+                    nodeOfType(KtTokens.ARROW) thenMapToTokens {
+                        listOf(SynchronizedBreakToken(whitespaceLength = 1), LeafNodeToken("->"))
+                    }
+                } thenMapTokens { tokens -> inBeginEndBlock(tokens, State.CODE) }
                 possibleWhitespace()
                 zeroOrOne { emptyBlock() thenMapToTokens { listOf(nonBreakingSpaceToken()) } }
             } thenMapTokens { it.plus(EndToken) }
