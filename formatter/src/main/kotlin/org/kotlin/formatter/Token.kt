@@ -154,6 +154,20 @@ data class NonIndentingSynchronizedBreakToken(internal val whitespaceLength: Int
  */
 data class BeginToken(internal val state: State, internal val length: Int = 0) : Token()
 
+/**
+ * A directive to begin a new weak block.
+ *
+ * This is similar to [BeginToken] in that it marks the beginning of a new block. Unlike
+ * [BeginToken], the block it begins plays no role in calculating [WhitespaceToken.length]. This
+ * implies that the formatter does not prefer to insert a line break before the block but rather may
+ * insert line breaks within the block. In this sense, the block is "weak".
+ *
+ * A weak block is terminated by [EndToken], just as a regular block.
+ */
+data class BeginWeakToken(internal val length: Int = 0) : Token() {
+    val beginToken = BeginToken(State.CODE, length)
+}
+
 /** A directive to end the current block. */
 object EndToken : Token()
 

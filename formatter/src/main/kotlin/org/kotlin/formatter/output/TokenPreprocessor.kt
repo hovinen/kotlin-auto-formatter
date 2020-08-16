@@ -3,6 +3,7 @@ package org.kotlin.formatter.output
 import java.lang.Integer.min
 import java.util.Stack
 import org.kotlin.formatter.BeginToken
+import org.kotlin.formatter.BeginWeakToken
 import org.kotlin.formatter.BlockFromMarkerToken
 import org.kotlin.formatter.ClosingForcedBreakToken
 import org.kotlin.formatter.ClosingSynchronizedBreakToken
@@ -72,7 +73,7 @@ class TokenPreprocessor {
      */
     fun preprocess(input: List<Token>): List<Token> {
         val deferredTokens = mutableListOf<Token>()
-        resultStack.push(BlockStackElement(State.CODE))
+        resultStack.push(StrongBlockStackElement(State.CODE))
         for (token in input) {
             if (token.allowsBlockToEnd) {
                 handleDeferredTokens(deferredTokens)
@@ -106,7 +107,10 @@ class TokenPreprocessor {
                     )
                 }
                 is BeginToken -> {
-                    resultStack.push(BlockStackElement(token.state))
+                    resultStack.push(StrongBlockStackElement(token.state))
+                }
+                is BeginWeakToken -> {
+                    resultStack.push(WeakBlockStackElement())
                 }
                 is EndToken, is BlockFromMarkerToken -> {
                     deferredTokens.add(token)
@@ -132,16 +136,12 @@ class TokenPreprocessor {
         return lastToken is SynchronizedBreakToken || lastToken is ClosingSynchronizedBreakToken
     }
 
-    private fun lastTokenWhitespaceLength(element: StackElement?): Int {
-        val token = element?.tokens?.last()
-        return if (token is SynchronizedBreakToken) {
-            token.whitespaceLength
-        } else if (token is ClosingSynchronizedBreakToken) {
-            token.whitespaceLength
-        } else {
-            0
+    private fun lastTokenWhitespaceLength(element: StackElement?): Int =
+        when (val token = element?.tokens?.last()) {
+            is SynchronizedBreakToken -> token.whitespaceLength
+            is ClosingSynchronizedBreakToken -> token.whitespaceLength
+            else -> 0
         }
-    }
 
     private fun lastToken(): Token? = lastElementWithTokens()?.tokens?.lastOrNull()
 
@@ -155,7 +155,7 @@ class TokenPreprocessor {
                 is BlockFromMarkerToken -> {
                     val poppedElement = popBlockToMarker()
                     if (poppedElement is BlockStackElement) {
-                        resultStack.push(BlockStackElement(State.CODE))
+                        resultStack.push(StrongBlockStackElement(State.CODE))
                     }
                     appendTokensInElement(poppedElement, State.CODE)
                 }
@@ -211,7 +211,7 @@ class TokenPreprocessor {
 
     private fun appendTokensInElement(stackElement: StackElement, state: State) {
         val topElement = resultStack.peek()
-        topElement.tokens.add(BeginToken(length = stackElement.textLength, state = state))
+        topElement.tokens.add(stackElement.beginToken(state))
         topElement.tokens.addAll(stackElement.tokens)
         topElement.tokens.add(EndToken)
     }
@@ -222,8 +222,7 @@ class TokenPreprocessor {
         if (followingBlockIsCommentWithNewlines(firstToken, element)) {
             tokens.add(ForcedBreakToken(count = min(element.content.countNewlines(), 2)))
         } else {
-            val length = element.totalLength
-            tokens.add(WhitespaceToken(length = length, content = element.content))
+            tokens.add(WhitespaceToken(length = element.totalLength, content = element.content))
         }
         tokens.addAll(element.tokens)
     }
@@ -277,9 +276,11 @@ private sealed class StackElement(internal val tokens: MutableList<Token> = muta
         get() = if (content.isEmpty()) 0 else 1
 
     internal open val inStringLiteral = false
+
+    internal open fun beginToken(state: State): Token = throw UnsupportedOperationException()
 }
 
-private class BlockStackElement(
+private abstract class BlockStackElement(
     internal val state: State,
     tokens: MutableList<Token> = mutableListOf()
 ) : StackElement(tokens) {
@@ -290,7 +291,7 @@ private class BlockStackElement(
                 when {
                     it is SynchronizedBreakToken && level == 0 -> ForcedBreakToken(count = 1)
                     it is ClosingSynchronizedBreakToken && level == 0 -> ClosingForcedBreakToken
-                    it is BeginToken -> {
+                    it is BeginToken || it is BeginWeakToken -> {
                         level++
                         it
                     }
@@ -314,6 +315,18 @@ private class BlockStackElement(
     override val inStringLiteral = state == State.STRING_LITERAL
 }
 
+private class StrongBlockStackElement(state: State, tokens: MutableList<Token> = mutableListOf()) :
+    BlockStackElement(state, tokens) {
+
+    override fun beginToken(state: State) = BeginToken(length = textLength, state = state)
+}
+
+private class WeakBlockStackElement(tokens: MutableList<Token> = mutableListOf()) :
+    BlockStackElement(State.CODE, tokens) {
+
+    override fun beginToken(state: State) = BeginWeakToken(length = textLength)
+}
+
 private class WhitespaceStackElement(
     internal val content: String,
     override val inStringLiteral: Boolean
@@ -324,7 +337,7 @@ private class WhitespaceStackElement(
         get() = contentLength + initialTextLength
 
     private val initialTextLength: Int
-        get() = tokens.firstOrNull()?.textLength ?: 0
+        get() = tokens.firstOrNull { it !is BeginWeakToken }?.textLength ?: 0
 }
 
 private class LiteralWhitespaceStackElement(
@@ -335,7 +348,9 @@ private class LiteralWhitespaceStackElement(
         get() = content.length + tokens.takeWhile { it is LeafNodeToken }.sumBy { it.textLength }
 }
 
-private class MarkerElement : StackElement()
+private class MarkerElement : StackElement() {
+    override fun beginToken(state: State) = BeginToken(length = textLength, state = state)
+}
 
 private val Token.textLength: Int
     get() =

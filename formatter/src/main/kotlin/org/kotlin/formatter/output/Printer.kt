@@ -2,6 +2,7 @@ package org.kotlin.formatter.output
 
 import java.util.Stack
 import org.kotlin.formatter.BeginToken
+import org.kotlin.formatter.BeginWeakToken
 import org.kotlin.formatter.ClosingForcedBreakToken
 import org.kotlin.formatter.ClosingSynchronizedBreakToken
 import org.kotlin.formatter.EndToken
@@ -233,6 +234,15 @@ class Printer(
                         currentIndent = currentLineIndent,
                         blockStartColumn = maxLineLength - spaceRemaining,
                         token = token
+                    )
+                )
+            }
+            is BeginWeakToken -> {
+                blockStack.push(
+                    BlockStackEntry(
+                        currentIndent = currentLineIndent,
+                        blockStartColumn = maxLineLength - spaceRemaining,
+                        token = token.beginToken
                     )
                 )
             }

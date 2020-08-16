@@ -6,6 +6,7 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import org.kotlin.formatter.BeginToken
+import org.kotlin.formatter.BeginWeakToken
 import org.kotlin.formatter.ClosingForcedBreakToken
 import org.kotlin.formatter.ClosingSynchronizedBreakToken
 import org.kotlin.formatter.EndToken
@@ -282,6 +283,22 @@ internal class PrinterTest {
             subject.print(
                 listOf(
                     BeginToken(length = 81, state = State.CODE),
+                    SynchronizedBreakToken(whitespaceLength = 0),
+                    LeafNodeToken("variable")
+                )
+            )
+
+        assertThat(result).isEqualTo("\n    variable")
+    }
+
+    @Test
+    fun `breaks at synchronized break inside weak block parent block does not fit on line`() {
+        val subject = subject(maxLineLength = 80, continuationIndent = 4)
+
+        val result =
+            subject.print(
+                listOf(
+                    BeginWeakToken(length = 81),
                     SynchronizedBreakToken(whitespaceLength = 0),
                     LeafNodeToken("variable")
                 )

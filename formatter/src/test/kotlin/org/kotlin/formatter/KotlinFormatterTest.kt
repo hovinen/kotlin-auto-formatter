@@ -368,7 +368,9 @@ class KotlinFormatterTest {
                     {
                         aValue: String,
                         anotherValue: String
-                        -> doSomething() }
+                        ->
+                        doSomething()
+                    }
                 """.trimIndent()
             )
     }

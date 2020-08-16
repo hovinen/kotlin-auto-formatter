@@ -5,6 +5,7 @@ import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.psi.psiUtil.children
 import org.kotlin.formatter.BeginToken
+import org.kotlin.formatter.BeginWeakToken
 import org.kotlin.formatter.ClosingSynchronizedBreakToken
 import org.kotlin.formatter.EndToken
 import org.kotlin.formatter.LeafNodeToken
@@ -22,7 +23,7 @@ internal class FunctionLiteralScanner(private val kotlinScanner: KotlinScanner) 
     private val nodePattern =
         nodePattern {
             nodeOfType(KtTokens.LBRACE) thenMapToTokens {
-                listOf(BeginToken(State.CODE), LeafNodeToken("{"))
+                listOf(BeginWeakToken(), BeginToken(State.CODE), LeafNodeToken("{"))
             }
             possibleWhitespace()
             zeroOrOne {
@@ -43,17 +44,15 @@ internal class FunctionLiteralScanner(private val kotlinScanner: KotlinScanner) 
                 nodeOfType(KtNodeTypes.BLOCK) thenMapToTokens { nodes ->
                     val tokens = kotlinScanner.scanNodes(nodes, ScannerState.BLOCK)
                     if (tokens.isNotEmpty()) {
-                        listOf(BeginToken(State.CODE), SynchronizedBreakToken(whitespaceLength = 1))
-                            .plus(tokens)
+                        listOf(SynchronizedBreakToken(whitespaceLength = 1)).plus(tokens)
                             .plus(ClosingSynchronizedBreakToken(whitespaceLength = 1))
-                            .plus(EndToken)
                     } else {
                         listOf()
                     }
                 }
             }
             possibleWhitespace()
-            nodeOfType(KtTokens.RBRACE) thenMapToTokens { listOf(LeafNodeToken("}")) }
+            nodeOfType(KtTokens.RBRACE) thenMapToTokens { listOf(LeafNodeToken("}"), EndToken) }
             end()
         }
 

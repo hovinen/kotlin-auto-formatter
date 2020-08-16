@@ -6,6 +6,7 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import org.kotlin.formatter.BeginToken
+import org.kotlin.formatter.BeginWeakToken
 import org.kotlin.formatter.BlockFromMarkerToken
 import org.kotlin.formatter.ClosingForcedBreakToken
 import org.kotlin.formatter.ClosingSynchronizedBreakToken
@@ -55,6 +56,41 @@ internal class TokenPreprocessorTest {
                 WhitespaceToken(content = " "),
                 BeginToken(state = State.CODE),
                 LeafNodeToken("any token"),
+                EndToken
+            )
+
+        val result = subject.preprocess(input)
+
+        assertThat(result).contains(WhitespaceToken(length = 10, content = " "))
+    }
+
+    @Test
+    fun `outputs a WhitespaceToken without the length of the following weak block`() {
+        val subject = TokenPreprocessor()
+        val input =
+            listOf(
+                WhitespaceToken(content = " "),
+                BeginWeakToken(),
+                LeafNodeToken(""),
+                LeafNodeToken("any token"),
+                EndToken
+            )
+
+        val result = subject.preprocess(input)
+
+        assertThat(result).contains(WhitespaceToken(length = 1, content = " "))
+    }
+
+    @Test
+    fun `outputs a WhitespaceToken with the length of the following block inside a weak block`() {
+        val subject = TokenPreprocessor()
+        val input =
+            listOf(
+                WhitespaceToken(content = " "),
+                BeginWeakToken(),
+                BeginToken(State.CODE),
+                LeafNodeToken("any token"),
+                EndToken,
                 EndToken
             )
 
@@ -375,6 +411,17 @@ internal class TokenPreprocessorTest {
             )
     }
 
+    @ParameterizedTest
+    @MethodSource("tokenLengthCases")
+    fun `outputs a BeginWeakToken with the correct length`(token: Token, lengthExpected: Int) {
+        val subject = TokenPreprocessor()
+        val input = listOf(BeginWeakToken(), token, EndToken)
+
+        val result = subject.preprocess(input)
+
+        assertThat(result).contains(BeginWeakToken(length = lengthExpected))
+    }
+
     @Test
     fun `moves an EndToken to after a following LeafNodeToken`() {
         val subject = TokenPreprocessor()
@@ -598,6 +645,39 @@ internal class TokenPreprocessorTest {
                 listOf(
                     BeginToken(length = 1, state = State.CODE),
                     BeginToken(length = 0, state = State.CODE),
+                    synchronizedBreakToken,
+                    EndToken,
+                    KDocContentToken("\n"),
+                    EndToken
+                )
+            )
+    }
+
+    @ParameterizedTest
+    @MethodSource("synchronizedBreakTokenCases")
+    fun `does not convert synchronized break tokens in a weak subblock`(
+        synchronizedBreakToken: Token,
+        unused1: Token,
+        unused2: Token
+    ) {
+        val subject = TokenPreprocessor()
+        val input =
+            listOf(
+                BeginToken(state = State.CODE),
+                BeginWeakToken(),
+                synchronizedBreakToken,
+                EndToken,
+                KDocContentToken("\n"),
+                EndToken
+            )
+
+        val result = subject.preprocess(input)
+
+        assertThat(result)
+            .isEqualTo(
+                listOf(
+                    BeginToken(length = 1, state = State.CODE),
+                    BeginWeakToken(length = 0),
                     synchronizedBreakToken,
                     EndToken,
                     KDocContentToken("\n"),
