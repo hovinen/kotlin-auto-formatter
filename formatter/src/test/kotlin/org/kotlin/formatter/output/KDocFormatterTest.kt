@@ -200,6 +200,48 @@ internal class KDocFormatterTest {
     }
 
     @Test
+    fun `maintains indentation of continuation lines of block tag`() {
+        val subject = KDocFormatter(maxLineLength = 50)
+
+        val result =
+            subject.format(
+                """
+                    @param aParameter A parameter with some additional
+                        text which wraps and some more additional text which also wraps.
+                """.trimIndent()
+            )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    @param aParameter A parameter with some additional
+                        text which wraps and some more additional text
+                        which also wraps.
+                """.trimIndent()
+            )
+    }
+
+    @Test
+    fun `inserts a newline between ordinary paragraph and block tag`() {
+        val subject = KDocFormatter(maxLineLength = 50)
+
+        val result = subject.format(
+            """
+                A paragraph.
+                @property aProperty A property.
+            """.trimIndent()
+        )
+
+        assertThat(result).isEqualTo(
+            """
+                A paragraph.
+                
+                @property aProperty A property.
+            """.trimIndent()
+        )
+    }
+
+    @Test
     fun `indents further lines of a tag based on continuation indent`() {
         val subject = KDocFormatter(maxLineLength = 50)
 

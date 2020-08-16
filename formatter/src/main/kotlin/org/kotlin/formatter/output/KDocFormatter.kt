@@ -76,7 +76,8 @@ class KDocFormatter(private val maxLineLength: Int) {
                     pushBlock(1)
                 }
                 isTag(line) -> {
-                    pushBlock(0)
+                    pushBlock(if (state == State.PARAGRAPH) 1 else 0)
+                    state = State.BLOCK_TAG
                     continuationIndent = 4
                     linesInBlock.add(line)
                 }
@@ -114,7 +115,7 @@ class KDocFormatter(private val maxLineLength: Int) {
 
         for (line in input.split("\n")) {
             when (state) {
-                State.PARAGRAPH -> {
+                State.PARAGRAPH, State.BLOCK_TAG -> {
                     handleParagraphLine(line)
                 }
                 State.EXITING_RAW_BLOCK -> {
@@ -143,7 +144,7 @@ class KDocFormatter(private val maxLineLength: Int) {
     }
 
     private enum class State {
-        PARAGRAPH, RAW_BLOCK, BLOCK_QUOTE, EXITING_RAW_BLOCK
+        PARAGRAPH, BLOCK_TAG, RAW_BLOCK, BLOCK_QUOTE, EXITING_RAW_BLOCK
     }
 
     private fun formatBlockQuote(content: String) =
