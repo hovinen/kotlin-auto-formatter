@@ -104,6 +104,9 @@ internal class ParameterListScanner(private val kotlinScanner: KotlinScanner) : 
                         parameterPattern.matchSequence(nodes.first().children().asIterable())
                     }
                 }
+                zeroOrOne {
+                    nodeOfType(KtTokens.COMMA) thenMapToTokens { listOf(LeafNodeToken(",")) }
+                }
                 possibleWhitespaceWithComment()
                 zeroOrOne {
                     nodeOfType(KtTokens.RPAR) thenMapToTokens {

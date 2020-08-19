@@ -311,6 +311,30 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `breaks constructor parameters with a trailing comma`() {
+        val result =
+            KotlinFormatter(maxLineLength = 60)
+                .format(
+                    """
+                        class AClass(
+                            private val aParameter: String,
+                            private val anotherParameter: String,
+                        )
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    class AClass(
+                        private val aParameter: String,
+                        private val anotherParameter: String,
+                    )
+                """.trimIndent()
+            )
+    }
+
+    @Test
     fun `breaks before a return type exceeds the column limit`() {
         val result =
             KotlinFormatter(maxLineLength = 45)
@@ -563,6 +587,28 @@ class KotlinFormatterTest {
                         anotherParameter: String,
                         aThirdParameter: String
                     ) {
+                    }
+                """.trimIndent()
+            )
+    }
+
+    @Test
+    fun `correctly handles functional interfaces`() {
+        val result =
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        interface fun AFunctionalInterface {
+                            fun doSomething()
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    interface fun AFunctionalInterface {
+                        fun doSomething()
                     }
                 """.trimIndent()
             )
@@ -1006,6 +1052,13 @@ class KotlinFormatterTest {
                         >
                 """.trimIndent()
             )
+    }
+
+    @Test
+    fun `properly formats annotated type parameters with trailing comma`() {
+        val result = KotlinFormatter(maxLineLength = 50).format("val value: Map<Key, Value,>")
+
+        assertThat(result).isEqualTo("val value: Map<Key, Value,>")
     }
 
     @Test
@@ -1590,6 +1643,30 @@ class KotlinFormatterTest {
                             aCollectionWithALongName
                         ) {
                         }
+                    }
+                """.trimIndent()
+            )
+    }
+
+    @Test
+    fun `handles for with label correctly`() {
+        val result =
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        loop@for (aVariable in aCollection) {
+                            break@loop
+                            continue@loop
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    loop@for (aVariable in aCollection) {
+                        break@loop
+                        continue@loop
                     }
                 """.trimIndent()
             )
