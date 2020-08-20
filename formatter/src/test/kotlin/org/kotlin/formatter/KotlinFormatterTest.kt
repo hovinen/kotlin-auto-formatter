@@ -1084,6 +1084,25 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `handles trailing commas in array initializers`() {
+        val result =
+            KotlinFormatter(maxLineLength = 53)
+                .format(
+                    """
+                        @AnAnnotation(["Some value", "Some other value",]) private val aProperty: String
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    @AnAnnotation(["Some value", "Some other value",])
+                    private val aProperty: String
+                """.trimIndent()
+            )
+    }
+
+    @Test
     fun `preserves vertical whitespace between constructor parameters`() {
         val result =
             KotlinFormatter(maxLineLength = 53)
@@ -1122,6 +1141,36 @@ class KotlinFormatterTest {
             KotlinFormatter(maxLineLength = 50).format("val value: Map< Key ,Something , Value >")
 
         assertThat(result).isEqualTo("val value: Map<Key, Something, Value>")
+    }
+
+    @Test
+    fun `preserves comments between type arguments`() {
+        val result =
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        val value: Map<
+                            /* A comment */ Key,
+                            Something, /* Another comment */
+                            SomethingElse, // Another comment
+                            Value, // Another comment
+                        >
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    val value:
+                        Map<
+                            /* A comment */
+                            Key,
+                            Something, /* Another comment */
+                            SomethingElse, // Another comment
+                            Value, // Another comment
+                        >
+                """.trimIndent()
+            )
     }
 
     @Test

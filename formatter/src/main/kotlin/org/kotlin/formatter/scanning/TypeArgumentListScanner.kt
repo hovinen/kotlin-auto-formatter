@@ -1,5 +1,6 @@
 package org.kotlin.formatter.scanning
 
+import org.jetbrains.kotlin.KtNodeTypes
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.psi.psiUtil.children
@@ -16,10 +17,10 @@ internal class TypeArgumentListScanner(private val kotlinScanner: KotlinScanner)
     private val nodePattern =
         nodePattern {
             nodeOfType(KtTokens.LT) thenMapToTokens { listOf(LeafNodeToken("<")) }
-            possibleWhitespace()
+            possibleWhitespaceWithComment()
             either {
                 exactlyOne {
-                    anyNode() thenMapToTokens { nodes ->
+                    nodeOfType(KtNodeTypes.TYPE_PROJECTION) thenMapToTokens { nodes ->
                         listOf(SynchronizedBreakToken(whitespaceLength = 0))
                             .plus(
                                 inBeginEndBlock(
@@ -34,16 +35,16 @@ internal class TypeArgumentListScanner(private val kotlinScanner: KotlinScanner)
                 possibleWhitespace()
                 zeroOrMore {
                     exactlyOne {
-                        anyNode() thenMapToTokens { nodes ->
+                        nodeOfType(KtNodeTypes.TYPE_PROJECTION) thenMapToTokens { nodes ->
                             listOf(SynchronizedBreakToken(whitespaceLength = 1))
                                 .plus(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT))
                         }
                         possibleWhitespace()
                         nodeOfType(KtTokens.COMMA) thenMapToTokens { listOf(LeafNodeToken(",")) }
                     }
-                    possibleWhitespace()
+                    possibleWhitespaceWithComment()
                 }
-                exactlyOne { anyNode() } thenMapToTokens { nodes ->
+                exactlyOne { nodeOfType(KtNodeTypes.TYPE_PROJECTION) } thenMapToTokens { nodes ->
                     listOf(SynchronizedBreakToken(whitespaceLength = 1))
                         .plus(
                             inBeginEndBlock(
@@ -54,14 +55,15 @@ internal class TypeArgumentListScanner(private val kotlinScanner: KotlinScanner)
                 }
             } or {
                 zeroOrOne {
-                    exactlyOne { anyNode() } thenMapToTokens { nodes ->
-                        listOf(SynchronizedBreakToken(whitespaceLength = 0))
-                            .plus(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT))
-                    }
+                    exactlyOne { nodeOfType(KtNodeTypes.TYPE_PROJECTION) } thenMapToTokens
+                        { nodes ->
+                            listOf(SynchronizedBreakToken(whitespaceLength = 0))
+                                .plus(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT))
+                        }
                 }
             }
             zeroOrOne { nodeOfType(KtTokens.COMMA) thenMapToTokens { listOf(LeafNodeToken(",")) } }
-            possibleWhitespace()
+            possibleWhitespaceWithComment(ignoreTrailingWhitespace = true)
             nodeOfType(KtTokens.GT) thenMapToTokens {
                 listOf(ClosingSynchronizedBreakToken(whitespaceLength = 0), LeafNodeToken(">"))
             }
