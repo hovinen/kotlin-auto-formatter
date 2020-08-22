@@ -256,7 +256,7 @@ internal class TokenPreprocessorTest {
     }
 
     @Test
-    fun `adjust whitespace length of SynchronizedBreakToken when MarkerToken is between`() {
+    fun `adjusts whitespace length of SynchronizedBreakToken when MarkerToken is between`() {
         val subject = TokenPreprocessor()
         val input =
             listOf(
@@ -268,6 +268,17 @@ internal class TokenPreprocessorTest {
         val result = subject.preprocess(input)
 
         assertThat(result).isEqualTo(listOf(SynchronizedBreakToken(whitespaceLength = 1)))
+    }
+
+    @Test
+    fun `consolidates ForcedBreakToken with ClosingSynchronizedBreakToken`() {
+        val subject = TokenPreprocessor()
+        val input =
+            listOf(ForcedBreakToken(count = 1), ClosingSynchronizedBreakToken(whitespaceLength = 1))
+
+        val result = subject.preprocess(input)
+
+        assertThat(result).isEqualTo(listOf(ClosingForcedBreakToken))
     }
 
     @Test

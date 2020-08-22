@@ -63,7 +63,7 @@ internal class TypeArgumentListScanner(private val kotlinScanner: KotlinScanner)
                 }
             }
             zeroOrOne { nodeOfType(KtTokens.COMMA) thenMapToTokens { listOf(LeafNodeToken(",")) } }
-            possibleWhitespaceWithComment(ignoreTrailingWhitespace = true)
+            possibleWhitespaceWithComment()
             nodeOfType(KtTokens.GT) thenMapToTokens {
                 listOf(ClosingSynchronizedBreakToken(whitespaceLength = 0), LeafNodeToken(">"))
             }

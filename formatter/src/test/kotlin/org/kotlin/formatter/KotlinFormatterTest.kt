@@ -335,6 +335,30 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `supports comments after a trailing comma`() {
+        val result =
+            KotlinFormatter(maxLineLength = 60)
+                .format(
+                    """
+                        fun aFunction(
+                            aParameter,
+                            anotherParameter, // A comment
+                        )
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    fun aFunction(
+                        aParameter,
+                        anotherParameter, // A comment
+                    )
+                """.trimIndent()
+            )
+    }
+
+    @Test
     fun `breaks before a return type exceeds the column limit`() {
         val result =
             KotlinFormatter(maxLineLength = 45)
@@ -1059,6 +1083,30 @@ class KotlinFormatterTest {
         val result = KotlinFormatter(maxLineLength = 50).format("val value: Map<Key, Value,>")
 
         assertThat(result).isEqualTo("val value: Map<Key, Value,>")
+    }
+
+    @Test
+    fun `properly formats annotated type parameters with trailing comma and EOL comment`() {
+        val result =
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        val value: Map<
+                            Key,
+                            Value, // Comment
+                        >
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    val value: Map<
+                        Key,
+                        Value, // Comment
+                    >
+                """.trimIndent()
+            )
     }
 
     @Test

@@ -54,8 +54,10 @@ class TokenPreprocessor {
      *  * There is a [ForcedBreakToken], [ClosingForcedBreakToken] in the same block.
      *  * There is already a [KDocContentToken] with a newline character in the same block.
      *
-     * Any [SynchronizedBreakToken] or [ClosingSynchronizedBreakToken] which immediately follows a
-     * [ForcedBreakToken] or [ClosingForcedBreakToken] is dropped.
+     * Any [SynchronizedBreakToken] which immediately follows a [ForcedBreakToken] or
+     * [ClosingForcedBreakToken] is dropped. A [ClosingSynchronizedBreakToken] which immediately
+     * follows a [ClosingForcedBreakToken] is also dropped. A sequence [ForcedBreakToken] followed
+     * by [ClosingSynchronizedBreakToken] is replaced by a [ClosingForcedBreakToken].
      *
      * Any [WhitespaceToken] containing newlines and immediately preceding a block of
      * [comment type][State.isComment] is converted into a [ForcedBreakToken] with the same number
@@ -118,9 +120,19 @@ class TokenPreprocessor {
                 is MarkerToken -> {
                     resultStack.push(MarkerElement())
                 }
-                is SynchronizedBreakToken, is ClosingSynchronizedBreakToken -> {
+                is SynchronizedBreakToken -> {
                     val lastToken = lastToken()
                     if (!(lastToken is ForcedBreakToken || lastToken is ClosingForcedBreakToken)) {
+                        resultStack.peek().tokens.add(token)
+                    }
+                }
+                is ClosingSynchronizedBreakToken -> {
+                    val lastToken = lastToken()
+                    if (lastToken is ForcedBreakToken) {
+                        val lastElementTokens = lastElementWithTokens()?.tokens
+                        lastElementTokens?.removeAt(lastElementTokens.size - 1)
+                        resultStack.peek().tokens.add(ClosingForcedBreakToken)
+                    } else if (lastToken !is ClosingForcedBreakToken) {
                         resultStack.peek().tokens.add(token)
                     }
                 }
