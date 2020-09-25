@@ -30,8 +30,12 @@ To run it, use
 
 ### As Gradle plugin
 
-This formatter comes with a Gradle plugin which adds the task `formatKotlin`. This task runs the
-formatter on all Kotlin source files.
+This formatter comes with a Gradle plugin adding the following tasks to your project:
+
+ * `formatKotlinSource`, which runs the formatter on all source files.
+ * `formatKotlinScript`, which runs the formatter on all Kotlin script files, e.g.
+   `build.gradle.kts`.
+ * `formatKotlin`, which runs both `formatKotlinSource` and `formatKotlinScript`.
 
 To use the plugin, add the following to your `build.gradle.kts`:
 
@@ -48,6 +52,11 @@ plugins {
     id 'tech.formatter-kt.formatter' version '0.6.1'
 }
 ```
+
+The task `formatKotlinSource` depends on one of the Kotlin plugins having been *previously*
+applied in order to locate the project's Kotlin source files. If the task has the status `NO-SOURCE`
+despite the existence of Kotlin source files, check that the Kotlin plugin is applied before the
+Kotlin auto-formatter plugin.
 
 ### As a library
 
