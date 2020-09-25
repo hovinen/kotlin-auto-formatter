@@ -22,6 +22,7 @@ class KotlinFormatterPlugin : Plugin<Project> {
         val formatKotlinSourceTask =
             target.tasks
                 .register("formatKotlinSource", FormatKotlinTask::class.java) {
+                    it.group = "formatting"
                     it.source(
                         target.extensions
                             .findByType(KotlinProjectExtension::class.java)
@@ -32,9 +33,10 @@ class KotlinFormatterPlugin : Plugin<Project> {
         val formatKotlinScriptTask =
             target.tasks
                 .register("formatKotlinScript", FormatKotlinTask::class.java) {
+                    it.group = "formatting"
                     it.source(target.fileTree(target.projectDir).apply { include("*.kts") })
                 }
-        val formatKotlinTask = target.tasks.register("formatKotlin")
+        val formatKotlinTask = target.tasks.register("formatKotlin") { it.group = "formatting" }
         formatKotlinTask.get().dependsOn(formatKotlinSourceTask.get(), formatKotlinScriptTask.get())
     }
 }
