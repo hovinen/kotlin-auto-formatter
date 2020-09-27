@@ -6,7 +6,7 @@ plugins {
     application
     id("org.jetbrains.dokka") version "0.10.1"
     `maven-publish`
-    id("tech.formatter-kt.formatter") version "0.6.1"
+    id("tech.formatter-kt.formatter") version "0.6.2"
     id("com.github.dawnwords.jacoco.badge") version "0.2.0"
     java
 }
