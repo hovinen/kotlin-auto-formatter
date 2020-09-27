@@ -4720,6 +4720,18 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `does not remove wildcard imports when directed`() {
+        val importPolicy: ImportPolicy = { importName, importPath ->
+            !(importName == "*" && importPath == "apackage.*")
+        }
+        val subject = KotlinFormatter(importPolicySupplier = { importPolicy })
+
+        val result = subject.format("import apackage.*")
+
+        assertThat(result).isEqualTo("import apackage.*")
+    }
+
+    @Test
     fun `retains imports whose alias is used`() {
         val importPolicy: ImportPolicy = { importName, importPath ->
             importName == "AClassAlias" && importPath == "apackage.AClass"

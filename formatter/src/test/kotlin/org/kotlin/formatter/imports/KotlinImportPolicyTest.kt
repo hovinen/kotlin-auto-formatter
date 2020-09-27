@@ -142,7 +142,7 @@ class KotlinImportPolicyTest {
 
         val subject = importPolicyForNode(node)
 
-        assertThat(subject("*", "apackage.AClass")).isTrue()
+        assertThat(subject("*", "apackage.*")).isTrue()
     }
 
     @Test
@@ -161,6 +161,15 @@ class KotlinImportPolicyTest {
         val subject = importPolicyForNode(node)
 
         assertThat(subject("AClass", "apackage.AClass")).isTrue()
+    }
+
+    @Test
+    fun `returns true on a wildcard import`() {
+        val node = kotlinLoader.parseKotlin("")
+
+        val subject = importPolicyForNode(node)
+
+        assertThat(subject("*", "apackage.*")).isTrue()
     }
 
     @Test

@@ -37,7 +37,8 @@ typealias ImportPolicy = (String, String) -> Boolean
  *  * Imports of symbols representing numbered components (see
  *    [destructuring declarations](https://kotlinlang.org/docs/reference/multi-declarations.html)),
  *  * Imports of the Kotlin function required to provide delegates with the `by` keyword (see
- * [delegated properties](https://kotlinlang.org/docs/reference/delegated-properties.html)).
+ *    [delegated properties](https://kotlinlang.org/docs/reference/delegated-properties.html)),
+ *  * Wildcard imports.
  *
  * All other imports are identified for removal.
  *
@@ -52,9 +53,12 @@ fun importPolicyForNode(node: ASTNode): ImportPolicy {
     fun isProvideDelegate(importPath: String): Boolean =
         importPath == "org.gradle.kotlin.dsl.provideDelegate"
 
+    fun isWildcardImport(importName: String) = importName == "*"
+
     fun isUsedImport(importName: String, importPath: String) =
         foundNames.contains(importName) || operators.contains(importName) ||
-            componentRegex.matches(importName) || (isProvideDelegate(importPath) && hasByKeyword)
+            componentRegex.matches(importName) || (isProvideDelegate(importPath) && hasByKeyword) ||
+            isWildcardImport(importName)
 
     fun isAliasedImport(importPath: String, importName: String) = !importPath.endsWith(importName)
 
