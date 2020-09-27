@@ -3650,6 +3650,92 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `does not indent init block after constructor`() {
+        val subject = KotlinFormatter()
+
+        val result =
+            subject.format(
+                """
+                    class MyClass {
+                        constructor(aParameter: String): super(aParameter)
+                        
+                        init {
+                            aFunction()
+                        }
+                    }
+                """.trimIndent()
+            )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    class MyClass {
+                        constructor(aParameter: String) : super(aParameter)
+                    
+                        init {
+                            aFunction()
+                        }
+                    }
+                """.trimIndent()
+            )
+    }
+
+    @Test
+    fun `enforces whitespace between init and {`() {
+        val subject = KotlinFormatter()
+
+        val result =
+            subject.format(
+                """
+                    class MyClass {
+                        init{
+                            aFunction()
+                        }
+                    }
+                """.trimIndent()
+            )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    class MyClass {
+                        init {
+                            aFunction()
+                        }
+                    }
+                """.trimIndent()
+            )
+    }
+
+    @Test
+    fun `removes extraneous whitespace between init and {`() {
+        val subject = KotlinFormatter()
+
+        val result =
+            subject.format(
+                """
+                    class MyClass {
+                        init
+                        {
+                            aFunction()
+                        }
+                    }
+                """.trimIndent()
+            )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    class MyClass {
+                        init {
+                            aFunction()
+                        }
+                    }
+                """.trimIndent()
+            )
+    }
+
+    @Test
     fun `maintains a line break between KDoc and class declaration`() {
         val subject = KotlinFormatter(maxLineLength = 40)
 
