@@ -12,6 +12,7 @@ import org.kotlin.formatter.scanning.nodepattern.nodePattern
 internal class ClassInitializerScanner(private val kotlinScaner: KotlinScanner) : NodeScanner {
     private val nodePattern =
         nodePattern {
+            possibleWhitespaceWithComment()
             nodeOfType(KtTokens.INIT_KEYWORD) thenMapToTokens {
                 listOf(MarkerToken, LeafNodeToken("init "))
             }

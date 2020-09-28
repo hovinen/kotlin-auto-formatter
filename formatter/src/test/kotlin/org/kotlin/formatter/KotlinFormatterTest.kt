@@ -3736,6 +3736,35 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `preserves comments before an init block`() {
+        val subject = KotlinFormatter()
+
+        val result =
+                subject.format(
+                        """
+                    class MyClass {
+                        // A comment
+                        init {
+                            aFunction()
+                        }
+                    }
+                """.trimIndent()
+                )
+
+        assertThat(result)
+                .isEqualTo(
+                        """
+                    class MyClass {
+                        // A comment
+                        init {
+                            aFunction()
+                        }
+                    }
+                """.trimIndent()
+                )
+    }
+
+    @Test
     fun `maintains a line break between KDoc and class declaration`() {
         val subject = KotlinFormatter(maxLineLength = 40)
 
