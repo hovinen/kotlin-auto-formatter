@@ -3740,8 +3740,8 @@ class KotlinFormatterTest {
         val subject = KotlinFormatter()
 
         val result =
-                subject.format(
-                        """
+            subject.format(
+                """
                     class MyClass {
                         // A comment
                         init {
@@ -3749,11 +3749,11 @@ class KotlinFormatterTest {
                         }
                     }
                 """.trimIndent()
-                )
+            )
 
         assertThat(result)
-                .isEqualTo(
-                        """
+            .isEqualTo(
+                """
                     class MyClass {
                         // A comment
                         init {
@@ -3761,7 +3761,7 @@ class KotlinFormatterTest {
                         }
                     }
                 """.trimIndent()
-                )
+            )
     }
 
     @Test

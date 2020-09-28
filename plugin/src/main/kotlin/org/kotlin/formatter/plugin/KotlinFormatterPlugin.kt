@@ -23,6 +23,7 @@ class KotlinFormatterPlugin : Plugin<Project> {
             target.tasks
                 .register("formatKotlinSource", FormatKotlinTask::class.java) {
                     it.group = "formatting"
+                    it.description = "Formats all Kotlin source files in this project."
                     it.source(
                         target.extensions
                             .findByType(KotlinProjectExtension::class.java)
@@ -34,9 +35,17 @@ class KotlinFormatterPlugin : Plugin<Project> {
             target.tasks
                 .register("formatKotlinScript", FormatKotlinTask::class.java) {
                     it.group = "formatting"
+                    it.description =
+                        "Formats all Kotlin script (kts) files in the root directory of this " +
+                            "project."
                     it.source(target.fileTree(target.projectDir).apply { include("*.kts") })
                 }
-        val formatKotlinTask = target.tasks.register("formatKotlin") { it.group = "formatting" }
+        val formatKotlinTask =
+            target.tasks
+                .register("formatKotlin") {
+                    it.group = "formatting"
+                    it.description = "Equivalent to formatKotlinSource and formatKotlinScript."
+                }
         formatKotlinTask.get().dependsOn(formatKotlinSourceTask.get(), formatKotlinScriptTask.get())
     }
 }
