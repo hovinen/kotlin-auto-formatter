@@ -10,7 +10,7 @@ import org.kotlin.formatter.loading.KotlinFileLoader
 import org.kotlin.formatter.output.Printer
 import org.kotlin.formatter.output.TokenPreprocessor
 import org.kotlin.formatter.scanning.KotlinScanner
-import org.kotlin.formatter.scanning.nodepattern.NodeSequenceNotMatchedException
+import org.kotlin.formatter.scanning.KotlinScannerException
 
 /**
  * Automatic formatter for Kotlin code to fit in a given column limit.
@@ -55,7 +55,7 @@ class KotlinFormatter(
         val input = path.toFile().readText(Charsets.UTF_8)
         try {
             path.toFile().writeText(format(input), Charsets.UTF_8)
-        } catch (thrown: NodeSequenceNotMatchedException) {
+        } catch (thrown: KotlinScannerException) {
             println(
                 "Could not process $path " +
                     "(line ${lineNumber(input, thrown.nodes.firstOrNull()?.startOffset)}): " +

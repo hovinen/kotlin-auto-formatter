@@ -73,11 +73,11 @@ internal class ModifierListScanner(
     }
 
     private fun sortModifiers(modifiers: List<ASTNode>): List<ASTNode> =
-        modifiers.sortedWith(
-            Comparator { node1, node2 ->
-                modifierSortOrder[node1.text]!! - modifierSortOrder[node2.text]!!
-            }
-        )
+        modifiers.sortedWith(Comparator { node1, node2 -> toSortOrder(node1) - toSortOrder(node2) })
+
+    private fun toSortOrder(node: ASTNode): Int =
+        modifierSortOrder[node.text]
+            ?: throw KotlinScannerException(listOf(node), "Unknown modifier ${node.text}")
 
     companion object {
         // From https://kotlinlang.org/docs/reference/coding-conventions.html#modifiers
