@@ -4716,6 +4716,15 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `correctly handles sorting of functional interfaces`() {
+        val result =
+            KotlinFormatter(maxLineLength = 88)
+                .format("""public fun interface AnInterface""".trimIndent())
+
+        assertThat(result).isEqualTo("""public fun interface AnInterface""".trimIndent())
+    }
+
+    @Test
     fun `removes whitespace between imports`() {
         val result =
             KotlinFormatter(importPolicySupplier = { { _, _ -> true } })

@@ -103,6 +103,7 @@ internal class ModifierListScanner(
                 "inner" to 9,
                 "enum" to 10,
                 "annotation" to 10,
+                "fun" to 10,
                 "companion" to 11,
                 "inline" to 12,
                 "infix" to 13,
