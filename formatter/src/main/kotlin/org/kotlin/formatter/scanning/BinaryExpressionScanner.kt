@@ -58,9 +58,7 @@ internal class BinaryExpressionScanner(private val kotlinScanner: KotlinScanner)
                 }
                 either {
                     possibleWhitespace() thenMapToTokens { listOf(nonBreakingSpaceToken()) }
-                } or {
-                    possibleWhitespaceWithComment()
-                }
+                } or { possibleWhitespaceWithComment() }
                 nodeOfType(KtNodeTypes.OPERATION_REFERENCE) thenMapToTokens { operator ->
                     kotlinScanner.scanNodes(operator, ScannerState.STATEMENT)
                 }

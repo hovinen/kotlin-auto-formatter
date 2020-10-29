@@ -1670,34 +1670,44 @@ class KotlinFormatterTest {
     @Test
     fun `does not consolidate EOL comment with following operator in a binary expression`() {
         val result =
-            KotlinFormatter(maxLineLength = 52).format("""
-                condition1 // A comment which doesn't fit on the line
-                && condition2
-            """.trimIndent())
+            KotlinFormatter(maxLineLength = 52)
+                .format(
+                    """
+                        condition1 // A comment which doesn't fit on the line
+                        && condition2
+                    """.trimIndent()
+                )
 
         assertThat(result)
-            .isEqualTo("""
-                condition1
-                    // A comment which doesn't fit on the line
-                    && condition2
-            """.trimIndent())
+            .isEqualTo(
+                """
+                    condition1
+                        // A comment which doesn't fit on the line
+                        && condition2
+                """.trimIndent()
+            )
     }
 
     @Test
     fun `preserves newline before EOL comment in a binary expression`() {
         val result =
-            KotlinFormatter(maxLineLength = 50).format("""
-                condition1
-                    // A comment which fits on the line
-                    && condition2
-            """.trimIndent())
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        condition1
+                            // A comment which fits on the line
+                            && condition2
+                    """.trimIndent()
+                )
 
         assertThat(result)
-            .isEqualTo("""
-                condition1
-                    // A comment which fits on the line
-                    && condition2
-            """.trimIndent())
+            .isEqualTo(
+                """
+                    condition1
+                        // A comment which fits on the line
+                        && condition2
+                """.trimIndent()
+            )
     }
 
     @Test
@@ -4791,15 +4801,21 @@ class KotlinFormatterTest {
     }
 
     @Test
-    fun `does not remove wildcard imports when directed`() {
-        val importPolicy: ImportPolicy = { importName, importPath ->
-            !(importName == "*" && importPath == "apackage.*")
-        }
-        val subject = KotlinFormatter(importPolicySupplier = { importPolicy })
+    fun `does not remove the wildcard import for java util`() {
+        val subject = KotlinFormatter()
 
-        val result = subject.format("import apackage.*")
+        val result = subject.format("""import java.util.*""".trimIndent())
 
-        assertThat(result).isEqualTo("import apackage.*")
+        assertThat(result).isEqualTo("""import java.util.*""".trimIndent())
+    }
+
+    @Test
+    fun `does not remove the wildcard import for a custom package`() {
+        val subject = KotlinFormatter()
+
+        val result = subject.format("""import apackage.*""".trimIndent())
+
+        assertThat(result).isEqualTo("""import apackage.*""".trimIndent())
     }
 
     @Test

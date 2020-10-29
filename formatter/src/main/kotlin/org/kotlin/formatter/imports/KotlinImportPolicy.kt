@@ -53,7 +53,7 @@ fun importPolicyForNode(node: ASTNode): ImportPolicy {
     fun isProvideDelegate(importPath: String): Boolean =
         importPath == "org.gradle.kotlin.dsl.provideDelegate"
 
-    fun isWildcardImport(importName: String) = importName == "*"
+    fun isWildcardImport(importName: String) = importName == ""
 
     fun isUsedImport(importName: String, importPath: String) =
         foundNames.contains(importName) || operators.contains(importName) ||
