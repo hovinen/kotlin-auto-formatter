@@ -1668,6 +1668,39 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `does not consolidate EOL comment with following operator in a binary expression`() {
+        val result =
+            KotlinFormatter(maxLineLength = 52).format("""
+                condition1 // A comment which doesn't fit on the line
+                && condition2
+            """.trimIndent())
+
+        assertThat(result)
+            .isEqualTo("""
+                condition1
+                    // A comment which doesn't fit on the line
+                    && condition2
+            """.trimIndent())
+    }
+
+    @Test
+    fun `preserves newline before EOL comment in a binary expression`() {
+        val result =
+            KotlinFormatter(maxLineLength = 50).format("""
+                condition1
+                    // A comment which fits on the line
+                    && condition2
+            """.trimIndent())
+
+        assertThat(result)
+            .isEqualTo("""
+                condition1
+                    // A comment which fits on the line
+                    && condition2
+            """.trimIndent())
+    }
+
+    @Test
     fun `format breaks at logical operator in a while statement`() {
         val result =
             KotlinFormatter(maxLineLength = 50)
