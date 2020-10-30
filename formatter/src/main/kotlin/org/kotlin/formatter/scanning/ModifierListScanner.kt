@@ -2,6 +2,7 @@ package org.kotlin.formatter.scanning
 
 import org.jetbrains.kotlin.KtNodeTypes
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
+import org.jetbrains.kotlin.kdoc.lexer.KDocTokens
 import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.psi.psiUtil.children
 import org.kotlin.formatter.ForcedBreakToken
@@ -37,6 +38,12 @@ internal class ModifierListScanner(
     private val nodePattern =
         nodePattern {
             zeroOrMore { whitespace() }
+            zeroOrOne {
+                nodeOfType(KDocTokens.KDOC) thenMapToTokens { nodes ->
+                    kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
+                        .plus(ForcedBreakToken(count = 1))
+                }
+            }
             zeroOrMore {
                 nodeOfType(KtNodeTypes.ANNOTATION_ENTRY) thenMapToTokens { nodes ->
                     kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
@@ -66,10 +73,15 @@ internal class ModifierListScanner(
         nodePattern.matchSequence(sortModifierNodes(node.children().asIterable()))
 
     private fun sortModifierNodes(nodes: Iterable<ASTNode>): Iterable<ASTNode> {
-        val nonKeywordNodes = nodes.filter { !KtTokens.MODIFIER_KEYWORDS.contains(it.elementType) }
+        val kdocNodes = nodes.filter { it.elementType == KDocTokens.KDOC }
+        val nonKeywordNodes =
+            nodes.filter {
+                !KtTokens.MODIFIER_KEYWORDS.contains(it.elementType) &&
+                    it.elementType != KDocTokens.KDOC
+            }
         val keywordNodes =
             sortModifiers(nodes.filter { KtTokens.MODIFIER_KEYWORDS.contains(it.elementType) })
-        return nonKeywordNodes.plus(keywordNodes)
+        return kdocNodes.plus(nonKeywordNodes).plus(keywordNodes)
     }
 
     private fun sortModifiers(modifiers: List<ASTNode>): List<ASTNode> =
