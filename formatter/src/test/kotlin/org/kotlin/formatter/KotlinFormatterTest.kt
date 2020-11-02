@@ -3840,6 +3840,25 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `accepts empty KDoc`() {
+        val subject = KotlinFormatter(maxLineLength = 40)
+
+        val result = subject.format(
+            """
+                /** */
+                class MyClass
+            """.trimIndent()
+        )
+
+        assertThat(result).isEqualTo(
+            """
+                /**  */
+                class MyClass
+            """.trimIndent()
+        )
+    }
+
+    @Test
     fun `maintains a line break between KDoc and object declaration`() {
         val subject = KotlinFormatter(maxLineLength = 40)
 

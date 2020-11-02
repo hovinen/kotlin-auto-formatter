@@ -46,7 +46,7 @@ internal class KDocScanner(private val kotlinScanner: KotlinScanner) : NodeScann
 
     private fun String.trimOneWhitespace(): String =
         if (startsWith(' ') && endsWith(' ')) {
-            substring(1, length - 1)
+            substring(1, Integer.max(length - 1, 1))
         } else {
             this
         }
