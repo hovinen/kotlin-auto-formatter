@@ -4,7 +4,7 @@ plugins {
     groovy
     `java-gradle-plugin`
     id("com.gradle.plugin-publish") version "0.12.0"
-    id("tech.formatter-kt.formatter") version "0.6.10"
+    id("tech.formatter-kt.formatter") version "0.6.11"
 }
 
 group = "tech.formatter-kt"
