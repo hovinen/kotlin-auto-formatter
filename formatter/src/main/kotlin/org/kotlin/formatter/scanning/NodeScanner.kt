@@ -126,6 +126,9 @@ internal fun nodeScannerForElementType(
         KtNodeTypes.LABELED_EXPRESSION -> {
             LabeledExpressionScanner(kotlinScanner)
         }
+        KtNodeTypes.ANNOTATED_EXPRESSION -> {
+            AnnotatedExpressionScanner(kotlinScanner)
+        }
         KtFileElementType.INSTANCE, is KtScriptElementType,
             KtNodeTypes.LITERAL_STRING_TEMPLATE_ENTRY -> {
                 SimpleScanner(kotlinScanner, ScannerState.BLOCK)

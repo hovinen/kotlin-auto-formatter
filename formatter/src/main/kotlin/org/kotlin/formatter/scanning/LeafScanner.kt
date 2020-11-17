@@ -44,11 +44,7 @@ internal class LeafScanner {
 
     private fun tokenizeNodeContentInBlockComment(node: ASTNode): List<Token> {
         val text =
-            node.text
-                .removePrefix("/*")
-                .removeSuffix("*/")
-                .replace(Regex("\n[ ]+\\*"), "\n")
-                .trim()
+            node.text.removePrefix("/*").removeSuffix("*/").replace(Regex("\n[ ]+\\*"), "\n").trim()
         return tokenizeString(text) { LiteralWhitespaceToken(it) }
     }
 

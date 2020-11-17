@@ -3605,6 +3605,27 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `preserves newline after Suppress annotation`() {
+        val subject = KotlinFormatter(maxLineLength = 70)
+
+        val result =
+            subject.format(
+                """
+                    @Suppress("UNCHECKED_CAST")
+                    aVariable as AGenericType<ATypeParameter>
+                """.trimIndent()
+            )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    @Suppress("UNCHECKED_CAST")
+                    aVariable as AGenericType<ATypeParameter>
+                """.trimIndent()
+            )
+    }
+
+    @Test
     fun `preserves formatting within EOL comments`() {
         val subject = KotlinFormatter()
 
