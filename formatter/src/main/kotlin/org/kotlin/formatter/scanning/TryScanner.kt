@@ -27,10 +27,13 @@ internal class TryScanner(private val kotlinScanner: KotlinScanner) : NodeScanne
                 blockPattern.matchSequence(nodes.first().children().asIterable())
             }
             oneOrMore {
-                possibleWhitespace()
+                either {
+                    possibleWhitespace() thenMapToTokens { listOf(ClosingForcedBreakToken) }
+                    comment()
+                    possibleWhitespace() thenMapToTokens { listOf(ClosingForcedBreakToken) }
+                } or { possibleWhitespace() thenMapToTokens { listOf(nonBreakingSpaceToken()) } }
                 nodeOfType(KtNodeTypes.CATCH) thenMapToTokens { nodes ->
-                    listOf(nonBreakingSpaceToken())
-                        .plus(catchPattern.matchSequence(nodes.first().children().asIterable()))
+                    catchPattern.matchSequence(nodes.first().children().asIterable())
                 }
             }
             end()

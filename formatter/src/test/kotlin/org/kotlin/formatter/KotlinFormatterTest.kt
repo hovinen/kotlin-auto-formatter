@@ -3039,6 +3039,36 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `handles comments before a catch clause`() {
+        val result =
+            KotlinFormatter(maxLineLength = 40)
+                .format(
+                    """
+                        try {
+                            aFunction()
+                        }
+                        // A comment
+                        catch (e: Exception) {
+                            anotherFunction()
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    try {
+                        aFunction()
+                    }
+                    // A comment
+                    catch (e: Exception) {
+                        anotherFunction()
+                    }
+                """.trimIndent()
+            )
+    }
+
+    @Test
     fun `breaks before try expression inside function literal`() {
         val result =
             KotlinFormatter()
