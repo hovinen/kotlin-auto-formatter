@@ -3643,6 +3643,27 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `preserves empty lines on block comments`() {
+        val subject = KotlinFormatter()
+
+        val result = subject.format(
+            """
+                /* A comment
+                 *
+                 * After blank line */
+            """.trimIndent()
+        )
+
+        assertThat(result).isEqualTo(
+            """
+                /* A comment
+                 *
+                 * After blank line */
+            """.trimIndent()
+        )
+    }
+
+    @Test
     fun `does not insert a line break in an EOL comment when column limit impossible to keep`() {
         val subject = KotlinFormatter(maxLineLength = 20)
 

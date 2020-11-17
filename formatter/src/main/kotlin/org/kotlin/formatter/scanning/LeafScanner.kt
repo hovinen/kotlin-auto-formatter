@@ -47,7 +47,7 @@ internal class LeafScanner {
             node.text
                 .removePrefix("/*")
                 .removeSuffix("*/")
-                .replace(Regex("\n[ ]+\\* "), "\n ")
+                .replace(Regex("\n[ ]+\\*"), "\n")
                 .trim()
         return tokenizeString(text) { LiteralWhitespaceToken(it) }
     }
