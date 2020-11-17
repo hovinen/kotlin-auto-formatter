@@ -2987,6 +2987,58 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `indents a try-catch expression on a single line correctly`() {
+        val result =
+            KotlinFormatter(maxLineLength = 40)
+                .format(
+                    """
+                        try { aFunction() } catch (e: Exception) { anotherFunction() }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    try {
+                        aFunction()
+                    } catch (e: Exception) {
+                        anotherFunction()
+                    }
+                """.trimIndent()
+            )
+    }
+
+    @Test
+    fun `indents a multi-try-catch expression correctly`() {
+        val result =
+            KotlinFormatter(maxLineLength = 40)
+                .format(
+                    """
+                        try {
+                            aFunction()
+                        } catch (e: Exception) {
+                            anotherFunction()
+                        } catch (e: AnotherExpression) {
+                            aDifferentFunction()
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    try {
+                        aFunction()
+                    } catch (e: Exception) {
+                        anotherFunction()
+                    } catch (e: AnotherExpression) {
+                        aDifferentFunction()
+                    }
+                """.trimIndent()
+            )
+    }
+
+    @Test
     fun `breaks before try expression inside function literal`() {
         val result =
             KotlinFormatter()
