@@ -4,9 +4,7 @@ import org.jetbrains.kotlin.KtNodeTypes
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.psi.psiUtil.children
-import org.kotlin.formatter.BeginToken
 import org.kotlin.formatter.ClosingForcedBreakToken
-import org.kotlin.formatter.EndToken
 import org.kotlin.formatter.ForcedBreakToken
 import org.kotlin.formatter.LeafNodeToken
 import org.kotlin.formatter.MarkerToken
@@ -15,6 +13,7 @@ import org.kotlin.formatter.Token
 import org.kotlin.formatter.inBeginEndBlock
 import org.kotlin.formatter.nonBreakingSpaceToken
 import org.kotlin.formatter.scanning.nodepattern.NodePattern
+import org.kotlin.formatter.scanning.nodepattern.NodePatternBuilder
 import org.kotlin.formatter.scanning.nodepattern.nodePattern
 
 /** A [NodeScanner] for `try`-`catch` expressions. */
@@ -26,14 +25,16 @@ internal class TryScanner(private val kotlinScanner: KotlinScanner) : NodeScanne
             anyNode() thenMapToTokens { nodes ->
                 blockPattern.matchSequence(nodes.first().children().asIterable())
             }
-            oneOrMore {
-                either {
-                    possibleWhitespace() thenMapToTokens { listOf(ClosingForcedBreakToken) }
-                    comment()
-                    possibleWhitespace() thenMapToTokens { listOf(ClosingForcedBreakToken) }
-                } or { possibleWhitespace() thenMapToTokens { listOf(nonBreakingSpaceToken()) } }
+            zeroOrMore {
+                possibleCommentBeforeClause()
                 nodeOfType(KtNodeTypes.CATCH) thenMapToTokens { nodes ->
                     catchPattern.matchSequence(nodes.first().children().asIterable())
+                }
+            }
+            zeroOrOne {
+                possibleCommentBeforeClause()
+                nodeOfType(KtNodeTypes.FINALLY) thenMapToTokens { nodes ->
+                    finallyPattern.matchSequence(nodes.first().children().asIterable())
                 }
             }
             end()
@@ -41,17 +42,22 @@ internal class TryScanner(private val kotlinScanner: KotlinScanner) : NodeScanne
 
     private val blockPattern =
         nodePattern {
-            nodeOfType(KtTokens.LBRACE) thenMapToTokens {
-                listOf(LeafNodeToken("{"), BeginToken(State.CODE), ForcedBreakToken(count = 1))
+            nodeOfType(KtTokens.LBRACE) thenMapToTokens { listOf(LeafNodeToken("{")) }
+            possibleWhitespace()
+            zeroOrMoreFrugal { anyNode() } thenMapToTokens { nodes ->
+                if (nodes.isNotEmpty()) {
+                    inBeginEndBlock(
+                        listOf(ForcedBreakToken(count = 1))
+                            .plus(kotlinScanner.scanNodes(nodes, ScannerState.BLOCK))
+                            .plus(ClosingForcedBreakToken),
+                        State.CODE
+                    )
+                } else {
+                    listOf()
+                }
             }
             possibleWhitespace()
-            oneOrMoreFrugal { anyNode() } thenMapToTokens { nodes ->
-                kotlinScanner.scanNodes(nodes, ScannerState.BLOCK)
-            }
-            possibleWhitespace()
-            nodeOfType(KtTokens.RBRACE) thenMapToTokens {
-                listOf(ClosingForcedBreakToken, EndToken, LeafNodeToken("}"))
-            }
+            nodeOfType(KtTokens.RBRACE) thenMapToTokens { listOf(LeafNodeToken("}")) }
             end()
         }
 
@@ -70,6 +76,26 @@ internal class TryScanner(private val kotlinScanner: KotlinScanner) : NodeScanne
             }
             end()
         }
+
+    private val finallyPattern: NodePattern =
+        nodePattern {
+            nodeOfType(KtTokens.FINALLY_KEYWORD) thenMapToTokens {
+                listOf(MarkerToken, LeafNodeToken("finally"))
+            }
+            possibleWhitespace() thenMapToTokens { listOf(nonBreakingSpaceToken()) }
+            anyNode() thenMapToTokens { nodes ->
+                blockPattern.matchSequence(nodes.first().children().asIterable())
+            }
+            end()
+        }
+
+    private fun NodePatternBuilder.possibleCommentBeforeClause() {
+        either {
+            possibleWhitespace() thenMapToTokens { listOf(ClosingForcedBreakToken) }
+            comment()
+            possibleWhitespace() thenMapToTokens { listOf(ClosingForcedBreakToken) }
+        } or { possibleWhitespace() thenMapToTokens { listOf(nonBreakingSpaceToken()) } }
+    }
 
     override fun scan(node: ASTNode, scannerState: ScannerState): List<Token> =
         inBeginEndBlock(nodePattern.matchSequence(node.children().asIterable()), State.CODE)

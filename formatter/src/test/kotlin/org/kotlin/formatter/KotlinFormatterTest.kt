@@ -3039,6 +3039,59 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `handles empty catch clause`() {
+        val result =
+            KotlinFormatter(maxLineLength = 40)
+                .format(
+                    """
+                        try {
+                            aFunction()
+                        }
+                        catch (e: Exception) {}
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    try {
+                        aFunction()
+                    } catch (e: Exception) {}
+                """.trimIndent()
+            )
+    }
+
+    @Test
+    fun `handles a finally block`() {
+        val result =
+            KotlinFormatter(maxLineLength = 40)
+                .format(
+                    """
+                        try {
+                            aFunction()
+                        } catch (e: Exception) {
+                            anotherFunction()
+                        } finally {
+                            aDifferentFunction()
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    try {
+                        aFunction()
+                    } catch (e: Exception) {
+                        anotherFunction()
+                    } finally {
+                        aDifferentFunction()
+                    }
+                """.trimIndent()
+            )
+    }
+
+    @Test
     fun `handles comments before a catch clause`() {
         val result =
             KotlinFormatter(maxLineLength = 40)
@@ -3062,6 +3115,36 @@ class KotlinFormatterTest {
                     }
                     // A comment
                     catch (e: Exception) {
+                        anotherFunction()
+                    }
+                """.trimIndent()
+            )
+    }
+
+    @Test
+    fun `handles comments before a finally clause`() {
+        val result =
+            KotlinFormatter(maxLineLength = 40)
+                .format(
+                    """
+                        try {
+                            aFunction()
+                        }
+                        // A comment
+                        finally {
+                            anotherFunction()
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    try {
+                        aFunction()
+                    }
+                    // A comment
+                    finally {
                         anotherFunction()
                     }
                 """.trimIndent()
