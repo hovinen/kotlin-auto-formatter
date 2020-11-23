@@ -46,7 +46,8 @@ class KotlinScanner(private val importPolicy: (String, String) -> Boolean) {
         return when (node) {
             is LeafPsiElement -> LeafScanner().scanLeaf(node)
             else ->
-                nodeScannerProvider.value.nodeScannerForElementType(node.elementType)
+                nodeScannerProvider.value
+                    .nodeScannerForElementType(node.elementType)
                     .scan(node, scannerState)
         }
     }
