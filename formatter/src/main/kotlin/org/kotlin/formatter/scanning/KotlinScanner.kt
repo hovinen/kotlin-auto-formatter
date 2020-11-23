@@ -26,15 +26,8 @@ import org.kotlin.formatter.scanning.nodepattern.nodePattern
  * Volume 2 Issue 4, Oct. 1980, pp. 465-483.
  */
 class KotlinScanner(private val importPolicy: (String, String) -> Boolean) {
-    private var realNodeScannerProvider: NodeScannerProvider? = null
-
-    private val nodeScannerProvider: NodeScannerProvider
-        get() {
-            if (realNodeScannerProvider == null) {
-                realNodeScannerProvider = NodeScannerProvider(this, importPolicy)
-            }
-            return realNodeScannerProvider!!
-        }
+    private val nodeScannerProvider: Lazy<NodeScannerProvider> =
+        lazy { NodeScannerProvider(this, importPolicy) }
 
     /**
      * Returns a list of [Token] derived from the given [ASTNode].
@@ -53,7 +46,7 @@ class KotlinScanner(private val importPolicy: (String, String) -> Boolean) {
         return when (node) {
             is LeafPsiElement -> LeafScanner().scanLeaf(node)
             else ->
-                nodeScannerProvider.nodeScannerForElementType(node.elementType)
+                nodeScannerProvider.value.nodeScannerForElementType(node.elementType)
                     .scan(node, scannerState)
         }
     }
