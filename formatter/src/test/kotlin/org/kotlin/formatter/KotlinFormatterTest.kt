@@ -4104,6 +4104,57 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `handles a typealias with a type parameter`() {
+        val subject = KotlinFormatter(maxLineLength = 40)
+
+        val result = subject.format("""typealias AType<ATypeParameter> = Int""".trimIndent())
+
+        assertThat(result).isEqualTo("""typealias AType<ATypeParameter> = Int""".trimIndent())
+    }
+
+    @Test
+    fun `handles comments between KDoc and typealias`() {
+        val subject = KotlinFormatter(maxLineLength = 40)
+
+        val result =
+            subject.format(
+                """
+                    /** Some KDoc. */
+                    // A comment
+                    typealias AType = Int
+                """.trimIndent()
+            )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    /** Some KDoc. */
+                    // A comment
+                    typealias AType = Int
+                """.trimIndent()
+            )
+    }
+
+    @Test
+    fun `handles comments before rhs of typealias`() {
+        val subject = KotlinFormatter(maxLineLength = 40)
+
+        val result = subject.format(
+            """
+                typealias AType = // A comment
+                    Int
+            """.trimIndent()
+        )
+
+        assertThat(result).isEqualTo(
+            """
+                typealias AType = // A comment
+                    Int
+            """.trimIndent()
+        )
+    }
+
+    @Test
     fun `moves modifiers preceding KDoc to after the KDoc`() {
         val subject = KotlinFormatter(maxLineLength = 40)
 
