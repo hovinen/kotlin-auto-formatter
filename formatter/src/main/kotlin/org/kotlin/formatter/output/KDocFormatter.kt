@@ -28,9 +28,10 @@ class KDocFormatter(private val maxLineLength: Int) {
         val linesInBlock = mutableListOf<String>()
         var continuationIndent = 0
         var state = State.PARAGRAPH
+        var previousLine = ""
 
         fun pushBlock(spacingAfter: Int) {
-            if (state == State.EXITING_RAW_BLOCK) {
+            if (state == State.EXITING_RAW_BLOCK || state == State.INDENTED_RAW_BLOCK) {
                 result.add(
                     RawBlock(linesInBlock.joinToString("\n").plus("\n".repeat(spacingAfter)))
                 )
@@ -63,6 +64,11 @@ class KDocFormatter(private val maxLineLength: Int) {
                 line.startsWith("```") -> {
                     pushBlock(0)
                     state = State.RAW_BLOCK
+                    linesInBlock.add(line)
+                }
+                line.startsWith("    ") && previousLine.isBlank() -> {
+                    pushBlock(0)
+                    state = State.INDENTED_RAW_BLOCK
                     linesInBlock.add(line)
                 }
                 line.startsWith(BLOCK_QUOTE_PREFIX) -> {
@@ -129,6 +135,15 @@ class KDocFormatter(private val maxLineLength: Int) {
                         state = State.EXITING_RAW_BLOCK
                     }
                 }
+                State.INDENTED_RAW_BLOCK -> {
+                    if (!line.startsWith("    ") && !line.isBlank()) {
+                        pushBlock(0)
+                        state = State.PARAGRAPH
+                        handleParagraphLine(line)
+                    } else {
+                        linesInBlock.add(line)
+                    }
+                }
                 State.BLOCK_QUOTE -> {
                     if (line.isBlank()) {
                         pushBlock(1)
@@ -138,13 +153,15 @@ class KDocFormatter(private val maxLineLength: Int) {
                     }
                 }
             }
+
+            previousLine = line
         }
         pushBlock(1)
         return result
     }
 
     private enum class State {
-        PARAGRAPH, BLOCK_TAG, RAW_BLOCK, BLOCK_QUOTE, EXITING_RAW_BLOCK
+        PARAGRAPH, BLOCK_TAG, RAW_BLOCK, BLOCK_QUOTE, EXITING_RAW_BLOCK, INDENTED_RAW_BLOCK
     }
 
     private fun formatBlockQuote(content: String) =
