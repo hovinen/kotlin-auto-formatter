@@ -588,100 +588,110 @@ internal class KDocFormatterTest {
     fun `leaves preformatted indented code blocks as is`() {
         val subject = KDocFormatter(maxLineLength = 50)
 
-        val result = subject.format(
-            """
+        val result =
+            subject.format(
+                """
             |    Some code
             |    Some more code
             """.trimMargin()
-        )
+            )
 
-        assertThat(result).isEqualTo(
-            """
+        assertThat(result)
+            .isEqualTo(
+                """
             |    Some code
             |    Some more code
             """.trimMargin()
-        )
+            )
     }
 
     @Test
     fun `leaves whitespace in preformatted indented code blocks as is`() {
         val subject = KDocFormatter(maxLineLength = 50)
 
-        val result = subject.format(
-            """
+        val result =
+            subject.format(
+                """
             |    Some code
             |
             |    Some more code
             """.trimMargin()
-        )
+            )
 
-        assertThat(result).isEqualTo(
-            """
+        assertThat(result)
+            .isEqualTo(
+                """
             |    Some code
             |
             |    Some more code
             """.trimMargin()
-        )
+            )
     }
 
     @Test
     fun `does not handle preformatted indented code blocks immediately preceded by paragraphs`() {
         val subject = KDocFormatter(maxLineLength = 50)
 
-        val result = subject.format(
-            """
+        val result =
+            subject.format(
+                """
             |A paragraph which is long enough that the text should wrap.
             |    Some code
             """.trimMargin()
-        )
+            )
 
-        assertThat(result).isEqualTo(
-            """
+        assertThat(result)
+            .isEqualTo(
+                """
             |A paragraph which is long enough that the text
             |should wrap. Some code
             """.trimMargin()
-        )
+            )
     }
 
     @Test
     fun `handles paragraph following preformatted indented code blocks`() {
         val subject = KDocFormatter(maxLineLength = 50)
 
-        val result = subject.format(
-            """
+        val result =
+            subject.format(
+                """
             |    Some code
             |A paragraph which is long enough that the text should wrap.
             """.trimMargin()
-        )
+            )
 
-        assertThat(result).isEqualTo(
-            """
+        assertThat(result)
+            .isEqualTo(
+                """
             |    Some code
             |A paragraph which is long enough that the text
             |should wrap.
             """.trimMargin()
-        )
+            )
     }
 
     @Test
     fun `preserves a blank line following a preformatted indented code block`() {
         val subject = KDocFormatter(maxLineLength = 50)
 
-        val result = subject.format(
-            """
+        val result =
+            subject.format(
+                """
                 |    Some code
                 |
                 |A paragraph.
             """.trimMargin()
-        )
+            )
 
-        assertThat(result).isEqualTo(
-            """
+        assertThat(result)
+            .isEqualTo(
+                """
                 |    Some code
                 |
                 |A paragraph.
             """.trimMargin()
-        )
+            )
     }
 
     @Test

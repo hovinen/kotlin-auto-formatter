@@ -1,15 +1,12 @@
-import java.io.ByteArrayOutputStream
 import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformJvmPlugin
 import org.jlleitschuh.gradle.ktlint.KtlintPlugin
+import org.kotlin.formatter.plugin.KotlinFormatterPlugin
+import java.io.ByteArrayOutputStream
 
-buildscript {
-    repositories {
-        gradlePluginPortal()
-    }
-    dependencies {
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.3.72")
-        classpath("org.jlleitschuh.gradle:ktlint-gradle:9.2.1")
-    }
+plugins {
+    kotlin("jvm") version "1.3.72" apply false
+    id("org.jlleitschuh.gradle.ktlint") version "9.2.1" apply false
+    id("tech.formatter-kt.formatter") version "0.6.15" apply false
 }
 
 group = "tech.formatter-kt"
@@ -18,6 +15,7 @@ version = "${gitVersion()}-SNAPSHOT"
 subprojects {
     apply<KotlinPlatformJvmPlugin>()
     apply<KtlintPlugin>()
+    apply<KotlinFormatterPlugin>()
 }
 
 project(":plugin") {

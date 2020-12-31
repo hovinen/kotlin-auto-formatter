@@ -1134,13 +1134,13 @@ class KotlinFormatterTest {
             KotlinFormatter(maxLineLength = 40)
                 .format(
                     """
-                    class AClass<
-                        // A comment
-                        // More text
-                        T1 : AType, // A comment
-                        /* A comment */ T2 : AnotherType /* A comment */,
-                        T3 : YetAnotherType, /* A comment */
-                    >
+                        class AClass<
+                            // A comment
+                            // More text
+                            T1 : AType, // A comment
+                            /* A comment */ T2 : AnotherType /* A comment */,
+                            T3 : YetAnotherType, /* A comment */
+                        >
                     """.trimIndent()
                 )
 
