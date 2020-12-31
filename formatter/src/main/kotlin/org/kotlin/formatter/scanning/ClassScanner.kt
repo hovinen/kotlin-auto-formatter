@@ -53,6 +53,21 @@ internal class ClassScanner(private val kotlinScanner: KotlinScanner) : NodeScan
                 zeroOrMoreFrugal { anyNode() }
             } thenMapToTokens { nodes -> kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT) }
             possibleWhitespace()
+            zeroOrOne {
+                nodeOfType(KtNodeTypes.PRIMARY_CONSTRUCTOR) thenMapToTokens { nodes ->
+                    val prefix =
+                        if (!nodes.first().text.startsWith("(")) {
+                            listOf(WhitespaceToken(" "))
+                        } else {
+                            listOf()
+                        }
+                    prefix.plus(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT))
+                }
+                zeroOrMoreFrugal { anyNode() } thenMapToTokens { nodes ->
+                    kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
+                }
+            }
+            possibleWhitespace()
             either {
                 either {
                     nodeOfType(KtTokens.COLON)

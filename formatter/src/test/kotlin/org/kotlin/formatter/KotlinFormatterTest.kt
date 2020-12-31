@@ -1079,6 +1079,20 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `corrects the spacing around a type parameter restriction`() {
+        val result = KotlinFormatter().format("class AClass<T:AType>")
+
+        assertThat(result).isEqualTo("class AClass<T : AType>")
+    }
+
+    @Test
+    fun `removes whitespace preceding a constructor invocation`() {
+        val result = KotlinFormatter().format("class AClass ()")
+
+        assertThat(result).isEqualTo("class AClass()")
+    }
+
+    @Test
     fun `properly formats annotated type parameters with trailing comma`() {
         val result = KotlinFormatter(maxLineLength = 50).format("val value: Map<Key, Value,>")
 

@@ -37,6 +37,7 @@ internal class NodeScannerProvider(
     private val functionDeclarationScanner = lazy { FunctionDeclarationScanner(kotlinScanner) }
     private val classInitializerScanner = lazy { ClassInitializerScanner(kotlinScanner) }
     private val typealiasScanner = lazy { TypealiasScanner(kotlinScanner) }
+    private val typeParameterScanner = lazy { TypeParameterScanner(kotlinScanner) }
     private val enumEntryScanner = lazy { EnumEntryScanner(kotlinScanner) }
     private val dotQualifiedExpressionScanner =
         lazy { DotQualifiedExpressionScanner(kotlinScanner) }
@@ -91,6 +92,7 @@ internal class NodeScannerProvider(
             KtNodeTypes.FUN, KtNodeTypes.SECONDARY_CONSTRUCTOR -> functionDeclarationScanner.value
             KtNodeTypes.CLASS_INITIALIZER -> classInitializerScanner.value
             KtNodeTypes.TYPEALIAS -> typealiasScanner.value
+            KtNodeTypes.TYPE_PARAMETER -> typeParameterScanner.value
             KtNodeTypes.ENUM_ENTRY -> enumEntryScanner.value
             KtNodeTypes.DOT_QUALIFIED_EXPRESSION, KtNodeTypes.SAFE_ACCESS_EXPRESSION ->
                 dotQualifiedExpressionScanner.value
