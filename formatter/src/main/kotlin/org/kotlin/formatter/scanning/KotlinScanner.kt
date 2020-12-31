@@ -117,7 +117,7 @@ class KotlinScanner(private val importPolicy: (String, String) -> Boolean) {
  */
 fun NodePatternBuilder.possibleWhitespaceWithComment(ignoreTrailingWhitespace: Boolean = false):
     NodePatternBuilder =
-        either { commentWithPossibleWhitespace(ignoreTrailingWhitespace) } or {
+        either { oneOrMore { commentWithPossibleWhitespace(ignoreTrailingWhitespace) } } or {
             possibleWhitespace()
         }
 

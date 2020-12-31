@@ -1086,6 +1086,80 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `corrects the spacing around a comma separating type parameters`() {
+        val result = KotlinFormatter().format("class AClass<T1 ,T2>")
+
+        assertThat(result).isEqualTo("class AClass<T1, T2>")
+    }
+
+    @Test
+    fun `treats type parameters as blocks for indentation`() {
+        val result =
+            KotlinFormatter(maxLineLength = 23)
+                .format("class AClass<T1:AType,T2:AnotherType,T3:YetAnotherType>")
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    class AClass<
+                        T1 : AType,
+                        T2 : AnotherType,
+                        T3 : YetAnotherType
+                    >
+                """.trimIndent()
+            )
+    }
+
+    @Test
+    fun `accepts trailing comma in type parameter list`() {
+        val result =
+            KotlinFormatter(maxLineLength = 24)
+                .format("class AClass<T1:AType,T2:AnotherType,T3:YetAnotherType,>")
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    class AClass<
+                        T1 : AType,
+                        T2 : AnotherType,
+                        T3 : YetAnotherType,
+                    >
+                """.trimIndent()
+            )
+    }
+
+    @Test
+    fun `accepts comments in type parameter list`() {
+        val result =
+            KotlinFormatter(maxLineLength = 40)
+                .format(
+                    """
+                    class AClass<
+                        // A comment
+                        // More text
+                        T1 : AType, // A comment
+                        /* A comment */ T2 : AnotherType /* A comment */,
+                        T3 : YetAnotherType, /* A comment */
+                    >
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    class AClass<
+                        // A comment
+                        // More text
+                        T1 : AType, // A comment
+                        /* A comment */
+                        T2 : AnotherType /* A comment */,
+                        T3 : YetAnotherType, /* A comment */
+                    >
+                """.trimIndent()
+            )
+    }
+
+    @Test
     fun `removes whitespace preceding a constructor invocation`() {
         val result = KotlinFormatter().format("class AClass ()")
 
