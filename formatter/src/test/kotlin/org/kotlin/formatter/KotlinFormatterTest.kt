@@ -1111,6 +1111,22 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `treats type parameter list as a block`() {
+        val result =
+            KotlinFormatter(maxLineLength = 24)
+                .format("""fun <T1, T2> aFunction(aParameter: String) = "Something"""")
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    fun <T1, T2> aFunction(
+                        aParameter: String
+                    ) = "Something"
+                """.trimIndent()
+            )
+    }
+
+    @Test
     fun `accepts trailing comma in type parameter list`() {
         val result =
             KotlinFormatter(maxLineLength = 24)
