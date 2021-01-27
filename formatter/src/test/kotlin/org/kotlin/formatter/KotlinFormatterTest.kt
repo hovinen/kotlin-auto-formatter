@@ -1183,6 +1183,28 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `properly breaks when a class inheritance spec uses a delegate`() {
+        val result =
+            KotlinFormatter(maxLineLength = 63)
+                .format(
+                    """
+                        class AClass(private val something: AType) : AType by something {
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    class AClass(private val something: AType) :
+                        AType by something {
+                    
+                    }
+                """.trimIndent()
+            )
+    }
+
+    @Test
     fun `properly formats annotated type parameters with trailing comma`() {
         val result = KotlinFormatter(maxLineLength = 50).format("val value: Map<Key, Value,>")
 
