@@ -2,11 +2,13 @@ package org.kotlin.formatter.output
 
 import java.lang.Integer.min
 import java.util.Stack
+import org.kotlin.formatter.BeginPreserveNewlinesToken
 import org.kotlin.formatter.BeginToken
 import org.kotlin.formatter.BeginWeakToken
 import org.kotlin.formatter.BlockFromMarkerToken
 import org.kotlin.formatter.ClosingForcedBreakToken
 import org.kotlin.formatter.ClosingSynchronizedBreakToken
+import org.kotlin.formatter.EndPreserveNewlinesToken
 import org.kotlin.formatter.EndToken
 import org.kotlin.formatter.ForcedBreakToken
 import org.kotlin.formatter.KDocContentToken
@@ -34,6 +36,7 @@ import org.kotlin.formatter.WhitespaceToken
  */
 class TokenPreprocessor {
     private val resultStack = Stack<StackElement>()
+    private var preserveNewlines = false
 
     /**
      * Returns a list of [Token] with the lengths of all [WhitespaceToken] and [BeginToken]
@@ -122,7 +125,13 @@ class TokenPreprocessor {
                 }
                 is SynchronizedBreakToken -> {
                     val lastToken = lastToken()
-                    if (!(lastToken is ForcedBreakToken || lastToken is ClosingForcedBreakToken)) {
+                    if (preserveNewlines && token.content.contains('\n')) {
+                        resultStack.peek()
+                            .tokens
+                            .add(ForcedBreakToken(count = token.content.count { it == '\n' }))
+                    } else if (!(lastToken is ForcedBreakToken || lastToken is
+                        ClosingForcedBreakToken)
+                    ) {
                         resultStack.peek().tokens.add(token)
                     }
                 }
@@ -132,9 +141,17 @@ class TokenPreprocessor {
                         val lastElementTokens = lastElementWithTokens()?.tokens
                         lastElementTokens?.removeAt(lastElementTokens.size - 1)
                         resultStack.peek().tokens.add(ClosingForcedBreakToken)
+                    } else if (preserveNewlines && token.content.contains('\n')) {
+                        resultStack.peek().tokens.add(ClosingForcedBreakToken)
                     } else if (lastToken !is ClosingForcedBreakToken) {
                         resultStack.peek().tokens.add(token)
                     }
+                }
+                is BeginPreserveNewlinesToken -> {
+                    preserveNewlines = true
+                }
+                is EndPreserveNewlinesToken -> {
+                    preserveNewlines = false
                 }
                 else -> resultStack.peek().tokens.add(token)
             }
@@ -231,7 +248,9 @@ class TokenPreprocessor {
     private fun appendTokensInWhitespaceElement(element: WhitespaceStackElement) {
         val firstToken = element.tokens.firstOrNull()
         val tokens = resultStack.peek().tokens
-        if (followingBlockIsCommentWithNewlines(firstToken, element)) {
+        if (followingBlockIsCommentWithNewlines(firstToken, element) ||
+            hasNewlineToBePreserved(element)
+        ) {
             tokens.add(ForcedBreakToken(count = min(element.content.countNewlines(), 2)))
         } else {
             tokens.add(WhitespaceToken(length = element.totalLength, content = element.content))
@@ -243,6 +262,9 @@ class TokenPreprocessor {
         firstToken: Token?,
         element: WhitespaceStackElement
     ) = firstToken is BeginToken && firstToken.state.isComment && element.content.contains('\n')
+
+    private fun hasNewlineToBePreserved(element: WhitespaceStackElement): Boolean =
+        preserveNewlines && element.content.contains('\n')
 
     private fun String.countNewlines(): Int = count { it == '\n' }
 

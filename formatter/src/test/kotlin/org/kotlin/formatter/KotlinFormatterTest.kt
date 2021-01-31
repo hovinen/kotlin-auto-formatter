@@ -5340,6 +5340,74 @@ class KotlinFormatterTest {
         assertThat(result).isEqualTo("package org.kotlin.formatter")
     }
 
+    @Test
+    fun `disables collapse of newlines when requested`() {
+        val result =
+            KotlinFormatter()
+                .format(
+                    """
+                        // ktformat: start-preserve-newlines
+                        aFunction {
+                            anotherFunction()
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    // ktformat: start-preserve-newlines
+                    aFunction {
+                        anotherFunction()
+                    }
+                """.trimIndent()
+            )
+    }
+
+    @Test
+    fun `does not insert unnecessary newlines when newlines are being preserved`() {
+        val result =
+            KotlinFormatter()
+                .format(
+                    """
+                        // ktformat: start-preserve-newlines
+                        aFunction { anotherFunction() }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    // ktformat: start-preserve-newlines
+                    aFunction { anotherFunction() }
+                """.trimIndent()
+            )
+    }
+
+    @Test
+    fun `reenables collapse of newlines when requested`() {
+        val result =
+            KotlinFormatter()
+                .format(
+                    """
+                        // ktformat: start-preserve-newlines
+                        // ktformat: end-preserve-newlines
+                        aFunction {
+                            anotherFunction()
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    // ktformat: start-preserve-newlines
+                    // ktformat: end-preserve-newlines
+                    aFunction { anotherFunction() }
+                """.trimIndent()
+            )
+    }
+
     @Nested
     inner class FormatFile {
         private val originalOut = System.out

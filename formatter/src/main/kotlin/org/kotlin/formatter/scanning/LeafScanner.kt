@@ -4,7 +4,9 @@ import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.LeafPsiElement
 import org.jetbrains.kotlin.kdoc.lexer.KDocTokens
 import org.jetbrains.kotlin.lexer.KtTokens
+import org.kotlin.formatter.BeginPreserveNewlinesToken
 import org.kotlin.formatter.BeginToken
+import org.kotlin.formatter.EndPreserveNewlinesToken
 import org.kotlin.formatter.EndToken
 import org.kotlin.formatter.LeafNodeToken
 import org.kotlin.formatter.LiteralWhitespaceToken
@@ -28,7 +30,8 @@ internal class LeafScanner {
     internal fun scanCommentNode(node: ASTNode): List<Token> =
         when (node.elementType) {
             KtTokens.EOL_COMMENT ->
-                listOf(BeginToken(stateBasedOnCommentContent(node.text)))
+                preserveNewlinesToken(node.text)
+                    .plus(BeginToken(stateBasedOnCommentContent(node.text)))
                     .plus(LeafScanner().tokenizeString(node.text) { LiteralWhitespaceToken(it) })
                     .plus(EndToken)
             KtTokens.BLOCK_COMMENT ->
@@ -40,6 +43,15 @@ internal class LeafScanner {
                     .plus(LeafNodeToken(" */"))
                     .plus(EndToken)
             else -> throw IllegalArgumentException("Invalid node for comment $node")
+        }
+
+    private fun preserveNewlinesToken(text: String): List<Token> =
+        if (text.contains("ktformat: start-preserve-newlines")) {
+            listOf(BeginPreserveNewlinesToken)
+        } else if (text.contains("ktformat: end-preserve-newlines")) {
+            listOf(EndPreserveNewlinesToken)
+        } else {
+            listOf()
         }
 
     private fun tokenizeNodeContentInBlockComment(node: ASTNode): List<Token> {

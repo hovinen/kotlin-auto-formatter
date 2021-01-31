@@ -69,6 +69,23 @@ documentation.
 Currently, it is only possible to configure the formatter when it is embedded as a library. See
 [KotlinFormatter](formatter/src/main/kotlin/org/kotlin/formatter/KotlinFormatter.kt) for details.
 
+## Preserving newlines
+
+The formatter contains experimental support for preserving newlines in blocks of code when
+requested. The formatter normally aggressively removes syntactically unnecessary newlines when no
+line break is needed to maintain the 100 column limit. This can cause some DSLs to be rendered in a
+less readable manner. To instruct the formatter to preserve newlines, add the following comment:
+
+```kotlin
+// ktformat: start-preserve-newlines
+```
+
+To restore default behaviour, add the following comment:
+
+```kotlin
+// ktformat: end-preserve-newlines
+```
+
 ## Comparison with other tools
 
 ### Kotlin autoformatter vs. [ktlint](https://github.com/pinterest/ktlint)

@@ -25,8 +25,8 @@ internal class FunctionLiteralScanner(private val kotlinScanner: KotlinScanner) 
             nodeOfType(KtTokens.LBRACE) thenMapToTokens {
                 listOf(BeginWeakToken(), BeginToken(State.CODE), LeafNodeToken("{"))
             }
-            possibleWhitespace()
             zeroOrOne {
+                possibleWhitespace()
                 exactlyOne {
                     nodeOfType(KtNodeTypes.VALUE_PARAMETER_LIST) thenMapToTokens { nodes ->
                         listOf(WhitespaceToken(" "))
@@ -41,13 +41,23 @@ internal class FunctionLiteralScanner(private val kotlinScanner: KotlinScanner) 
                 zeroOrOne { emptyBlock() thenMapToTokens { listOf(nonBreakingSpaceToken()) } }
             } thenMapTokens { it.plus(EndToken) }
             zeroOrOne {
-                nodeOfType(KtNodeTypes.BLOCK) thenMapToTokens { nodes ->
-                    val tokens = kotlinScanner.scanNodes(nodes, ScannerState.BLOCK)
-                    if (tokens.isNotEmpty()) {
-                        listOf(SynchronizedBreakToken(whitespaceLength = 1)).plus(tokens)
-                            .plus(ClosingSynchronizedBreakToken(whitespaceLength = 1))
-                    } else {
-                        listOf()
+                either {
+                    possibleWhitespace()
+                    emptyBlock()
+                    possibleWhitespace()
+                } or {
+                    possibleWhitespace() thenMapToTokens { nodes ->
+                        val content = nodes.firstOrNull()?.text ?: " "
+                        listOf(SynchronizedBreakToken(content = content, whitespaceLength = 1))
+                    }
+                    nodeOfType(KtNodeTypes.BLOCK) thenMapToTokens { nodes ->
+                        kotlinScanner.scanNodes(nodes, ScannerState.BLOCK)
+                    }
+                    possibleWhitespace() thenMapToTokens { nodes ->
+                        val content = nodes.firstOrNull()?.text ?: " "
+                        listOf(
+                            ClosingSynchronizedBreakToken(content = content, whitespaceLength = 1)
+                        )
                     }
                 }
             }

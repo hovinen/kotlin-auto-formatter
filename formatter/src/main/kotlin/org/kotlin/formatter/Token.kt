@@ -115,7 +115,10 @@ object ClosingForcedBreakToken : Token()
  * @property whitespaceLength the number of spaces of whitespace to be output by this token if no
  *     line break is introduced; normally either zero or one
  */
-data class SynchronizedBreakToken(internal val whitespaceLength: Int) : Token()
+data class SynchronizedBreakToken(
+    internal val whitespaceLength: Int,
+    internal val content: String = " ".repeat(whitespaceLength)
+) : Token()
 
 /**
  * A directive to add a closing line break only if the containing block does not fit on one line.
@@ -127,7 +130,10 @@ data class SynchronizedBreakToken(internal val whitespaceLength: Int) : Token()
  * @property whitespaceLength the number of spaces of whitespace to be output by this token if no
  *     line break is introduced; normally either zero or one
  */
-data class ClosingSynchronizedBreakToken(internal val whitespaceLength: Int) : Token()
+data class ClosingSynchronizedBreakToken(
+    internal val whitespaceLength: Int,
+    internal val content: String = " ".repeat(whitespaceLength)
+) : Token()
 
 /**
  * A directive to add line break without indent only if the containing block does not fit on one
@@ -196,3 +202,20 @@ object MarkerToken : Token()
  * printer.
  */
 object BlockFromMarkerToken : Token()
+
+/**
+ * A directive that, from this token on, newlines in the original source code should be preserved
+ * when they would ordinarily be removed as redundant by the autoformatter.
+ *
+ * If this token appears while the formatter is already in the preserve newlines mode, it has no
+ * effect.
+ */
+object BeginPreserveNewlinesToken : Token()
+
+/**
+ * A directive that, from this point on, newlines in the original code should be treated normally
+ * and removed when they are redundant.
+ *
+ * If this token appears while the formatter is in regular mode, it has no effect.
+ */
+object EndPreserveNewlinesToken : Token()
