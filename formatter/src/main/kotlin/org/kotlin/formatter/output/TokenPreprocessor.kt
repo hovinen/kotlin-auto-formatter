@@ -129,8 +129,8 @@ class TokenPreprocessor {
                         resultStack.peek()
                             .tokens
                             .add(ForcedBreakToken(count = token.content.count { it == '\n' }))
-                    } else if (!(lastToken is ForcedBreakToken || lastToken is
-                        ClosingForcedBreakToken)
+                    } else if (!(lastToken is ForcedBreakToken ||
+                        lastToken is ClosingForcedBreakToken)
                     ) {
                         resultStack.peek().tokens.add(token)
                     }

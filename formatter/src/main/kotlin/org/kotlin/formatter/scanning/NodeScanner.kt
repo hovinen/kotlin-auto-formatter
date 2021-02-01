@@ -121,11 +121,10 @@ internal class NodeScannerProvider(
             KtNodeTypes.WHEN_ENTRY, KtNodeTypes.ANNOTATION_ENTRY, KtNodeTypes.PREFIX_EXPRESSION,
                 KtNodeTypes.VALUE_PARAMETER, KtNodeTypes.SUPER_TYPE_ENTRY,
                 KtNodeTypes.SUPER_TYPE_CALL_ENTRY, KtNodeTypes.USER_TYPE,
-                KtNodeTypes.BINARY_WITH_TYPE, KtNodeTypes.DELEGATED_SUPER_TYPE_ENTRY ->
-                simpleBlockScanner.value
+                KtNodeTypes.BINARY_WITH_TYPE, KtNodeTypes.DELEGATED_SUPER_TYPE_ENTRY,
+                KtNodeTypes.IS_EXPRESSION -> simpleBlockScanner.value
             KtNodeTypes.SHORT_STRING_TEMPLATE_ENTRY, KtNodeTypes.LONG_STRING_TEMPLATE_ENTRY ->
                 stringTemplateEntryScanner.value
-            KtNodeTypes.OBJECT_LITERAL -> simpleScanner.value
             else -> simpleScanner.value
         }
 }

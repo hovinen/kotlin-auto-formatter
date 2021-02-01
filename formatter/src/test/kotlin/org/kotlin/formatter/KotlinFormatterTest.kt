@@ -1852,6 +1852,19 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `prefers not to break before is operator`() {
+        val result =
+            KotlinFormatter(maxLineLength = 26).format("val something = variable is MyClass")
+
+        assertThat(result).isEqualTo(
+            """
+                val something =
+                    variable is MyClass
+            """.trimIndent()
+        )
+    }
+
+    @Test
     fun `format breaks at logical operator in a while statement`() {
         val result =
             KotlinFormatter(maxLineLength = 50)
