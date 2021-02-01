@@ -726,6 +726,7 @@ internal class KotlinScannerTest {
             kotlinLoader.parseKotlin(
                 """
                     class MyClass(val aParameter: Int) : AnInterface {
+                        val something = "Something"
                     }
                 """.trimIndent()
             )

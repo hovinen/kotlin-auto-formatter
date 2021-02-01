@@ -1189,6 +1189,7 @@ class KotlinFormatterTest {
                 .format(
                     """
                         class AClass(private val something: AType) : AType by something {
+                            val something = "Something"
                         }
                     """.trimIndent()
                 )
@@ -1199,6 +1200,7 @@ class KotlinFormatterTest {
                     class AClass(private val something: AType) :
                         AType by something {
                     
+                        val something = "Something"
                     }
                 """.trimIndent()
             )
@@ -3673,22 +3675,36 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `breaks empty object literal correctly`() {
+        val subject = KotlinFormatter(maxLineLength = 50)
+
+        val result =
+            subject.format(
+                """
+                    val obj = object :
+                        OtherClass(
+                          one = "ONE",
+                          two = "TWO") {}
+                """.trimIndent()
+            )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    val obj =
+                        object : OtherClass(one = "ONE", two = "TWO")
+                            {}
+                """.trimIndent()
+            )
+    }
+
+    @Test
     fun `inserts whitespace before and after colon before super type list`() {
         val subject = KotlinFormatter()
 
-        val result = subject.format(
-            """
-                class MyClass():AnInterface {
-                }
-            """.trimIndent()
-        )
+        val result = subject.format("""class MyClass():AnInterface {}""".trimIndent())
 
-        assertThat(result).isEqualTo(
-            """
-                class MyClass() : AnInterface {
-                }
-            """.trimIndent()
-        )
+        assertThat(result).isEqualTo("""class MyClass() : AnInterface {}""".trimIndent())
     }
 
     @Test

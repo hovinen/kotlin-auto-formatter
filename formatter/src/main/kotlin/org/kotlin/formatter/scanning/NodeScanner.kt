@@ -125,6 +125,7 @@ internal class NodeScannerProvider(
                 simpleBlockScanner.value
             KtNodeTypes.SHORT_STRING_TEMPLATE_ENTRY, KtNodeTypes.LONG_STRING_TEMPLATE_ENTRY ->
                 stringTemplateEntryScanner.value
+            KtNodeTypes.OBJECT_LITERAL -> simpleScanner.value
             else -> simpleScanner.value
         }
 }
