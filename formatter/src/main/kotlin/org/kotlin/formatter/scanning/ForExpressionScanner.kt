@@ -19,13 +19,15 @@ internal class ForExpressionScanner(private val kotlinScanner: KotlinScanner) : 
             nodeOfType(KtTokens.FOR_KEYWORD)
             possibleWhitespace()
             nodeOfType(KtTokens.LPAR)
-            oneOrMore { anyNode() } thenMapToTokens { nodes ->
+            possibleWhitespace()
+            oneOrMoreFrugal { anyNode() } thenMapToTokens { nodes ->
                 val tokens = kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
                 listOf(LeafNodeToken("for ("), BeginToken(State.CODE)).plus(tokens)
                     .plus(ClosingSynchronizedBreakToken(whitespaceLength = 0))
                     .plus(EndToken)
                     .plus(LeafNodeToken(")"))
             }
+            possibleWhitespace()
             nodeOfType(KtTokens.RPAR)
             zeroOrMore { anyNode() } thenMapToTokens { nodes ->
                 kotlinScanner.scanNodes(nodes, ScannerState.BLOCK)

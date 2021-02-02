@@ -16,11 +16,13 @@ internal class WhileExpressionScanner(private val kotlinScanner: KotlinScanner) 
             nodeOfType(KtTokens.WHILE_KEYWORD)
             possibleWhitespace()
             nodeOfType(KtTokens.LPAR)
-            oneOrMore { anyNode() } thenMapToTokens { nodes ->
+            possibleWhitespace()
+            oneOrMoreFrugal { anyNode() } thenMapToTokens { nodes ->
                 listOf(LeafNodeToken("while ("))
                     .plus(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT))
                     .plus(LeafNodeToken(")"))
             }
+            possibleWhitespace()
             nodeOfType(KtTokens.RPAR)
             zeroOrMore { anyNode() } thenMapToTokens { nodes ->
                 kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)

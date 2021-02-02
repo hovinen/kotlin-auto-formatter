@@ -1796,6 +1796,96 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `reformats if statement with whitespace before the condition`() {
+        val result = KotlinFormatter().format(
+            """
+                if (
+                    1 == 2
+                ) {
+                    something()
+                }
+            """.trimIndent()
+        )
+
+        assertThat(result).isEqualTo(
+            """
+                if (1 == 2) {
+                    something()
+                }
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun `reformats while statement with whitespace before the condition`() {
+        val result =
+            KotlinFormatter().format(
+                """
+                    while (
+                        1 == 2
+                    ) {
+                        something()
+                    }
+                """.trimIndent()
+            )
+
+        assertThat(result).isEqualTo(
+            """
+                while (1 == 2) {
+                    something()
+                }
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun `reformats when statement with whitespace before the expression`() {
+        val result =
+            KotlinFormatter()
+                .format(
+                    """
+                        when (
+                            aVariable
+                        ) {
+                            else -> something()
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result).isEqualTo(
+            """
+                when (aVariable) {
+                    else -> something()
+                }
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun `reformats for statement with whitespace before the expression`() {
+        val result =
+            KotlinFormatter()
+                .format(
+                    """
+                        for (
+                            aVariable in aCollection
+                        ) {
+                            something()
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    for (aVariable in aCollection) {
+                        something()
+                    }
+                """.trimIndent()
+            )
+    }
+
+    @Test
     fun `does not consolidate EOL comment with following operator in a binary expression`() {
         val result =
             KotlinFormatter(maxLineLength = 52)

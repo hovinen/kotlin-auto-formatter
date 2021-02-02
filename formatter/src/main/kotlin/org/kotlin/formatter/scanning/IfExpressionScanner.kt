@@ -4,9 +4,7 @@ import org.jetbrains.kotlin.KtNodeTypes
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.psi.psiUtil.children
-import org.kotlin.formatter.BeginToken
 import org.kotlin.formatter.ClosingSynchronizedBreakToken
-import org.kotlin.formatter.EndToken
 import org.kotlin.formatter.LeafNodeToken
 import org.kotlin.formatter.State
 import org.kotlin.formatter.SynchronizedBreakToken
@@ -24,10 +22,10 @@ internal class IfExpressionScanner(private val kotlinScanner: KotlinScanner) : N
             nodeOfType(KtTokens.IF_KEYWORD)
             possibleWhitespace()
             nodeOfType(KtTokens.LPAR)
+            possibleWhitespace()
             nodeOfType(KtNodeTypes.CONDITION) thenMapToTokens { nodes ->
-                listOf(LeafNodeToken("if ("), BeginToken(State.CODE))
+                listOf(LeafNodeToken("if ("))
                     .plus(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT))
-                    .plus(EndToken)
             }
             possibleWhitespace()
             nodeOfType(KtTokens.RPAR)
