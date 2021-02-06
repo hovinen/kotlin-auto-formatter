@@ -2393,6 +2393,42 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `corrects formatting of closing curly brace for function definition`() {
+        val result = KotlinFormatter().format(
+            """
+                fun foo() {
+                    bar()}
+            """.trimIndent()
+        )
+
+        assertThat(result).isEqualTo(
+            """
+                fun foo() {
+                    bar()
+                }
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun `corrects formatting of opening curly braces for function definition`() {
+        val result = KotlinFormatter().format(
+            """
+                fun foo() { bar()
+                }
+            """.trimIndent()
+        )
+
+        assertThat(result).isEqualTo(
+            """
+                fun foo() {
+                    bar()
+                }
+            """.trimIndent()
+        )
+    }
+
+    @Test
     fun `format breaks expressions at operators leaving operations at the end`() {
         val result =
             KotlinFormatter(maxLineLength = 50)

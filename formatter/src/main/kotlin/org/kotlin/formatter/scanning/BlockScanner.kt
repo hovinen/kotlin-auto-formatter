@@ -6,9 +6,12 @@ import org.jetbrains.kotlin.psi.psiUtil.children
 import org.kotlin.formatter.BeginToken
 import org.kotlin.formatter.BlockFromMarkerToken
 import org.kotlin.formatter.ClosingForcedBreakToken
+import org.kotlin.formatter.ClosingSynchronizedBreakToken
 import org.kotlin.formatter.EndToken
+import org.kotlin.formatter.ForcedBreakToken
 import org.kotlin.formatter.LeafNodeToken
 import org.kotlin.formatter.State
+import org.kotlin.formatter.SynchronizedBreakToken
 import org.kotlin.formatter.Token
 import org.kotlin.formatter.scanning.nodepattern.nodePattern
 
@@ -17,13 +20,25 @@ internal class BlockScanner(private val kotlinScanner: KotlinScanner) : NodeScan
     private val nodePattern =
         nodePattern {
             either {
-                nodeOfType(KtTokens.LBRACE)
-                zeroOrMoreFrugal { anyNode() } thenMapToTokens { nodes ->
+                nodeOfType(KtTokens.LBRACE) thenMapToTokens {
                     listOf(LeafNodeToken("{"), BlockFromMarkerToken, BeginToken(State.CODE))
-                        .plus(kotlinScanner.scanNodes(nodes, ScannerState.BLOCK))
                 }
                 zeroOrOne { whitespaceWithNewline() } thenMapToTokens { nodes ->
-                    if (nodes.isNotEmpty()) listOf(ClosingForcedBreakToken) else listOf()
+                    if (nodes.isNotEmpty()) {
+                        listOf(ForcedBreakToken(count = nodes.first().text.count { it == '\n' }))
+                    } else {
+                        listOf(SynchronizedBreakToken(whitespaceLength = 0))
+                    }
+                }
+                zeroOrMoreFrugal { anyNode() } thenMapToTokens { nodes ->
+                    kotlinScanner.scanNodes(nodes, ScannerState.BLOCK)
+                }
+                zeroOrOne { whitespaceWithNewline() } thenMapToTokens { nodes ->
+                    if (nodes.isNotEmpty()) {
+                        listOf(ClosingForcedBreakToken)
+                    } else {
+                        listOf(ClosingSynchronizedBreakToken(whitespaceLength = 0))
+                    }
                 }
                 nodeOfType(KtTokens.RBRACE) thenMapToTokens { listOf(EndToken, LeafNodeToken("}")) }
             } or {

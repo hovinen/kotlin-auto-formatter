@@ -359,7 +359,7 @@ internal class KotlinScannerTest {
     }
 
     @Test
-    fun `outputs ClosingForcedBreakToken before closing brace of a class`() {
+    fun `outputs ClosingSynchronizedBreakToken before closing brace of a class`() {
         val subject = subject()
         val node = kotlinLoader.parseKotlin(
             """
@@ -371,7 +371,11 @@ internal class KotlinScannerTest {
         val result = subject.scan(node)
 
         assertThat(result)
-            .containsSubsequence(LeafNodeToken("{"), ClosingForcedBreakToken, LeafNodeToken("}"))
+            .containsSubsequence(
+                LeafNodeToken("{"),
+                ClosingSynchronizedBreakToken(whitespaceLength = 0),
+                LeafNodeToken("}")
+            )
     }
 
     @Test
@@ -424,7 +428,7 @@ internal class KotlinScannerTest {
     }
 
     @Test
-    fun `outputs ClosingForcedBreakToken before closing brace of a block`() {
+    fun `outputs ClosingSynchronizedBreakToken before closing brace of a block`() {
         val subject = subject()
         val node = kotlinLoader.parseKotlin(
             """
@@ -436,7 +440,11 @@ internal class KotlinScannerTest {
         val result = subject.scan(node)
 
         assertThat(result)
-            .containsSubsequence(LeafNodeToken("{"), ClosingForcedBreakToken, LeafNodeToken("}"))
+            .containsSubsequence(
+                LeafNodeToken("{"),
+                ClosingSynchronizedBreakToken(whitespaceLength = 0),
+                LeafNodeToken("}")
+            )
     }
 
     @Test
@@ -655,26 +663,6 @@ internal class KotlinScannerTest {
 
         assertThat(result)
             .containsSubsequence(LeafNodeToken("}"), ClosingForcedBreakToken, LeafNodeToken("}"))
-    }
-
-    @Test
-    fun `does not output ForcedBreakToken before closing brace of a block`() {
-        val subject = subject()
-        val node = kotlinLoader.parseKotlin(
-            """
-                fun myFunction() {
-                }
-            """.trimIndent()
-        )
-
-        val result = subject.scan(node)
-
-        assertThat(result)
-            .doesNotContainSubsequence(
-                LeafNodeToken("{"),
-                ForcedBreakToken(count = 1),
-                LeafNodeToken("}")
-            )
     }
 
     @Test
