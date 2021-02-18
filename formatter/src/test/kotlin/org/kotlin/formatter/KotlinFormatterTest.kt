@@ -3660,6 +3660,56 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `admits comments at the top of the file`() {
+        val subject = KotlinFormatter()
+
+        val result = subject.format(
+            """
+                /* A comment */
+                package org.kotlin.formatter
+                
+                class MyClass
+            """.trimIndent()
+        )
+
+        assertThat(result).isEqualTo(
+            """
+                /* A comment */
+                package org.kotlin.formatter
+                
+                class MyClass
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun `admits comments before the import list`() {
+        val subject = KotlinFormatter()
+
+        val result = subject.format(
+            """
+                package org.kotlin.formatter
+                
+                /* A comment */
+                import apackage.AClass
+                
+                class MyClass : AClass
+            """.trimIndent()
+        )
+
+        assertThat(result).isEqualTo(
+            """
+                package org.kotlin.formatter
+                
+                /* A comment */
+                import apackage.AClass
+                
+                class MyClass : AClass
+            """.trimIndent()
+        )
+    }
+
+    @Test
     fun `breaks before inheritance spec when necessary`() {
         val subject = KotlinFormatter(maxLineLength = 46)
 

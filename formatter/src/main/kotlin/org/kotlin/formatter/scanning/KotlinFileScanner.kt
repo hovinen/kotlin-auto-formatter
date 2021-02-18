@@ -13,12 +13,14 @@ import org.kotlin.formatter.scanning.nodepattern.nodePattern
 internal class KotlinFileScanner(private val kotlinScanner: KotlinScanner) : NodeScanner {
     private val nodePattern =
         nodePattern {
+            possibleWhitespaceWithComment()
             either {
                 nonEmptyPackageDirective() thenMapToTokens { nodes ->
                     kotlinScanner.scanNodes(nodes, ScannerState.BLOCK)
                 }
-                possibleWhitespace()
                 exactlyOne {
+                    possibleWhitespace()
+                    possibleWhitespaceWithComment()
                     nodeOfType(KtNodeTypes.IMPORT_LIST) thenMapToTokens { nodes ->
                         kotlinScanner.scanNodes(nodes, ScannerState.BLOCK)
                     }
