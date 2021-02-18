@@ -5407,6 +5407,29 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `removes the spacing for imports when all imports are removed`() {
+        val result =
+            KotlinFormatter()
+                .format(
+                    """
+                        package apackage
+                        
+                        import apackage.AClass                        
+                        
+                        class MyClass
+                    """.trimIndent()
+                )
+
+        assertThat(result).isEqualTo(
+            """
+                package apackage
+                
+                class MyClass
+            """.trimIndent()
+        )
+    }
+
+    @Test
     fun `removes imports when directed`() {
         val importPolicy: ImportPolicy = { importName, importPath ->
             !(importName == "AClass" && importPath == "apackage.AClass")

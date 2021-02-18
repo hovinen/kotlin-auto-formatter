@@ -23,6 +23,7 @@ internal class NodeScannerProvider(
     private val kotlinScanner: KotlinScanner,
     private val importPolicy: (String, String) -> Boolean
 ) {
+    private val kotlinFileScanner = lazy { KotlinFileScanner(kotlinScanner) }
     private val blockScanner = lazy { BlockScanner(kotlinScanner) }
     private val whenExpressionScanner = lazy { WhenExpressionScanner(kotlinScanner) }
     private val ifExpressionScanner = lazy { IfExpressionScanner(kotlinScanner) }
@@ -116,6 +117,7 @@ internal class NodeScannerProvider(
             KtNodeTypes.PARENTHESIZED -> parenthesizedScanner.value
             KtNodeTypes.LABELED_EXPRESSION -> labeledExpressionScanner.value
             KtNodeTypes.ANNOTATED_EXPRESSION -> annotatedExpressionScanner.value
+            KtFileElementType.INSTANCE -> kotlinFileScanner.value
             KtFileElementType.INSTANCE, is KtScriptElementType,
                 KtNodeTypes.LITERAL_STRING_TEMPLATE_ENTRY -> simpleScannerForBlock.value
             KtNodeTypes.WHEN_ENTRY, KtNodeTypes.ANNOTATION_ENTRY, KtNodeTypes.PREFIX_EXPRESSION,
