@@ -125,6 +125,7 @@ internal class ParameterListScanner(private val kotlinScanner: KotlinScanner) : 
 
     private val parameterPattern =
         nodePattern {
+            optionalKDoc(kotlinScanner, modifierListScanner)
             zeroOrOne {
                 nodeOfType(KtNodeTypes.MODIFIER_LIST) thenMapToTokens { nodes ->
                     modifierListScanner.scan(nodes.first(), ScannerState.STATEMENT)

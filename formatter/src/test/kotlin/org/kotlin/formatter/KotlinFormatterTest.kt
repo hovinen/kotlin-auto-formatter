@@ -4347,6 +4347,30 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `maintains a line break between KDoc and a property`() {
+        val result =
+            KotlinFormatter()
+                .format(
+                    """
+                        class MyClass(
+                            /** Some KDoc */
+                            val property: String
+                        )
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    class MyClass(
+                        /** Some KDoc */
+                        val property: String
+                    )
+                """.trimIndent()
+            )
+    }
+
+    @Test
     fun `maintains a line break between KDoc and object declaration`() {
         val subject = KotlinFormatter(maxLineLength = 40)
 
