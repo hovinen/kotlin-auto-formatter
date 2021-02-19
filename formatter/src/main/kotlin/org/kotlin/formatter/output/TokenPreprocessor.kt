@@ -371,7 +371,14 @@ private class WhitespaceStackElement(
         get() = contentLength + initialTextLength
 
     private val initialTextLength: Int
-        get() = tokens.firstOrNull { it !is BeginWeakToken }?.textLength ?: 0
+        get() {
+            val firstRelevantToken = tokens.firstOrNull { it !is BeginWeakToken }
+            return if (firstRelevantToken is LeafNodeToken) {
+                tokens.takeWhile { it is LeafNodeToken }.map { it.textLength }.sum()
+            } else {
+                firstRelevantToken?.textLength ?: 0
+            }
+        }
 }
 
 private class LiteralWhitespaceStackElement(

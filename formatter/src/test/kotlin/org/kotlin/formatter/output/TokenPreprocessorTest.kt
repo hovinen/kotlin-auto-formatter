@@ -49,6 +49,23 @@ internal class TokenPreprocessorTest {
     }
 
     @Test
+    fun `outputs a WhitespaceToken with the length of the following sequence of leaf tokens`() {
+        val subject = TokenPreprocessor()
+        val input = listOf(WhitespaceToken(content = " "), LeafNodeToken("a"), LeafNodeToken("b"))
+
+        val result = subject.preprocess(input)
+
+        assertThat(result)
+            .isEqualTo(
+                listOf(
+                    WhitespaceToken(length = 3, content = " "),
+                    LeafNodeToken("a"),
+                    LeafNodeToken("b")
+                )
+            )
+    }
+
+    @Test
     fun `outputs a WhitespaceToken with the length of the following block`() {
         val subject = TokenPreprocessor()
         val input =
