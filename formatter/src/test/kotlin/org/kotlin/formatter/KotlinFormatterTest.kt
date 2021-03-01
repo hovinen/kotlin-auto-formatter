@@ -3155,6 +3155,13 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `supports non-block do-while loops`() {
+        val result = KotlinFormatter().format("do doSomething() while (true)")
+
+        assertThat(result).isEqualTo("do doSomething() while (true)")
+    }
+
+    @Test
     fun `respects column limit when assignment operator would break it`() {
         val result =
             KotlinFormatter(maxLineLength = 48)

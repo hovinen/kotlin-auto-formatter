@@ -44,8 +44,14 @@ internal class DoWhileExpressionScanner(private val kotlinScanner: KotlinScanner
 
     private val bodyPattern: NodePattern =
         nodePattern {
-            nodeOfType(KtNodeTypes.BLOCK) thenMapToTokens { nodes ->
-                blockPattern.matchSequence(nodes.first().children().asIterable())
+            either {
+                nodeOfType(KtNodeTypes.BLOCK) thenMapToTokens { nodes ->
+                    blockPattern.matchSequence(nodes.first().children().asIterable())
+                }
+            } or {
+                zeroOrMore { anyNode() } thenMapToTokens { nodes ->
+                    kotlinScanner.scanNodes(nodes, ScannerState.BLOCK)
+                }
             }
             end()
         }
