@@ -26,7 +26,7 @@ internal class DoWhileExpressionScanner(private val kotlinScanner: KotlinScanner
                 )
             }
             possibleWhitespace()
-            nodeOfType(KtTokens.WHILE_KEYWORD) thenMapToTokens { listOf(LeafNodeToken(" while(")) }
+            nodeOfType(KtTokens.WHILE_KEYWORD) thenMapToTokens { listOf(LeafNodeToken(" while (")) }
             possibleWhitespace()
             nodeOfType(KtTokens.LPAR)
             possibleWhitespace()

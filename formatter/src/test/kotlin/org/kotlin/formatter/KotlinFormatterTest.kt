@@ -3104,7 +3104,7 @@ class KotlinFormatterTest {
                         aMethodWithLambda {
                             do {
                                 doSomething()
-                            } while(true)
+                            } while (true)
                         }
                     """.trimIndent()
                 )
@@ -3115,7 +3115,7 @@ class KotlinFormatterTest {
                     aMethodWithLambda {
                         do {
                             doSomething()
-                        } while(true)
+                        } while (true)
                     }
                 """.trimIndent()
             )
@@ -3129,7 +3129,7 @@ class KotlinFormatterTest {
             """
                 do {
                     doSomething()
-                } while(true)
+                } while (true)
             """.trimIndent()
         )
     }
@@ -3140,7 +3140,7 @@ class KotlinFormatterTest {
             """
                 do {
                     doSomething()
-                } while(true)
+                } while (true)
             """.trimIndent()
         )
 
@@ -3148,7 +3148,7 @@ class KotlinFormatterTest {
             """
                 do {
                     doSomething()
-                } while(true)
+                } while (true)
             """.trimIndent()
         )
     }
