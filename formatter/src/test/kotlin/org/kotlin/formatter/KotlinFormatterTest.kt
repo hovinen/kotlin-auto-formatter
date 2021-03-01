@@ -3136,13 +3136,14 @@ class KotlinFormatterTest {
 
     @Test
     fun `maintains correct formatting of do-while loops`() {
-        val result = KotlinFormatter().format(
-            """
-                do {
-                    doSomething()
-                } while (true)
-            """.trimIndent()
-        )
+        val result =
+            KotlinFormatter().format(
+                """
+                    do {
+                        doSomething()
+                    } while (true)
+                """.trimIndent()
+            )
 
         assertThat(result).isEqualTo(
             """
