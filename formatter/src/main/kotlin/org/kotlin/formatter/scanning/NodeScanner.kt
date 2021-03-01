@@ -46,6 +46,7 @@ internal class NodeScannerProvider(
     private val functionLiteralScanner = lazy { FunctionLiteralScanner(kotlinScanner) }
     private val conditionScanner = lazy { ConditionScanner(kotlinScanner) }
     private val forExpressionScanner = lazy { ForExpressionScanner(kotlinScanner) }
+    private val doWhileExpressionScanner = lazy { DoWhileExpressionScanner(kotlinScanner) }
     private val binaryExpressionScanner = lazy { BinaryExpressionScanner(kotlinScanner) }
     private val callExpressionScanner = lazy { CallExpressionScanner(kotlinScanner) }
     private val propertyScanner = lazy { PropertyScanner(kotlinScanner) }
@@ -102,6 +103,7 @@ internal class NodeScannerProvider(
             KtNodeTypes.FUNCTION_LITERAL -> functionLiteralScanner.value
             KtNodeTypes.CONDITION -> conditionScanner.value
             KtNodeTypes.FOR -> forExpressionScanner.value
+            KtNodeTypes.DO_WHILE -> doWhileExpressionScanner.value
             KtNodeTypes.BINARY_EXPRESSION -> binaryExpressionScanner.value
             KtNodeTypes.CALL_EXPRESSION -> callExpressionScanner.value
             KtNodeTypes.PROPERTY -> propertyScanner.value

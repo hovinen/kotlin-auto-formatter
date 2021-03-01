@@ -3096,6 +3096,64 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `does not break before block of a lambda containing a do loop`() {
+        val result =
+            KotlinFormatter()
+                .format(
+                    """
+                        aMethodWithLambda {
+                            do {
+                                doSomething()
+                            } while(true)
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    aMethodWithLambda {
+                        do {
+                            doSomething()
+                        } while(true)
+                    }
+                """.trimIndent()
+            )
+    }
+
+    @Test
+    fun `corrects formatting of do-while loops`() {
+        val result = KotlinFormatter().format("do{doSomething()}while ( true )")
+
+        assertThat(result).isEqualTo(
+            """
+                do {
+                    doSomething()
+                } while(true)
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun `maintains correct formatting of do-while loops`() {
+        val result = KotlinFormatter().format(
+            """
+                do {
+                    doSomething()
+                } while(true)
+            """.trimIndent()
+        )
+
+        assertThat(result).isEqualTo(
+            """
+                do {
+                    doSomething()
+                } while(true)
+            """.trimIndent()
+        )
+    }
+
+    @Test
     fun `respects column limit when assignment operator would break it`() {
         val result =
             KotlinFormatter(maxLineLength = 48)
