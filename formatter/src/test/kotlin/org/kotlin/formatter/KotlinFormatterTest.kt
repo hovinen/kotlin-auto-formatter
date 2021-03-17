@@ -430,8 +430,7 @@ class KotlinFormatterTest {
     @Test
     fun `prefers not to break within array access expression`() {
         val result =
-            KotlinFormatter(maxLineLength = 35)
-                .format("fun aFunction(): String = m[one to two]")
+            KotlinFormatter(maxLineLength = 35).format("fun aFunction(): String = m[one to two]")
 
         assertThat(result).isEqualTo(
             """

@@ -6,7 +6,7 @@ import java.io.ByteArrayOutputStream
 plugins {
     kotlin("jvm") version "1.3.72" apply false
     id("org.jlleitschuh.gradle.ktlint") version "9.2.1" apply false
-    id("tech.formatter-kt.formatter") version "0.7.3" apply false
+    id("tech.formatter-kt.formatter") version "0.7.4" apply false
 }
 
 group = "tech.formatter-kt"
