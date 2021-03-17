@@ -98,17 +98,18 @@ internal fun NodePatternBuilder.declarationWithOptionalModifierList(
     }
 }
 
-private fun NodePatternBuilder.declarationKeyword(kotlinScanner: KotlinScanner):
-    NodePatternBuilder =
-        either {
-            nodeOfType(KtTokens.CONSTRUCTOR_KEYWORD) thenMapToTokens {
-                listOf(LeafNodeToken("constructor"))
-            }
-        } or {
-            anyNode() thenMapToTokens { nodes ->
-                kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT).plus(nonBreakingSpaceToken())
-            }
+private fun NodePatternBuilder.declarationKeyword(
+    kotlinScanner: KotlinScanner
+): NodePatternBuilder =
+    either {
+        nodeOfType(KtTokens.CONSTRUCTOR_KEYWORD) thenMapToTokens {
+            listOf(LeafNodeToken("constructor"))
         }
+    } or {
+        anyNode() thenMapToTokens { nodes ->
+            kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT).plus(nonBreakingSpaceToken())
+        }
+    }
 
 /**
  * Adds to the receiver [NodePatternBuilder] a sequence matching optionally present KDoc.

@@ -68,7 +68,7 @@ internal class TryScanner(private val kotlinScanner: KotlinScanner) : NodeScanne
             }
             possibleWhitespace()
             nodeOfType(KtNodeTypes.VALUE_PARAMETER_LIST) thenMapToTokens { nodes ->
-                kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
+                inBeginEndBlock(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT), State.CODE)
             }
             possibleWhitespace() thenMapToTokens { listOf(nonBreakingSpaceToken()) }
             anyNode() thenMapToTokens { nodes ->

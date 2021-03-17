@@ -770,6 +770,30 @@ internal class TokenPreprocessorTest {
 
     @ParameterizedTest
     @MethodSource("synchronizedBreakTokenCases")
+    fun `converts sync break into forced break when force sync breaks in the same marker block`(
+        synchronizedBreakToken: Token,
+        unused: Token,
+        expectedBreakToken: Token
+    ) {
+        val subject = TokenPreprocessor()
+        val input =
+            listOf(
+                MarkerToken,
+                synchronizedBreakToken,
+                ForceSynchronizedBreaksInBlockToken,
+                BlockFromMarkerToken
+            )
+
+        val result = subject.preprocess(input)
+
+        assertThat(result)
+            .isEqualTo(
+                listOf(BeginToken(length = 0, state = State.CODE), expectedBreakToken, EndToken)
+            )
+    }
+
+    @ParameterizedTest
+    @MethodSource("synchronizedBreakTokenCases")
     fun `removes SynchronizedBreakTokens which immediately follow ForcedBreakTokens`(
         synchronizedBreakToken: Token,
         unused: Token,

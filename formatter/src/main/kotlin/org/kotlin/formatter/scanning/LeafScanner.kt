@@ -63,21 +63,23 @@ internal class LeafScanner {
     private fun stateBasedOnCommentContent(content: String) =
         if (content.startsWith("// TODO")) State.TODO_COMMENT else State.LINE_COMMENT
 
-    private fun tokenizeString(text: String, whitespaceTokenSupplier: (String) -> Token):
-        List<Token> {
-            val whitespaceRegex = Regex("\\s+")
-            var match = whitespaceRegex.find(text)
-            val result = mutableListOf<Token>()
-            var start = 0
-            while (match != null) {
-                result.add(LeafNodeToken(text.substring(start, match.range.first)))
-                result.add(whitespaceTokenSupplier(match.value))
-                start = match.range.last + 1
-                match = match.next()
-            }
-            if (start < text.length) {
-                result.add(LeafNodeToken(text.substring(start)))
-            }
-            return result
+    private fun tokenizeString(
+        text: String,
+        whitespaceTokenSupplier: (String) -> Token
+    ): List<Token> {
+        val whitespaceRegex = Regex("\\s+")
+        var match = whitespaceRegex.find(text)
+        val result = mutableListOf<Token>()
+        var start = 0
+        while (match != null) {
+            result.add(LeafNodeToken(text.substring(start, match.range.first)))
+            result.add(whitespaceTokenSupplier(match.value))
+            start = match.range.last + 1
+            match = match.next()
         }
+        if (start < text.length) {
+            result.add(LeafNodeToken(text.substring(start)))
+        }
+        return result
+    }
 }

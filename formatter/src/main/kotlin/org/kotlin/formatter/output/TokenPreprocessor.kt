@@ -184,7 +184,7 @@ class TokenPreprocessor {
             when (deferredToken) {
                 is EndToken -> handleEndToken()
                 is BlockFromMarkerToken -> {
-                    val poppedElement = popBlockToMarker()
+                    val poppedElement = popBlockToMarker().apply { replaceSynchronizedBreaks() }
                     if (poppedElement is BlockStackElement) {
                         resultStack.push(StrongBlockStackElement(State.CODE))
                     }
@@ -314,12 +314,7 @@ private sealed class StackElement(internal val tokens: MutableList<Token> = muta
     internal open val inStringLiteral = false
 
     internal open fun beginToken(state: State): Token = throw UnsupportedOperationException()
-}
 
-private abstract class BlockStackElement(
-    internal val state: State,
-    tokens: MutableList<Token> = mutableListOf()
-) : StackElement(tokens) {
     internal fun replaceSynchronizedBreaks() {
         if (shouldConvertSynchronizedBreaksToForcedBreaks()) {
             var level = 0
@@ -348,7 +343,12 @@ private abstract class BlockStackElement(
         this is ForcedBreakToken || this is ClosingForcedBreakToken ||
             this is ForceSynchronizedBreaksInBlockToken ||
             (this is KDocContentToken && content.contains('\n'))
+}
 
+private abstract class BlockStackElement(
+    internal val state: State,
+    tokens: MutableList<Token> = mutableListOf()
+) : StackElement(tokens) {
     override val inStringLiteral = state == State.STRING_LITERAL
 }
 

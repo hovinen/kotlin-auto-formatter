@@ -17,6 +17,14 @@ internal class CallExpressionScanner(private val kotlinScanner: KotlinScanner) :
                 kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
             }
             zeroOrOne {
+                nodeOfType(KtNodeTypes.VALUE_ARGUMENT_LIST) thenMapToTokens { nodes ->
+                    inBeginEndBlock(
+                        kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT),
+                        State.CODE
+                    )
+                }
+            }
+            zeroOrOne {
                 possibleWhitespace()
                 nodeOfType(KtNodeTypes.LAMBDA_ARGUMENT) thenMapToTokens { nodes ->
                     listOf(WhitespaceToken(" "))

@@ -85,15 +85,17 @@ class KotlinScanner(private val importPolicy: (String, String) -> Boolean) {
         }
     }
 
-    private fun whitespaceElementToTokens(node: LeafPsiElement, scannerState: ScannerState):
-        List<Token> =
-            if (node.isAtEndOfFile || hasNewlineInBlockState(node, scannerState)) {
-                toForcedBreak(node)
-            } else if (hasNewlineInPackageImportState(node, scannerState)) {
-                listOf(ForcedBreakToken(count = 1))
-            } else {
-                listOf(WhitespaceToken(node.text))
-            }
+    private fun whitespaceElementToTokens(
+        node: LeafPsiElement,
+        scannerState: ScannerState
+    ): List<Token> =
+        if (node.isAtEndOfFile || hasNewlineInBlockState(node, scannerState)) {
+            toForcedBreak(node)
+        } else if (hasNewlineInPackageImportState(node, scannerState)) {
+            listOf(ForcedBreakToken(count = 1))
+        } else {
+            listOf(WhitespaceToken(node.text))
+        }
 
     private val ASTNode.isAtEndOfFile: Boolean
         get() = treeNext == null
@@ -115,11 +117,12 @@ class KotlinScanner(private val importPolicy: (String, String) -> Boolean) {
  * Pass the flag [ignoreTrailingWhitespace] to ignore whitespace after the comment. Otherwise
  * newlines after EOL comments are turned into [ForcedBreakToken].
  */
-fun NodePatternBuilder.possibleWhitespaceWithComment(ignoreTrailingWhitespace: Boolean = false):
-    NodePatternBuilder =
-        either { oneOrMore { commentWithPossibleWhitespace(ignoreTrailingWhitespace) } } or {
-            possibleWhitespace()
-        }
+fun NodePatternBuilder.possibleWhitespaceWithComment(
+    ignoreTrailingWhitespace: Boolean = false
+): NodePatternBuilder =
+    either { oneOrMore { commentWithPossibleWhitespace(ignoreTrailingWhitespace) } } or {
+        possibleWhitespace()
+    }
 
 private fun NodePatternBuilder.commentWithPossibleWhitespace(ignoreTrailingWhitespace: Boolean) {
     either {

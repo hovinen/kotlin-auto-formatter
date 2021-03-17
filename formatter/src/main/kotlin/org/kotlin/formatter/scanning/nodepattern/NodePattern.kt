@@ -50,18 +50,20 @@ class NodePattern internal constructor(private val initialState: State) {
     private fun epsilonStep(paths: List<PathStep>, states: MutableSet<State>): List<PathStep> =
         paths.flatMap { if (it is PathStepOnState) epsilonStepForPath(it, states) else listOf(it) }
 
-    private fun epsilonStepForPath(startingPath: PathStepOnState, visitedStates: MutableSet<State>):
-        List<PathStep> {
-            val newStates = startingPath.state.immediateNextStates.minus(visitedStates)
-            return if (newStates.isNotEmpty()) {
-                visitedStates.addAll(newStates)
-                newStates.flatMap { state ->
-                    epsilonStepForPath(ContinuingPathStep(state, startingPath), visitedStates)
-                }
-            } else {
-                listOf(startingPath)
+    private fun epsilonStepForPath(
+        startingPath: PathStepOnState,
+        visitedStates: MutableSet<State>
+    ): List<PathStep> {
+        val newStates = startingPath.state.immediateNextStates.minus(visitedStates)
+        return if (newStates.isNotEmpty()) {
+            visitedStates.addAll(newStates)
+            newStates.flatMap { state ->
+                epsilonStepForPath(ContinuingPathStep(state, startingPath), visitedStates)
             }
+        } else {
+            listOf(startingPath)
         }
+    }
 
     private fun step(paths: List<PathStep>, node: ASTNode): List<PathStep> =
         paths.flatMap { path ->

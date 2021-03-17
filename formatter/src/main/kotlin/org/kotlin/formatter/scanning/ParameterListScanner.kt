@@ -4,14 +4,11 @@ import org.jetbrains.kotlin.KtNodeTypes
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.psi.psiUtil.children
-import org.kotlin.formatter.BeginToken
 import org.kotlin.formatter.BlockFromMarkerToken
 import org.kotlin.formatter.ClosingSynchronizedBreakToken
-import org.kotlin.formatter.EndToken
 import org.kotlin.formatter.ForcedBreakToken
 import org.kotlin.formatter.LeafNodeToken
 import org.kotlin.formatter.MarkerToken
-import org.kotlin.formatter.State
 import org.kotlin.formatter.SynchronizedBreakToken
 import org.kotlin.formatter.Token
 import org.kotlin.formatter.WhitespaceToken
@@ -43,9 +40,7 @@ internal class ParameterListScanner(private val kotlinScanner: KotlinScanner) : 
                 }
             } or {
                 zeroOrOne {
-                    nodeOfType(KtTokens.LPAR) thenMapToTokens {
-                        listOf(BeginToken(State.CODE), LeafNodeToken("("))
-                    }
+                    nodeOfType(KtTokens.LPAR) thenMapToTokens { listOf(LeafNodeToken("(")) }
                 }
                 possibleWhitespaceWithComment()
                 nodeOfOneOfTypes(
@@ -110,8 +105,7 @@ internal class ParameterListScanner(private val kotlinScanner: KotlinScanner) : 
                     nodeOfType(KtTokens.RPAR) thenMapToTokens {
                         listOf(
                             ClosingSynchronizedBreakToken(whitespaceLength = 0),
-                            LeafNodeToken(")"),
-                            EndToken
+                            LeafNodeToken(")")
                         )
                     }
                 }

@@ -373,8 +373,56 @@ class KotlinFormatterTest {
         assertThat(result)
             .isEqualTo(
                 """
-                    fun aFunction(aParameter: String):
-                        AClass<Type> = AClass()
+                    fun aFunction(
+                        aParameter: String
+                    ): AClass<Type> = AClass()
+                """.trimIndent()
+            )
+    }
+
+    @Test
+    fun `prefers to break within parameter list if declaration does not fit on line`() {
+        val result =
+            KotlinFormatter(maxLineLength = 48)
+                .format(
+                    """
+                        fun aFunction(aParameter: String): AClass<Type> {
+                            return AClass()
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    fun aFunction(
+                        aParameter: String
+                    ): AClass<Type> {
+                        return AClass()
+                    }
+                """.trimIndent()
+            )
+    }
+
+    @Test
+    fun `does not break empty parameter list`() {
+        val result =
+            KotlinFormatter(maxLineLength = 30)
+                .format(
+                    """
+                        fun aFunction(): AClass<Type> {
+                            return AClass()
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    fun aFunction():
+                        AClass<Type> {
+                            return AClass()
+                        }
                 """.trimIndent()
             )
     }
@@ -2603,9 +2651,11 @@ class KotlinFormatterTest {
             .isEqualTo(
                 """
                     class AClass {
-                        fun myFunction(aParameter: String, anotherParameter: String):
-                            String =
-                                "A string initializer which should move to the next"
+                        fun myFunction(
+                            aParameter: String,
+                            anotherParameter: String
+                        ): String =
+                            "A string initializer which should move to the next"
                     }
                 """.trimIndent()
             )
@@ -3176,8 +3226,9 @@ class KotlinFormatterTest {
         assertThat(result)
             .isEqualTo(
                 """
-                    fun myFunction(aParameter: String):
-                        AReturnType = anotherFunction()
+                    fun myFunction(
+                        aParameter: String
+                    ): AReturnType = anotherFunction()
                 """.trimIndent()
             )
     }
