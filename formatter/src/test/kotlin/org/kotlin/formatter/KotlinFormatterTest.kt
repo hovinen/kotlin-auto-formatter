@@ -1072,8 +1072,10 @@ class KotlinFormatterTest {
                 """
                     val value:
                         Map<
-                            @AnAnnotation("A value") Key,
-                            @AnotherAnnotation("Another value") Value
+                            @AnAnnotation("A value")
+                            Key,
+                            @AnotherAnnotation("Another value")
+                            Value
                         >
                 """.trimIndent()
             )
@@ -5401,6 +5403,22 @@ class KotlinFormatterTest {
         val result = KotlinFormatter().format("fun aFunction(@AnAnnotation aParameter: String)")
 
         assertThat(result).isEqualTo("fun aFunction(@AnAnnotation aParameter: String)")
+    }
+
+    @Test
+    fun `puts annotation with parameters on its own line`() {
+        val result =
+            KotlinFormatter().format("""fun aFunction(@AnAnnotation("value") aParameter: String)""")
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    fun aFunction(
+                        @AnAnnotation("value")
+                        aParameter: String
+                    )
+                """.trimIndent()
+            )
     }
 
     @Test

@@ -10,6 +10,7 @@ import org.kotlin.formatter.ClosingForcedBreakToken
 import org.kotlin.formatter.ClosingSynchronizedBreakToken
 import org.kotlin.formatter.EndPreserveNewlinesToken
 import org.kotlin.formatter.EndToken
+import org.kotlin.formatter.ForceSynchronizedBreaksInBlockToken
 import org.kotlin.formatter.ForcedBreakToken
 import org.kotlin.formatter.KDocContentToken
 import org.kotlin.formatter.LeafNodeToken
@@ -54,7 +55,8 @@ class TokenPreprocessor {
      * [ForcedBreakToken] respectively [ClosingForcedBreakToken] whenever either of the following
      * holds:
      *
-     *  * There is a [ForcedBreakToken], [ClosingForcedBreakToken] in the same block.
+     *  * There is a [ForcedBreakToken], [ClosingForcedBreakToken], or
+     *    [ForceSynchronizedBreaksInBlockToken] in the same block.
      *  * There is already a [KDocContentToken] with a newline character in the same block.
      *
      * Any [SynchronizedBreakToken] which immediately follows a [ForcedBreakToken] or
@@ -157,7 +159,7 @@ class TokenPreprocessor {
             }
         }
         handleDeferredTokens(deferredTokens)
-        return popBlock().tokens
+        return popBlock().tokens.filter { it != ForceSynchronizedBreaksInBlockToken }
     }
 
     private fun consolidateWithLastToken(): Boolean {
@@ -344,6 +346,7 @@ private abstract class BlockStackElement(
 
     private fun Token.forcesSynchronizedBreakConversionToForcedBreak(): Boolean =
         this is ForcedBreakToken || this is ClosingForcedBreakToken ||
+            this is ForceSynchronizedBreaksInBlockToken ||
             (this is KDocContentToken && content.contains('\n'))
 
     override val inStringLiteral = state == State.STRING_LITERAL

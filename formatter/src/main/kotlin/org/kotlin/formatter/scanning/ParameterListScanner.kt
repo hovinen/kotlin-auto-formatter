@@ -78,7 +78,7 @@ internal class ParameterListScanner(private val kotlinScanner: KotlinScanner) : 
                                 }
                             }
                             comment()
-                            whitespaceWithNewline() thenMapToTokens { nodes ->
+                            whitespaceWithNewline() thenMapToTokens {
                                 listOf(SynchronizedBreakToken(whitespaceLength = 1))
                             }
                         } or {
@@ -92,9 +92,7 @@ internal class ParameterListScanner(private val kotlinScanner: KotlinScanner) : 
                                 }
                             }
                             comment()
-                            possibleWhitespace() thenMapToTokens { nodes ->
-                                listOf(WhitespaceToken(" "))
-                            }
+                            possibleWhitespace() thenMapToTokens { listOf(WhitespaceToken(" ")) }
                         }
                     }
                     nodeOfOneOfTypes(

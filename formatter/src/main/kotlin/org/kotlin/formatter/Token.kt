@@ -148,6 +148,14 @@ data class ClosingSynchronizedBreakToken(
 data class NonIndentingSynchronizedBreakToken(internal val whitespaceLength: Int) : Token()
 
 /**
+ * A directive to force any [SynchronizedBreakToken] and [ClosingSynchronizedBreakToken] in the same
+ * block to break, regardless of the size of the block.
+ *
+ * The token otherwise produces no output.
+ */
+object ForceSynchronizedBreaksInBlockToken : Token()
+
+/**
  * A directive to begin a new block in the given [State].
  *
  * The [printer][org.kotlin.formatter.output.Printer] prefers to insert line breaks outside of

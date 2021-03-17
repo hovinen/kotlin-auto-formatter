@@ -11,6 +11,7 @@ import org.kotlin.formatter.BlockFromMarkerToken
 import org.kotlin.formatter.ClosingForcedBreakToken
 import org.kotlin.formatter.ClosingSynchronizedBreakToken
 import org.kotlin.formatter.EndToken
+import org.kotlin.formatter.ForceSynchronizedBreaksInBlockToken
 import org.kotlin.formatter.ForcedBreakToken
 import org.kotlin.formatter.KDocContentToken
 import org.kotlin.formatter.LeafNodeToken
@@ -745,6 +746,30 @@ internal class TokenPreprocessorTest {
 
     @ParameterizedTest
     @MethodSource("synchronizedBreakTokenCases")
+    fun `converts synchronized break into forced break when force sync breaks in the same block`(
+        synchronizedBreakToken: Token,
+        unused: Token,
+        expectedBreakToken: Token
+    ) {
+        val subject = TokenPreprocessor()
+        val input =
+            listOf(
+                BeginToken(state = State.CODE),
+                synchronizedBreakToken,
+                ForceSynchronizedBreaksInBlockToken,
+                EndToken
+            )
+
+        val result = subject.preprocess(input)
+
+        assertThat(result)
+            .isEqualTo(
+                listOf(BeginToken(length = 0, state = State.CODE), expectedBreakToken, EndToken)
+            )
+    }
+
+    @ParameterizedTest
+    @MethodSource("synchronizedBreakTokenCases")
     fun `removes SynchronizedBreakTokens which immediately follow ForcedBreakTokens`(
         synchronizedBreakToken: Token,
         unused: Token,
@@ -771,6 +796,16 @@ internal class TokenPreprocessorTest {
         val result = subject.preprocess(input)
 
         assertThat(result).isEqualTo(listOf(expectedToken, BeginToken(commentState), EndToken))
+    }
+
+    @Test
+    fun `strips ForceSynchronizedBreaksInBlockToken from output`() {
+        val subject = TokenPreprocessor()
+        val input = listOf(ForceSynchronizedBreaksInBlockToken)
+
+        val result = subject.preprocess(input)
+
+        assertThat(result).isEmpty()
     }
 
     companion object {

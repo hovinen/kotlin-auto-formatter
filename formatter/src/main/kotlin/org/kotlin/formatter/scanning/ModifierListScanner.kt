@@ -5,11 +5,13 @@ import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.kdoc.lexer.KDocTokens
 import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.psi.psiUtil.children
+import org.kotlin.formatter.ForceSynchronizedBreaksInBlockToken
 import org.kotlin.formatter.ForcedBreakToken
 import org.kotlin.formatter.MarkerToken
 import org.kotlin.formatter.SynchronizedBreakToken
 import org.kotlin.formatter.Token
 import org.kotlin.formatter.WhitespaceToken
+import org.kotlin.formatter.scanning.nodepattern.NodePatternBuilder
 import org.kotlin.formatter.scanning.nodepattern.nodePattern
 
 /**
@@ -45,8 +47,15 @@ internal class ModifierListScanner(
                 }
             }
             zeroOrMore {
-                nodeOfType(KtNodeTypes.ANNOTATION_ENTRY) thenMapToTokens { nodes ->
-                    kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
+                either {
+                    simpleAnnotation() thenMapToTokens { nodes ->
+                        kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
+                    }
+                } or {
+                    nodeOfType(KtNodeTypes.ANNOTATION_ENTRY) thenMapToTokens { nodes ->
+                        kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
+                            .plus(ForceSynchronizedBreaksInBlockToken)
+                    }
                 }
                 zeroOrOne {
                     possibleWhitespace() thenMapToTokens { nodes ->
@@ -66,6 +75,30 @@ internal class ModifierListScanner(
                         .plus(WhitespaceToken(" "))
                 }
             } thenMapTokens { tokens -> List(markerCount) { MarkerToken }.plus(tokens) }
+            end()
+        }
+
+    private fun NodePatternBuilder.simpleAnnotation(): NodePatternBuilder =
+        nodeMatching {
+            it.elementType == KtNodeTypes.ANNOTATION_ENTRY &&
+                it.lastChildNode.elementType == KtNodeTypes.CONSTRUCTOR_CALLEE
+        }
+
+    private val annotationPattern =
+        nodePattern {
+            nodeOfType(KtTokens.AT) thenMapToTokens { nodes ->
+                kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
+            }
+            possibleWhitespace()
+            nodeOfType(KtNodeTypes.CONSTRUCTOR_CALLEE) thenMapToTokens { nodes ->
+                kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
+            }
+            possibleWhitespace()
+            zeroOrOne {
+                nodeOfType(KtNodeTypes.VALUE_ARGUMENT_LIST) thenMapToTokens { nodes ->
+                    kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
+                }
+            }
             end()
         }
 
