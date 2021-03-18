@@ -9,9 +9,11 @@ import org.kotlin.formatter.ClosingSynchronizedBreakToken
 import org.kotlin.formatter.ForcedBreakToken
 import org.kotlin.formatter.LeafNodeToken
 import org.kotlin.formatter.MarkerToken
+import org.kotlin.formatter.State
 import org.kotlin.formatter.SynchronizedBreakToken
 import org.kotlin.formatter.Token
 import org.kotlin.formatter.WhitespaceToken
+import org.kotlin.formatter.inBeginEndBlock
 import org.kotlin.formatter.scanning.nodepattern.NodePatternBuilder
 import org.kotlin.formatter.scanning.nodepattern.nodePattern
 
@@ -130,8 +132,26 @@ internal class ParameterListScanner(private val kotlinScanner: KotlinScanner) : 
                     tokens
                 }
             }
-            oneOrMore { anyNode() } thenMapToTokens { nodes ->
-                kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT).plus(BlockFromMarkerToken)
+            either {
+                nodeOfType(KtTokens.IDENTIFIER) thenMapToTokens { nodes ->
+                    kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
+                }
+                possibleWhitespace()
+                nodeOfType(KtTokens.COLON) thenMapToTokens { listOf(LeafNodeToken(":")) }
+                possibleWhitespace() thenMapToTokens { nodes ->
+                    listOf(WhitespaceToken(nodes.map { it.text }.firstOrNull() ?: " "))
+                }
+                nodeOfType(KtNodeTypes.TYPE_REFERENCE) thenMapToTokens { nodes ->
+                    inBeginEndBlock(
+                        kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT),
+                        State.CODE
+                    ).plus(BlockFromMarkerToken)
+                }
+            } or {
+                oneOrMore { anyNode() } thenMapToTokens { nodes ->
+                    kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
+                        .plus(BlockFromMarkerToken)
+                }
             }
             end()
         }

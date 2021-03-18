@@ -405,6 +405,29 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `correctly indents parameter list when parameter is a suspend function`() {
+        val result =
+            KotlinFormatter(maxLineLength = 31)
+                .format("""fun aFunction(aParameter: suspend () -> T)""".trimIndent())
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    fun aFunction(
+                        aParameter: suspend () -> T
+                    )
+                """.trimIndent()
+            )
+    }
+
+    @Test
+    fun `fixes spacing around function parameter`() {
+        val result = KotlinFormatter().format("""fun aFunction(aParameter :T)""".trimIndent())
+
+        assertThat(result).isEqualTo("""fun aFunction(aParameter: T)""".trimIndent())
+    }
+
+    @Test
     fun `does not break empty parameter list`() {
         val result =
             KotlinFormatter(maxLineLength = 30)
