@@ -377,7 +377,10 @@ private class WhitespaceStackElement(
         get() {
             val firstRelevantToken = tokens.firstOrNull { it !is BeginWeakToken }
             return if (firstRelevantToken is LeafNodeToken) {
-                tokens.takeWhile { it is LeafNodeToken }.map { it.textLength }.sum()
+                tokens.filter { it !is BeginToken }
+                    .takeWhile { it is LeafNodeToken }
+                    .map { it.textLength }
+                    .sum()
             } else {
                 firstRelevantToken?.textLength ?: 0
             }

@@ -3380,6 +3380,21 @@ class KotlinFormatterTest {
             )
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = [".", "?."])
+    fun `breaks at first dot operator in dot expression with variable when necessary`(
+        operator: String
+    ) {
+        val result = KotlinFormatter(maxLineLength = 18).format("aVariable${operator}aMethod()")
+
+        assertThat(result).isEqualTo(
+            """
+                aVariable
+                    ${operator}aMethod()
+            """.trimIndent()
+        )
+    }
+
     @Test
     fun `indents a try-catch expression correctly`() {
         val result =

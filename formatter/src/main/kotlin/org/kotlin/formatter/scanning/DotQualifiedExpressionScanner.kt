@@ -23,7 +23,7 @@ internal class DotQualifiedExpressionScanner(private val kotlinScanner: KotlinSc
 
     override fun scan(node: ASTNode, scannerState: ScannerState): List<Token> =
         inBeginEndBlock(
-            dotQualifiedExpressionPattern(true).matchSequence(node.children().asIterable()),
+            outermostDotQualifiedExpressionPattern.matchSequence(node.children().asIterable()),
             stateForDotQualifiedExpression(scannerState)
         )
 
@@ -31,89 +31,107 @@ internal class DotQualifiedExpressionScanner(private val kotlinScanner: KotlinSc
         if (scannerState == ScannerState.PACKAGE_IMPORT) State.PACKAGE_IMPORT else State.CODE
 
     private fun scanInner(node: ASTNode): List<Token> =
-        dotQualifiedExpressionPattern(false).matchSequence(node.children().asIterable())
+        innerDotQualifiedExpressionPattern.matchSequence(node.children().asIterable())
 
-    private fun dotQualifiedExpressionPattern(isOutermost: Boolean) =
+    private val outermostDotQualifiedExpressionPattern =
         nodePattern {
-            either {
-                either {
-                    multilineStringTemplate() thenMapToTokens { nodes ->
-                        listOf(
-                            LeafNodeToken("\"\"\""),
-                            BeginToken(State.CODE),
-                            SynchronizedBreakToken(whitespaceLength = 0)
-                        ).plus(stringTemplateToTokens(nodes.first()))
-                            .plus(ClosingSynchronizedBreakToken(whitespaceLength = 0))
-                            .plus(EndToken)
-                            .plus(LeafNodeToken("\"\"\".trimIndent()"))
+            either { stringDotQualifiedExpression() } or {
+                either { nestedDotQualifiedExpression() } or {
+                    either { methodCallOnReferenceExpression() } or {
+                        arbitraryDotQualifiedExpression()
                     }
-                    possibleWhitespace()
-                    nodeOfType(KtTokens.DOT)
-                    possibleWhitespace()
-                    trimIndentCall()
-                } or {
-                    singleLineStringTemplate() thenMapToTokens { nodes ->
-                        listOf(BeginToken(State.MULTILINE_STRING_LITERAL))
-                            .plus(stringTemplateToTokens(nodes.first()))
-                            .plus(EndToken)
-                            .plus(emptyBreakPoint())
-                            .plus(LeafNodeToken("."))
-                    }
-                    possibleWhitespace()
-                    nodeOfType(KtTokens.DOT)
-                    possibleWhitespace()
-                    anyNode() thenMapToTokens { nodes ->
-                        kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
-                    }
-                }
-            } or {
-                either {
-                    nodeOfOneOfTypes(
-                        KtNodeTypes.DOT_QUALIFIED_EXPRESSION,
-                        KtNodeTypes.SAFE_ACCESS_EXPRESSION
-                    ) thenMapToTokens { nodes -> scanInner(nodes.first()) }
-                    possibleWhitespaceWithComment()
-                    dotToken() thenMapToTokens { nodes ->
-                        listOf(
-                            SynchronizedBreakToken(whitespaceLength = 0),
-                            BeginToken(State.CODE),
-                            LeafNodeToken(nodes.first().text)
-                        )
-                    }
-                } or {
-                    either {
-                        nodeOfOneOfTypes(
-                            KtNodeTypes.CALL_EXPRESSION,
-                            KtNodeTypes.ARRAY_ACCESS_EXPRESSION,
-                            KtNodeTypes.PARENTHESIZED
-                        ) thenMapToTokens { nodes ->
-                            kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
-                        }
-                        possibleWhitespaceWithComment()
-                        dotToken() thenMapToTokens { nodes ->
-                            val tokens =
-                                listOf(BeginToken(State.CODE), LeafNodeToken(nodes.first().text))
-                            listOf(emptyBreakPoint()).plus(tokens)
-                        }
-                    } or {
-                        anyNode() thenMapToTokens { nodes ->
-                            kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
-                        }
-                        possibleWhitespaceWithComment()
-                        dotToken() thenMapToTokens { nodes ->
-                            val tokens =
-                                listOf(BeginToken(State.CODE), LeafNodeToken(nodes.first().text))
-                            if (isOutermost) tokens else listOf(emptyBreakPoint()).plus(tokens)
-                        }
-                    }
-                }
-                possibleWhitespace()
-                oneOrMore { anyNode() } thenMapToTokens { nodes ->
-                    kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT).plus(EndToken)
                 }
             }
             end()
         }
+
+    private fun NodePatternBuilder.methodCallOnReferenceExpression() {
+        nodeOfType(KtNodeTypes.REFERENCE_EXPRESSION) thenMapToTokens { nodes ->
+            kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
+        }
+        possibleWhitespace()
+        dotToken() thenMapToTokens { nodes ->
+            listOf(emptyBreakPoint(), LeafNodeToken(nodes.first().text))
+        }
+        possibleWhitespace()
+        nodeOfType(KtNodeTypes.CALL_EXPRESSION) thenMapToTokens { nodes ->
+            kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
+        }
+    }
+
+    private val innerDotQualifiedExpressionPattern =
+        nodePattern {
+            either { stringDotQualifiedExpression() } or {
+                either { nestedDotQualifiedExpression() } or { arbitraryDotQualifiedExpression() }
+            }
+            end()
+        }
+
+    private fun NodePatternBuilder.nestedDotQualifiedExpression() {
+        nodeOfOneOfTypes(
+            KtNodeTypes.DOT_QUALIFIED_EXPRESSION,
+            KtNodeTypes.SAFE_ACCESS_EXPRESSION
+        ) thenMapToTokens { nodes -> scanInner(nodes.first()) }
+        possibleWhitespaceWithComment()
+        dotToken() thenMapToTokens { nodes ->
+            listOf(
+                SynchronizedBreakToken(whitespaceLength = 0),
+                BeginToken(State.CODE),
+                LeafNodeToken(nodes.first().text)
+            )
+        }
+        possibleWhitespace()
+        oneOrMore { anyNode() } thenMapToTokens { nodes ->
+            kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT).plus(EndToken)
+        }
+    }
+
+    private fun NodePatternBuilder.stringDotQualifiedExpression() {
+        either {
+            multilineStringTemplate() thenMapToTokens { nodes ->
+                listOf(
+                    LeafNodeToken("\"\"\""),
+                    BeginToken(State.CODE),
+                    SynchronizedBreakToken(whitespaceLength = 0)
+                ).plus(stringTemplateToTokens(nodes.first()))
+                    .plus(ClosingSynchronizedBreakToken(whitespaceLength = 0))
+                    .plus(EndToken)
+                    .plus(LeafNodeToken("\"\"\".trimIndent()"))
+            }
+            possibleWhitespace()
+            nodeOfType(KtTokens.DOT)
+            possibleWhitespace()
+            trimIndentCall()
+        } or {
+            singleLineStringTemplate() thenMapToTokens { nodes ->
+                listOf(BeginToken(State.MULTILINE_STRING_LITERAL))
+                    .plus(stringTemplateToTokens(nodes.first()))
+                    .plus(EndToken)
+                    .plus(emptyBreakPoint())
+                    .plus(LeafNodeToken("."))
+            }
+            possibleWhitespace()
+            nodeOfType(KtTokens.DOT)
+            possibleWhitespace()
+            anyNode() thenMapToTokens { nodes ->
+                kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
+            }
+        }
+    }
+
+    private fun NodePatternBuilder.arbitraryDotQualifiedExpression() {
+        anyNode() thenMapToTokens { nodes ->
+            kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
+        }
+        possibleWhitespaceWithComment()
+        dotToken() thenMapToTokens { nodes ->
+            listOf(emptyBreakPoint(), BeginToken(State.CODE), LeafNodeToken(nodes.first().text))
+        }
+        possibleWhitespace()
+        oneOrMore { anyNode() } thenMapToTokens { nodes ->
+            kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT).plus(EndToken)
+        }
+    }
 
     private fun NodePatternBuilder.dotToken(): NodePatternBuilder =
         nodeOfOneOfTypes(KtTokens.DOT, KtTokens.SAFE_ACCESS)

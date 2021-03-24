@@ -67,6 +67,32 @@ internal class TokenPreprocessorTest {
     }
 
     @Test
+    fun `ignores intervening BeginTokens when calculating WhitespaceToken length`() {
+        val subject = TokenPreprocessor()
+        val input =
+            listOf(
+                WhitespaceToken(content = " "),
+                LeafNodeToken("a"),
+                BeginToken(State.CODE),
+                LeafNodeToken("b"),
+                EndToken
+            )
+
+        val result = subject.preprocess(input)
+
+        assertThat(result)
+            .isEqualTo(
+                listOf(
+                    WhitespaceToken(length = 3, content = " "),
+                    LeafNodeToken("a"),
+                    BeginToken(State.CODE, length = 1),
+                    LeafNodeToken("b"),
+                    EndToken
+                )
+            )
+    }
+
+    @Test
     fun `outputs a WhitespaceToken with the length of the following block`() {
         val subject = TokenPreprocessor()
         val input =
