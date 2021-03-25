@@ -46,9 +46,11 @@ internal class DotQualifiedExpressionScanner(private val kotlinScanner: KotlinSc
         }
 
     private fun NodePatternBuilder.methodCallOnReferenceExpression() {
-        nodeOfType(KtNodeTypes.REFERENCE_EXPRESSION) thenMapToTokens { nodes ->
-            kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
-        }
+        nodeOfOneOfTypes(
+            KtNodeTypes.REFERENCE_EXPRESSION,
+            KtNodeTypes.THIS_EXPRESSION,
+            KtNodeTypes.SUPER_EXPRESSION
+        ) thenMapToTokens { nodes -> kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT) }
         possibleWhitespace()
         dotToken() thenMapToTokens { nodes ->
             listOf(emptyBreakPoint(), LeafNodeToken(nodes.first().text))

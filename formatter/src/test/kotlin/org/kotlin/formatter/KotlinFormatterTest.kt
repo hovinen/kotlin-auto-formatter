@@ -3357,6 +3357,33 @@ class KotlinFormatterTest {
             )
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = ["this", "super"])
+    fun `does not break on a single dot expression with keyword`(reference: String) {
+        val result =
+            KotlinFormatter(maxLineLength = 50)
+                .format(
+                    """
+                        fun myFunction() {
+                            $reference.aMethod(aParameter, anotherParameter, aThirdParameter)
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    fun myFunction() {
+                        $reference.aMethod(
+                            aParameter,
+                            anotherParameter,
+                            aThirdParameter
+                        )
+                    }
+                """.trimIndent()
+            )
+    }
+
     @Test
     fun `breaks at first dot operator in dot expression when necessary`() {
         val result =
