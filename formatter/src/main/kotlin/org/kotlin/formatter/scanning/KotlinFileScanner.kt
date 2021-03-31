@@ -13,6 +13,16 @@ import org.kotlin.formatter.scanning.nodepattern.nodePattern
 internal class KotlinFileScanner(private val kotlinScanner: KotlinScanner) : NodeScanner {
     private val nodePattern =
         nodePattern {
+            zeroOrOne {
+                nodeOfType(KtNodeTypes.FILE_ANNOTATION_LIST) thenMapToTokens { nodes ->
+                    kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT)
+                }
+                zeroOrOne {
+                    possibleWhitespaceOutputToToken()
+                    comment()
+                }
+                possibleWhitespace() thenMapToTokens { listOf(ForcedBreakToken(count = 2)) }
+            }
             possibleWhitespaceWithComment()
             either {
                 nonEmptyPackageDirective() thenMapToTokens { nodes ->

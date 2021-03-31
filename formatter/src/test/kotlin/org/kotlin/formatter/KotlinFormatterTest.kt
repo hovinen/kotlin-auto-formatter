@@ -3756,6 +3756,82 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `properly handles file-level annotations`() {
+        val result =
+            KotlinFormatter(importPolicySupplier = { { _, _ -> true } })
+                .format(
+                    """
+                        @file:AnAnnotation
+                        package apackage
+                        
+                        import anotherpackage.AClass
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    @file:AnAnnotation
+
+                    package apackage
+                    
+                    import anotherpackage.AClass
+                """.trimIndent()
+            )
+    }
+
+    @Test
+    fun `properly handles comment after file-level annotations`() {
+        val result =
+            KotlinFormatter(importPolicySupplier = { { _, _ -> true } })
+                .format(
+                    """
+                        @file:AnAnnotation // A comment
+
+                        package apackage
+                        
+                        import anotherpackage.AClass
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    @file:AnAnnotation // A comment
+
+                    package apackage
+                    
+                    import anotherpackage.AClass
+                """.trimIndent()
+            )
+    }
+
+    @Test
+    fun `handles multiple file-level annotations`() {
+        val result =
+            KotlinFormatter(importPolicySupplier = { { _, _ -> true } })
+                .format(
+                    """
+                        @file:[AnAnnotation AnotherAnnotation]
+                        package apackage
+                        
+                        import anotherpackage.AClass
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    @file:[AnAnnotation AnotherAnnotation]
+
+                    package apackage
+                    
+                    import anotherpackage.AClass
+                """.trimIndent()
+            )
+    }
+
+    @Test
     fun `does not insert line breaks in an import statement`() {
         val subject =
             KotlinFormatter(maxLineLength = 20, importPolicySupplier = { { _, _ -> true } })
