@@ -56,6 +56,7 @@ internal class NodeScannerProvider(
             SimpleBlockScanner(kotlinScanner, ScannerState.PACKAGE_IMPORT, State.PACKAGE_IMPORT)
         }
     private val modifierListScanner = lazy { ModifierListScanner(kotlinScanner) }
+    private val fileAnnotationListScanner = lazy { FileAnnotationListScanner(kotlinScanner) }
     private val returnScanner = lazy { ReturnScanner(kotlinScanner) }
     private val throwScanner = lazy { ThrowScanner(kotlinScanner) }
     private val tryScanner = lazy { TryScanner(kotlinScanner) }
@@ -121,8 +122,9 @@ internal class NodeScannerProvider(
             KtNodeTypes.LABELED_EXPRESSION -> labeledExpressionScanner.value
             KtNodeTypes.ANNOTATED_EXPRESSION -> annotatedExpressionScanner.value
             KtFileElementType.INSTANCE -> kotlinFileScanner.value
-            KtFileElementType.INSTANCE, is KtScriptElementType,
-                KtNodeTypes.LITERAL_STRING_TEMPLATE_ENTRY -> simpleScannerForBlock.value
+            is KtScriptElementType, KtNodeTypes.LITERAL_STRING_TEMPLATE_ENTRY ->
+                simpleScannerForBlock.value
+            KtNodeTypes.FILE_ANNOTATION_LIST -> fileAnnotationListScanner.value
             KtNodeTypes.TYPE_REFERENCE -> typeReferenceScanner.value
             KtNodeTypes.WHEN_ENTRY, KtNodeTypes.ANNOTATION_ENTRY, KtNodeTypes.PREFIX_EXPRESSION,
                 KtNodeTypes.VALUE_PARAMETER, KtNodeTypes.SUPER_TYPE_ENTRY,

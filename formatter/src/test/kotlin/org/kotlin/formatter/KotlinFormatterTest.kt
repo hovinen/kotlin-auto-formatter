@@ -3772,7 +3772,7 @@ class KotlinFormatterTest {
             .isEqualTo(
                 """
                     @file:AnAnnotation
-
+                    
                     package apackage
                     
                     import anotherpackage.AClass
@@ -3787,7 +3787,7 @@ class KotlinFormatterTest {
                 .format(
                     """
                         @file:AnAnnotation // A comment
-
+                        
                         package apackage
                         
                         import anotherpackage.AClass
@@ -3798,7 +3798,93 @@ class KotlinFormatterTest {
             .isEqualTo(
                 """
                     @file:AnAnnotation // A comment
+                    
+                    package apackage
+                    
+                    import anotherpackage.AClass
+                """.trimIndent()
+            )
+    }
 
+    @Test
+    fun `adds newline between file annotations with attributes`() {
+        val result =
+            KotlinFormatter(importPolicySupplier = { { _, _ -> true } })
+                .format(
+                    """
+                        @file:AnAnnotation("A value")
+                        @file:AnotherAnnotation
+                        
+                        package apackage
+                        
+                        import anotherpackage.AClass
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    @file:AnAnnotation("A value")
+                    @file:AnotherAnnotation
+                    
+                    package apackage
+                    
+                    import anotherpackage.AClass
+                """.trimIndent()
+            )
+    }
+
+    @Test
+    fun `preserves comments between file annotations`() {
+        val result =
+            KotlinFormatter(importPolicySupplier = { { _, _ -> true } })
+                .format(
+                    """
+                        @file:AnAnnotation // A comment
+                        @file:AnotherAnnotation
+                        
+                        package apackage
+                        
+                        import anotherpackage.AClass
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    @file:AnAnnotation // A comment
+                    @file:AnotherAnnotation
+                    
+                    package apackage
+                    
+                    import anotherpackage.AClass
+                """.trimIndent()
+            )
+    }
+
+    @Test
+    fun `preserves block between file annotations`() {
+        val result =
+            KotlinFormatter(importPolicySupplier = { { _, _ -> true } })
+                .format(
+                    """
+                        @file:AnAnnotation
+                        /* A comment */
+                        @file:AnotherAnnotation
+                        
+                        package apackage
+                        
+                        import anotherpackage.AClass
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    @file:AnAnnotation
+                    /* A comment */
+                    @file:AnotherAnnotation
+                    
                     package apackage
                     
                     import anotherpackage.AClass
@@ -3823,7 +3909,7 @@ class KotlinFormatterTest {
             .isEqualTo(
                 """
                     @file:[AnAnnotation AnotherAnnotation]
-
+                    
                     package apackage
                     
                     import anotherpackage.AClass
