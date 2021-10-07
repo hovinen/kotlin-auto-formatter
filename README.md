@@ -97,7 +97,24 @@ To restore default behaviour, add the following comment:
  * Does not have all of the rules of ktlint, e.g. replacing `${variable}` with `$variable` in a
    string template.
 
-It should be fine to use both ktlint and this formatter in the same project.
+For the most part, it should be fine to use both ktlint and this formatter in the same project. There
+is one point where this formatter's output is incompatible with the default settings in ktlint. Namely,
+ktlint will complain about the newline before the lambda expression in the following:
+
+```kotlin
+aFunctionCall(someArgument, someOtherArgument)
+    { ...a lambda argument }
+```
+
+If the column limit is right after the closing right parenthesis on the first line, then the above
+is exactly how this tool will format the code. The recommended solution here, should you be using
+ktlint and run into this, is to disable the corresponding ktlint rule by adding the line
+
+```editorconfig
+disabled_rules=curly-spacing
+```
+
+to your project's `.editorconfig` file.
 
 ### Kotlin autoformatter vs. [ktfmt](https://github.com/facebookincubator/ktfmt)
 
