@@ -119,7 +119,7 @@ internal class IfExpressionScanner(private val kotlinScanner: KotlinScanner) : N
                 }
             } or {
                 oneOrMore { anyNode() } thenMapToTokens { nodes ->
-                    listOf(SynchronizedBreakToken(whitespaceLength = 1))
+                    listOf(SynchronizedBreakToken(whitespaceLength = 0))
                         .plus(kotlinScanner.scanNodes(nodes, ScannerState.STATEMENT))
                 }
             }

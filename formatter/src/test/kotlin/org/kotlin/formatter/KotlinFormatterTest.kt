@@ -1857,6 +1857,15 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `does not break a short if-else block`() {
+        val result =
+            KotlinFormatter(maxLineLength = 100)
+                .format("""if (aCondition) "Some value" else "Some other value"""")
+
+        assertThat(result).isEqualTo("""if (aCondition) "Some value" else "Some other value"""")
+    }
+
+    @Test
     fun `does not break a before else if`() {
         val result =
             KotlinFormatter(maxLineLength = 51)
