@@ -473,7 +473,8 @@ internal class KotlinScannerTest {
             .containsSubsequence(
                 LeafNodeToken("if ("),
                 LeafNodeToken("aCondition"),
-                LeafNodeToken(") ")
+                LeafNodeToken(")"),
+                LeafNodeToken(" ")
             )
     }
 
@@ -520,7 +521,8 @@ internal class KotlinScannerTest {
                 LeafNodeToken("aCondition"),
                 ClosingSynchronizedBreakToken(whitespaceLength = 0),
                 EndToken,
-                LeafNodeToken(") ")
+                LeafNodeToken(")"),
+                LeafNodeToken(" ")
             )
     }
 

@@ -1883,6 +1883,32 @@ class KotlinFormatterTest {
     }
 
     @Test
+    fun `correctly formats non-block if followed by else if`() {
+        val result =
+            KotlinFormatter(maxLineLength = 51)
+                .format(
+                    """
+                        if (aCondition)
+                            something()
+                        else if (anotherCondition) {
+                            somethingElse()
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    if (aCondition)
+                        something()
+                    else if (anotherCondition) {
+                        somethingElse()
+                    }
+                """.trimIndent()
+            )
+    }
+
+    @Test
     fun `reformats if statement with whitespace before the condition`() {
         val result = KotlinFormatter().format(
             """
@@ -1901,6 +1927,223 @@ class KotlinFormatterTest {
                 }
             """.trimIndent()
         )
+    }
+
+    @Test
+    fun `handles EOL comment between if condition and block statement`() {
+        val result =
+            KotlinFormatter()
+                .format(
+                    """
+                        if (aCondition) // A comment
+                        {
+                            doSomething()
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    if (aCondition) // A comment
+                    {
+                        doSomething()
+                    }
+                """.trimIndent()
+            )
+    }
+
+    @Test
+    fun `handles EOL comment at start of block statement on if`() {
+        val result =
+            KotlinFormatter()
+                .format(
+                    """
+                        if (aCondition) { // A comment
+                            doSomething()
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    if (aCondition) {
+                        // A comment
+                        doSomething()
+                    }
+                """.trimIndent()
+            )
+    }
+
+    @Test
+    fun `handles EOL comment between if block and else statement`() {
+        val result =
+            KotlinFormatter()
+                .format(
+                    """
+                        if (aCondition) {
+                            doSomething()
+                        } // A comment
+                        else {
+                            doSomethingElse()
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    if (aCondition) {
+                        doSomething()
+                    } // A comment
+                    else {
+                        doSomethingElse()
+                    }
+                """.trimIndent()
+            )
+    }
+
+    @Test
+    fun `handles EOL comment between if statement and else`() {
+        val result =
+            KotlinFormatter()
+                .format(
+                    """
+                        if (aCondition) doSomething() // A comment
+                        else doSomethingElse()
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    if (aCondition)
+                        doSomething() // A comment
+                    else
+                        doSomethingElse()
+                """.trimIndent()
+            )
+    }
+
+    @Test
+    fun `handles EOL comment between else and statement`() {
+        val result =
+            KotlinFormatter()
+                .format(
+                    """
+                        if (aCondition)
+                            doSomething()
+                        else // A comment
+                            doSomethingElse()
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    if (aCondition)
+                        doSomething()
+                    else // A comment
+                        doSomethingElse()
+                """.trimIndent()
+            )
+    }
+
+    @Test
+    fun `handles EOL comment between else and block statement`() {
+        val result =
+            KotlinFormatter()
+                .format(
+                    """
+                        if (aCondition)
+                            doSomething()
+                        else // A comment
+                        {
+                            doSomethingElse()
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    if (aCondition)
+                        doSomething()
+                    else // A comment
+                        {
+                            doSomethingElse()
+                        }
+                """.trimIndent()
+            )
+    }
+
+    @Test
+    fun `handles EOL comment between else if and statement`() {
+        val result =
+            KotlinFormatter()
+                .format(
+                    """
+                        if (aCondition)
+                            doSomething()
+                        else if (anotherCondition) // A comment
+                            doSomethingElse()
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    if (aCondition)
+                        doSomething()
+                    else if (anotherCondition) // A comment
+                        doSomethingElse()
+                """.trimIndent()
+            )
+    }
+
+    @Test
+    fun `handles EOL comment between while condition and simple statement`() {
+        val result =
+            KotlinFormatter()
+                .format(
+                    """
+                        while (aCondition) // A comment
+                            doSomething()
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    while (aCondition) // A comment
+                        doSomething()
+                """.trimIndent()
+            )
+    }
+
+    @Test
+    fun `handles EOL comment between while condition and block statement`() {
+        val result =
+            KotlinFormatter()
+                .format(
+                    """
+                        while (aCondition) // A comment
+                        {
+                            doSomething()
+                        }
+                    """.trimIndent()
+                )
+
+        assertThat(result)
+            .isEqualTo(
+                """
+                    while (aCondition) // A comment
+                        {
+                            doSomething()
+                        }
+                """.trimIndent()
+            )
     }
 
     @Test
